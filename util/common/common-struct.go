@@ -1,15 +1,19 @@
 package common
 
+var (
+	SysConfig = new(SystemConfig)
+)
+
 // SystemConfig 系统基础配置信息
 type SystemConfig struct {
-	AppName    string  // App名称
-	AppVersion float64 // App版本号
-	RunMode    string  // App运行模式
-	Cors       bool    // 是否允许跨域
-	Mysql      Mysql
-	WebServer  WebServer
-	JWTAuth    JWTAuth
-	SmtpServer SmtpServer
+	AppName     string  // App名称
+	AppVersion  float64 // App版本号
+	RunMode     string  // App运行模式
+	DefaultLang string  // 系统默认语言
+	Mysql       Mysql
+	WebServer   WebServer
+	JWTAuth     JWTAuth
+	SmtpServer  SmtpServer
 }
 
 // Mysql mysql数据库配置信息
@@ -23,11 +27,11 @@ type Mysql struct {
 
 // WebServer Web服务配置信息
 type WebServer struct {
-	Host      string // Web服务IP地址
-	Port      int    // Web服务端口
-	HttpsMode bool   // 是否启用Https
-	CrtFile   string // Https Crt证书
-	KeyFile   string // Https私钥
+	Host         string // Web服务IP地址
+	Port         int    // Web服务端口
+	HttpsMode    bool   // 是否启用Https
+	HttpsCrtFile string // Https Crt证书
+	HttpsKeyFile string // Https私钥
 }
 
 // JWTAuth JWTAuth认证配置信息
@@ -39,6 +43,7 @@ type JWTAuth struct {
 
 // SmtpServer 邮件服务配置信息
 type SmtpServer struct {
+	Enable          bool   // 是否启用邮件服务
 	EmailServerName string // 邮件服务名称
 	SmtpHost        string // 邮件服务IP地址
 	SmtpPort        int    // 邮件服务端口
