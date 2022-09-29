@@ -4,9 +4,16 @@ package consts
 const (
 	AppName              = "BasicFrame"          // 系统名称
 	AppVersion           = "0.1"                 // 系统版本号
-	RunMode              = "DEBUG"               // 运行模式
+	RunMode              = RunModeDev            // 系统默认运行模式
 	DefaultLang          = LanguageEn            // 系统默认语言
 	SystemConfigFileName = "./config/config.ini" // 系统基础配置文件
+)
+
+// 运行模式
+const (
+	RunModeDev  = "Develop"
+	RunModeTest = "Test"
+	RunModePro  = "Production"
 )
 
 // Mysql配置信息

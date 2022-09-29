@@ -4,6 +4,7 @@ import (
 	"basic-frame/config"
 	"basic-frame/util/consts"
 	"basic-frame/util/i18n/Localizer"
+	"basic-frame/util/logger"
 	"log"
 )
 
@@ -17,6 +18,7 @@ func main() {
 	}
 
 	// 初始化日志中间件
+	logger.Init()
 
 	// DB连接
 
