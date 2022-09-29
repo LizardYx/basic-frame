@@ -5,7 +5,7 @@ const (
 	AppName              = "BasicFrame"          // 系统名称
 	AppVersion           = "0.1"                 // 系统版本号
 	RunMode              = "DEBUG"               // 运行模式
-	DefaultLang          = "zh_CN"               // 系统默认语言
+	DefaultLang          = LanguageEn            // 系统默认语言
 	SystemConfigFileName = "./config/config.ini" // 系统基础配置文件
 )
 
@@ -47,4 +47,10 @@ const (
 const (
 	RootName     = "root"    // 超管账号
 	RootPassword = "1234asd" // 超管密码
+)
+
+// i18n配置
+const (
+	LanguageZh = "zh_CN" // 国际化(中文)
+	LanguageEn = "en_US" // 国际化(英文)
 )
