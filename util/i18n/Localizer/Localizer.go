@@ -1,9 +1,8 @@
 package Localizer
 
 import (
-	_ "basic-frame/util/i18n/translations"
-
 	"basic-frame/util/consts"
+	_ "basic-frame/util/i18n/translations"
 	"golang.org/x/text/language"
 	"golang.org/x/text/message"
 )

@@ -39,19 +39,21 @@ func init() {
 }
 
 var messageKeyToIndex = map[string]int{
-	"this is test": 0,
+	"Websocket connect Closed":       1,
+	"Websocket connect Successfully": 0,
 }
 
-var en_USIndex = []uint32{ // 2 elements
-	0x00000000, 0x0000000d,
-} // Size: 32 bytes
+var en_USIndex = []uint32{ // 3 elements
+	0x00000000, 0x0000001f, 0x00000038,
+} // Size: 36 bytes
 
-const en_USData string = "\x02this is test"
+const en_USData string = "" + // Size: 56 bytes
+	"\x02Websocket connect Successfully\x02Websocket connect Closed"
 
-var zh_CNIndex = []uint32{ // 2 elements
-	0x00000000, 0x00000000,
-} // Size: 32 bytes
+var zh_CNIndex = []uint32{ // 3 elements
+	0x00000000, 0x00000000, 0x00000000,
+} // Size: 36 bytes
 
 const zh_CNData string = ""
 
-// Total table size 77 bytes (0KiB); checksum: 9A62E2AC
+// Total table size 128 bytes (0KiB); checksum: B3E6E965

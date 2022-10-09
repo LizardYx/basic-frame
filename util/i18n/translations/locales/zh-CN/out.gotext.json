@@ -1,4 +1,15 @@
 {
     "language": "zh-CN",
-    "messages": null
+    "messages": [
+        {
+            "id": "Websocket connect Successfully",
+            "message": "Websocket connect Successfully",
+            "translation": ""
+        },
+        {
+            "id": "Websocket connect Closed",
+            "message": "Websocket connect Closed",
+            "translation": ""
+        }
+    ]
 }

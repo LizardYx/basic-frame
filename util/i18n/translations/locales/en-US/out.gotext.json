@@ -1,4 +1,19 @@
 {
     "language": "en-US",
-    "messages": null
+    "messages": [
+        {
+            "id": "Websocket connect Successfully",
+            "message": "Websocket connect Successfully",
+            "translation": "Websocket connect Successfully",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "Websocket connect Closed",
+            "message": "Websocket connect Closed",
+            "translation": "Websocket connect Closed",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        }
+    ]
 }

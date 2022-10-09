@@ -67,3 +67,9 @@ const (
 	LanguageZh = "zh_CN" // 国际化(中文)
 	LanguageEn = "en_US" // 国际化(英文)
 )
+
+// Websocket
+const (
+	WSEventIDConnectSuccess = 1  // Websocket连接成功
+	WSEventIDConnectClosed  = -1 // Websocket连接关闭
+)
