@@ -20,9 +20,9 @@ func LoadSystemConfigFile() (string, error) {
 			cfg, _ = ini.Load(consts.SystemConfigFileName)
 		}
 	}
+	common.SysConfig.RunMode = cfg.Section("").Key("RunMode").String()
 	common.SysConfig.AppName = cfg.Section("").Key("AppName").String()
 	common.SysConfig.AppVersion = cfg.Section("").Key("AppVersion").MustFloat64()
-	common.SysConfig.RunMode = cfg.Section("").Key("RunMode").String()
 	common.SysConfig.DefaultLang = cfg.Section("").Key("DefaultLang").String()
 	// 读取mysql配置部分
 	if err = cfg.Section("Mysql").MapTo(&common.SysConfig.Mysql); err != nil {
@@ -35,6 +35,10 @@ func LoadSystemConfigFile() (string, error) {
 	// 读取JWTAuth配置部分
 	if err = cfg.Section("JWTAuth").MapTo(&common.SysConfig.JWTAuth); err != nil {
 		return "failed to load JWTAuth config :", err
+	}
+	// 读取Logger配置部分
+	if err = cfg.Section("Logger").MapTo(&common.SysConfig.Logger); err != nil {
+		return "failed to load Logger config :", err
 	}
 	// 读取SmtpServer配置部分
 	if err = cfg.Section("SmtpServer").MapTo(&common.SysConfig.SmtpServer); err != nil {
@@ -49,9 +53,10 @@ func createSystemConfigFile() (string, error) {
 
 	cfg := ini.Empty()
 	defaultSection := cfg.Section("")
+	defaultSection.Comment = getRunModelDesc()
+	defaultSection.NewKey("RunMode", consts.RunModeDev)
 	defaultSection.NewKey("AppName", consts.AppName)
 	defaultSection.NewKey("AppVersion", consts.AppVersion)
-	defaultSection.NewKey("RunMode", consts.RunMode)
 	defaultSection.NewKey("DefaultLang", consts.DefaultLang)
 
 	// 创建默认mysql配置
@@ -88,6 +93,15 @@ func createSystemConfigFile() (string, error) {
 		JWTAuthSection.NewKey("Expired", consts.JWTAuthExpired)
 	}
 
+	// 创建默认Logger配置
+	var LoggerSection *ini.Section
+	if LoggerSection, err = cfg.NewSection("Logger"); err != nil {
+		return fmt.Sprintf("init Logger config to %s failed: ", consts.SystemConfigFileName), err
+	} else {
+		LoggerSection.NewKey("RotationTime", consts.LoggerRotationTime)
+		LoggerSection.NewKey("MaxAge", consts.LoggerMaxAge)
+	}
+
 	// 创建默认SmtpServer配置
 	var SmtpServerSection *ini.Section
 	if SmtpServerSection, err = cfg.NewSection("SmtpServer"); err != nil {
@@ -104,4 +118,8 @@ func createSystemConfigFile() (string, error) {
 		return fmt.Sprintf("Create %s file failed: ", consts.SystemConfigFileName), err
 	}
 	return "", nil
+}
+
+func getRunModelDesc() string {
+	return fmt.Sprintf("运行模式(%s:开发模式,%s:测试模式,%s:线上模式)", consts.RunModeDev, consts.RunModeTest, consts.RunModePro)
 }

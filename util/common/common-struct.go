@@ -6,13 +6,14 @@ var (
 
 // SystemConfig 系统基础配置信息
 type SystemConfig struct {
+	RunMode     string  // App运行模式
 	AppName     string  // App名称
 	AppVersion  float64 // App版本号
-	RunMode     string  // App运行模式
 	DefaultLang string  // 系统默认语言
 	Mysql       Mysql
 	WebServer   WebServer
 	JWTAuth     JWTAuth
+	Logger      LoggerConf
 	SmtpServer  SmtpServer
 }
 
@@ -39,6 +40,11 @@ type JWTAuth struct {
 	SigningMethod string // 加密方式
 	SigningKey    string // 密钥
 	Expired       int    // 过期时间
+}
+
+type LoggerConf struct {
+	RotationTime int // 设置日志切割时间间隔(单位:小时)
+	MaxAge       int // 设置文件清理前的最长保存时间(单位:小时)
 }
 
 // SmtpServer 邮件服务配置信息

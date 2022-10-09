@@ -3,6 +3,7 @@ package middleware
 import (
 	"basic-frame/util/logger"
 	"github.com/gin-gonic/gin"
+	"github.com/sirupsen/logrus"
 	"net/http"
 	"time"
 )
@@ -10,15 +11,41 @@ import (
 // GinLoggerMiddleware gin的日志中间件，记录restful请求信息
 func GinLoggerMiddleware() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		fields := make(map[string]interface{})
-		start := time.Now()
-		method := c.Request.Method
-		if method == http.MethodPost || method == http.MethodPut {
+		// 开始时间
+		startTime := time.Now()
+
+		// 处理请求
+		c.Next()
+
+		// 结束时间
+		endTime := time.Now()
+
+		// 执行时间
+		latencyTime := endTime.Sub(startTime)
+
+		// 请求方式
+		reqMethod := c.Request.Method
+
+		// 请求路由
+		reqUri := c.Request.RequestURI
+
+		// 状态码
+		statusCode := c.Writer.Status()
+
+		// 请求IP
+		clientIP := c.ClientIP()
+
+		if reqMethod == http.MethodPost || reqMethod == http.MethodPut {
 			// TODO: 还需要记录这2种请求的参数
 		}
-		c.Next()
-		timeConsuming := time.Since(start).Nanoseconds() / 1e6
-		fields["user_agent"] = c.GetHeader("User-Agent")
-		logger.Log.WithFields(fields).Infof("%s(%s) | %d(%dms)", c.Request.RequestURI, method, c.Writer.Status(), timeConsuming)
+
+		// 日志格式
+		logger.Log.WithFields(logrus.Fields{
+			"status_code":  statusCode,
+			"latency_time": latencyTime,
+			"client_ip":    clientIP,
+			"req_method":   reqMethod,
+			"req_uri":      reqUri,
+		}).Info()
 	}
 }

@@ -1,6 +1,6 @@
 package consts
 
-// 系统基础配置信息
+// 系统默认基础配置信息
 const (
 	AppName              = "BasicFrame"          // 系统名称
 	AppVersion           = "0.1"                 // 系统版本号
@@ -11,12 +11,12 @@ const (
 
 // 运行模式
 const (
-	RunModeDev  = "Develop"
-	RunModeTest = "Test"
-	RunModePro  = "Production"
+	RunModeDev  = "Develop"    // 系统运行模式(开发)
+	RunModeTest = "Test"       // 系统运行模式(测试)
+	RunModePro  = "Production" // 系统运行模式(线上)
 )
 
-// Mysql配置信息
+// Mysql默认配置信息
 const (
 	MysqlHost     = "0.0.0.0"     // mysql主机地址
 	MysqlPort     = "3306"        // mysql连接端口
@@ -25,7 +25,7 @@ const (
 	MysqlDBName   = "basic_frame" // mysql数据库名称
 )
 
-// WebServer配置信息
+// WebServer默认配置信息
 const (
 	WebServerHost = "0.0.0.0" // Web服务IP地址
 	WebServerPort = "8080"    // Web服务端口
@@ -34,14 +34,20 @@ const (
 	HttpsKeyFile  = ""        // HTTPS私钥
 )
 
-// JWTAuth配置信息
+// JWTAuth默认配置信息
 const (
 	JWTAuthSigningMethod = "HS256"       // JWTAuth加密方式
 	JWTAuthSigningKey    = "basic-frame" // JWTAuth签名
 	JWTAuthExpired       = "604800"      // JWTAuth认证过期时间(秒)
 )
 
-// SmtpServer邮件服务配置信息
+// Logger默认配置信息
+const (
+	LoggerRotationTime = "24"  // 设置日志分割的时间(单位:小时)
+	LoggerMaxAge       = "168" // 设置文件清理前的最长保存时间(单位:小时)
+)
+
+// SmtpServer邮件服务默认配置信息
 const (
 	SmtpEnable     = "false" // 是否启用Smtp邮件服务
 	SmtpServerName = ""      // 邮件服务名称
