@@ -76,3 +76,7 @@ func (a *Mysql) GetDBConnString() string {
 	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=true&loc=Local",
 		a.User, a.Password, a.Host, a.Port, a.DBName)
 }
+
+func (a *WebServer) GetWebServerAddr() string {
+	return fmt.Sprintf("%s:%d", a.Host, a.Port)
+}

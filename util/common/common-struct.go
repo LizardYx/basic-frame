@@ -10,6 +10,7 @@ type SystemConfig struct {
 	AppName     string  // App名称
 	AppVersion  float64 // App版本号
 	DefaultLang string  // 系统默认语言
+	MenuVersion float64 // 系统菜单版本号
 	Mysql       Mysql
 	WebServer   WebServer
 	JWTAuth     JWTAuth
