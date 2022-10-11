@@ -16,6 +16,8 @@ type RestfulApi struct {
 }
 
 func (a *RestfulApi) Create(ctx context.Context, item schema.RestfulApi) (uint64, error) {
+	// 参数检查
+	// 其它的业务逻辑
 	item.UUID = common.GetUUID()
-	return a.ResApiModel.Create(item)
+	return a.ResApiModel.Create(ctx, item)
 }

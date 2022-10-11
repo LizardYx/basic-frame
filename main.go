@@ -10,18 +10,21 @@ import (
 )
 
 func main() {
+	// 加载系统配置文件
 	// 初始化日志中间件
-	logger.InitLogger()
-
-	// DB连接
-	mysql.InitMysql()
-
-	// 加载系统配置配置文件(读取并更新DB中的系统基础配置信息)
+	// 连接DB
+	// 读取并更新DB中的系统基础配置信息
 	// 读取DB中的菜单版本、系统默认语言、SMTP服务信息、到缓存中
 	// 初始化超管用户
 	if errMessage, err := config.LoadSystemConfigFile(); err != nil {
 		log.Fatal(errMessage, err)
 	}
+
+	// 初始化日志中间件
+	logger.InitLogger()
+
+	// DB连接
+	mysql.InitMysql()
 
 	// 注册定时任务
 	RegisterCronTask(context.Background())

@@ -8,6 +8,7 @@ import (
 	"io"
 	"log"
 	"path"
+	"strings"
 	"time"
 )
 
@@ -26,11 +27,12 @@ func InitLogger() {
 	})
 
 	// 日志分割
+	logName := strings.ToLower(common.SysConfig.AppName)
 	rotationTime := common.SysConfig.Logger.RotationTime
 	maxAge := common.SysConfig.Logger.MaxAge
 	allWriter, err := rotatelogs.New(
-		path.Join("log", "basic-frame"+".%Y%m%d"),
-		rotatelogs.WithLinkName(path.Join("log", "basic-frame")),           // 为最新的日志建立软连接，以方便随着找到当前日志文件
+		path.Join("log", logName+".%Y%m%d"),
+		rotatelogs.WithLinkName(path.Join("log", logName)),                 // 为最新的日志建立软连接，以方便随着找到当前日志文件
 		rotatelogs.WithRotationTime(time.Duration(rotationTime)*time.Hour), // 设置日志分割的时间
 		rotatelogs.WithMaxAge(time.Duration(maxAge)*time.Hour),             // 设置文件清理前的最长保存时间
 	)

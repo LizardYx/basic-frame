@@ -23,4 +23,9 @@ func (a *Router) Register(api *gin.RouterGroup) {
 	{
 		buttonGroup.POST("", a.ButtonAPI.Create)
 	}
+
+	ResApiGroup := api.Group("res-api")
+	{
+		ResApiGroup.POST("", a.RestfulAPI.Create)
+	}
 }

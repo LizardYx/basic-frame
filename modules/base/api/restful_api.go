@@ -18,7 +18,9 @@ type RestfulApi struct {
 func (a *RestfulApi) Create(ctx *gin.Context) {
 	var item schema.RestfulApi
 	if err := ctx.ShouldBindJSON(&item); err != nil {
-		ctx.JSON(http.StatusOK, err)
+		// 封装Gin response
+		// TODO:
+		ctx.JSON(http.StatusOK, err.Error())
 		return
 	}
 	id, err := a.RestfulApiBll.Create(ctx, item)
