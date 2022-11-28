@@ -4,7 +4,6 @@ import (
 	BaseEntity "basic-frame/modules/base/dao/entity"
 	"basic-frame/util/common"
 	"basic-frame/util/logger"
-	"context"
 	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
@@ -78,7 +77,7 @@ func gormLogger() GormLogger.Interface {
 }
 
 // Paginate 分页查询
-func Paginate(ctx context.Context, db *gorm.DB, params PaginationParam, out interface{}) (*PaginationResult, error) {
+func Paginate(db *gorm.DB, params PaginationParam, out interface{}) (*PaginationResult, error) {
 	var count int64
 	err := db.Count(&count).Error
 	if err != nil {
@@ -110,7 +109,7 @@ func Paginate(ctx context.Context, db *gorm.DB, params PaginationParam, out inte
 }
 
 // Check 检查数据是否存在
-func Check(ctx context.Context, db *gorm.DB) (bool, error) {
+func Check(db *gorm.DB) (bool, error) {
 	var count int64
 	result := db.Count(&count)
 	if err := result.Error; err != nil {

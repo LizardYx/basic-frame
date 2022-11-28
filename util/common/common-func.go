@@ -77,6 +77,7 @@ func (a *Mysql) GetDBConnString() string {
 		a.User, a.Password, a.Host, a.Port, a.DBName)
 }
 
+// GetWebServerAddr 获取web服务地址
 func (a *WebServer) GetWebServerAddr() string {
 	return fmt.Sprintf("%s:%d", a.Host, a.Port)
 }
