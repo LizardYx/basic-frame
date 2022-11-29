@@ -56,3 +56,31 @@ type SmtpServer struct {
 	SmtpPort        int    // 邮件服务端口
 	SmtpPassword    string // 邮件服务密码
 }
+
+// PaginationParam 分页查询条件
+type PaginationParam struct {
+	Pagination bool `form:"-"`                    // 是否使用分页查询
+	OnlyCount  bool `form:"-"`                    // 是否仅查询count
+	Current    int  `form:"current,default=1"`    // 当前页
+	PageSize   int  `form:"pageSize,default=100"` // 页大小
+}
+
+// PaginationResult 分页查询结果
+type PaginationResult struct {
+	Total    int64 `json:"total"`
+	Current  int   `json:"current"`
+	PageSize int   `json:"pageSize"`
+}
+
+// ResponseError 定义响应错误
+type ResponseError struct {
+	Code       int    // 错误码
+	Message    string // 错误消息
+	StatusCode int    // 响应状态码
+	ERR        error  // 响应错误
+}
+
+// IDResult 响应唯一标识
+type IDResult struct {
+	ID uint64 `json:"id,string"`
+}

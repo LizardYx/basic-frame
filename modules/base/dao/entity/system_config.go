@@ -51,5 +51,5 @@ func (a SystemConfigs) ToSchemaSystemConfigs() schema.SystemConfigs {
 func (a SystemConfigs) ToSchemaSystemConfigPres() schema.SystemConfigPres {
 	item := new(schema.SystemConfigPres)
 	_ = common.Copy(a, item)
-	return *item
+	return *item.Init()
 }

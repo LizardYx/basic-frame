@@ -1,7 +1,7 @@
 package schema
 
 import (
-	"basic-frame/util/mysql"
+	"basic-frame/util/common"
 	"time"
 )
 
@@ -21,12 +21,12 @@ type SystemConfig struct {
 type SystemConfigs []*SystemConfig
 
 type SystemConfigQueryParam struct {
-	mysql.PaginationParam
+	common.PaginationParam
 }
 
 type SystemConfigQueryResult struct {
 	Data       SystemConfigPres
-	PageResult *mysql.PaginationResult
+	PageResult *common.PaginationResult
 }
 
 // ---------------------------------------- Response Struct --------------------------------------
@@ -45,3 +45,10 @@ type SystemConfigPre struct {
 }
 
 type SystemConfigPres []*SystemConfigPre
+
+func (a SystemConfigPres) Init() *SystemConfigPres {
+	if len(a) == 0 {
+		a = make(SystemConfigPres, 0)
+	}
+	return &a
+}

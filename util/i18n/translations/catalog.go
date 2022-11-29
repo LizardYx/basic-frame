@@ -41,19 +41,25 @@ func init() {
 var messageKeyToIndex = map[string]int{
 	"Websocket connect Closed":       1,
 	"Websocket connect Successfully": 0,
+	"服务器发生错误":                        4,
+	"检查系统基础配置项是否存在失败":                2,
+	"系统基础配置项已存在":                     3,
 }
 
-var en_USIndex = []uint32{ // 3 elements
-	0x00000000, 0x0000001f, 0x00000038,
-} // Size: 36 bytes
+var en_USIndex = []uint32{ // 6 elements
+	0x00000000, 0x0000001f, 0x00000038, 0x00000066,
+	0x00000085, 0x0000009b,
+} // Size: 48 bytes
 
-const en_USData string = "" + // Size: 56 bytes
-	"\x02Websocket connect Successfully\x02Websocket connect Closed"
+const en_USData string = "" + // Size: 155 bytes
+	"\x02Websocket connect Successfully\x02Websocket connect Closed\x02检查系统基础" +
+	"配置项是否存在失败\x02系统基础配置项已存在\x02服务器发生错误"
 
-var zh_CNIndex = []uint32{ // 3 elements
-	0x00000000, 0x00000000, 0x00000000,
-} // Size: 36 bytes
+var zh_CNIndex = []uint32{ // 6 elements
+	0x00000000, 0x00000000, 0x00000000, 0x00000000,
+	0x00000000, 0x00000000,
+} // Size: 48 bytes
 
 const zh_CNData string = ""
 
-// Total table size 128 bytes (0KiB); checksum: B3E6E965
+// Total table size 251 bytes (0KiB); checksum: 6EF2B5A9

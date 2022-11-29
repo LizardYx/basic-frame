@@ -3,8 +3,8 @@ package api
 import (
 	"basic-frame/modules/base/bll"
 	"basic-frame/modules/base/schema"
+	"basic-frame/util/ginx"
 	"github.com/gin-gonic/gin"
-	"net/http"
 )
 
 var SystemConfigApi = &SystemConfig{
@@ -17,30 +17,30 @@ type SystemConfig struct {
 
 func (a *SystemConfig) Query(ctx *gin.Context) {
 	var params schema.SystemConfigQueryParam
-	if err := ctx.ShouldBindJSON(&params); err != nil {
-		ctx.JSON(http.StatusOK, err.Error())
+	if err := ginx.ParseQuery(ctx, &params); err != nil {
+		ginx.ResError(ctx, err)
 		return
 	}
 
 	params.Pagination = true
 	result, err := a.SystemConfigBll.Query(params)
 	if err != nil {
-		ctx.JSON(http.StatusOK, err)
+		ginx.ResError(ctx, err)
 		return
 	}
-	ctx.JSON(http.StatusOK, result)
+	ginx.ResPaginate(ctx, result.Data, result.PageResult)
 }
 
 func (a *SystemConfig) Create(ctx *gin.Context) {
 	var item schema.SystemConfig
-	if err := ctx.ShouldBindJSON(&item); err != nil {
-		ctx.JSON(http.StatusOK, err.Error())
+	if err := ginx.ParseJSON(ctx, &item); err != nil {
+		ginx.ResError(ctx, err)
 		return
 	}
-	id, err := a.SystemConfigBll.Create(ctx, item)
+	result, err := a.SystemConfigBll.Create(ctx, item)
 	if err != nil {
-		ctx.JSON(http.StatusOK, err)
+		ginx.ResError(ctx, err)
 		return
 	}
-	ctx.JSON(http.StatusOK, id)
+	ginx.ResSuccess(ctx, result)
 }

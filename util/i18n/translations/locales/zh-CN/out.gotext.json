@@ -10,6 +10,21 @@
             "id": "Websocket connect Closed",
             "message": "Websocket connect Closed",
             "translation": ""
+        },
+        {
+            "id": "检查系统基础配置项是否存在失败",
+            "message": "检查系统基础配置项是否存在失败",
+            "translation": ""
+        },
+        {
+            "id": "系统基础配置项已存在",
+            "message": "系统基础配置项已存在",
+            "translation": ""
+        },
+        {
+            "id": "服务器发生错误",
+            "message": "服务器发生错误",
+            "translation": ""
         }
     ]
 }

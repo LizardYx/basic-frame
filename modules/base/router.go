@@ -24,6 +24,7 @@ func (a *Router) Register(api *gin.RouterGroup) {
 	SystemConfigGroup := api.Group("system-config")
 	{
 		SystemConfigGroup.GET("", a.SystemConfigAPI.Query)
+		SystemConfigGroup.POST("", a.SystemConfigAPI.Create)
 	}
 
 	buttonGroup := api.Group("button")

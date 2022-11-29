@@ -17,21 +17,6 @@ import (
 
 var DB *gorm.DB
 
-// PaginationParam 分页查询条件
-type PaginationParam struct {
-	Pagination bool `form:"-"`                    // 是否使用分页查询
-	OnlyCount  bool `form:"-"`                    // 是否仅查询count
-	Current    int  `form:"current,default=1"`    // 当前页
-	PageSize   int  `form:"pageSize,default=100"` // 页大小
-}
-
-// PaginationResult 分页查询结果
-type PaginationResult struct {
-	Total    int64 `json:"total"`
-	Current  int   `json:"current"`
-	PageSize int   `json:"pageSize"`
-}
-
 // InitMysql 初始化Mysql数据库
 func InitMysql() {
 	var err error
@@ -74,46 +59,4 @@ func gormLogger() GormLogger.Interface {
 			Colorful:      true,            // 禁用彩色打印
 		},
 	)
-}
-
-// Paginate 分页查询
-func Paginate(db *gorm.DB, params PaginationParam, out interface{}) (*PaginationResult, error) {
-	var count int64
-	err := db.Count(&count).Error
-	if err != nil {
-		return nil, err
-	}
-
-	if params.OnlyCount {
-		// 仅查询count
-		return &PaginationResult{Total: count}, nil
-	} else if !params.Pagination {
-		// 查询所有数据
-		err := db.Find(out).Error
-		return nil, err
-	} else {
-		// 分页查询
-		if params.Current == 0 {
-			params.Current = 1
-		} else if params.PageSize <= 0 {
-			params.PageSize = 10
-		}
-		db = db.Offset((params.Current - 1) * params.PageSize).Limit(params.PageSize)
-		err = db.Find(out).Error
-		return &PaginationResult{
-			Total:    count,
-			Current:  params.Current,
-			PageSize: params.PageSize,
-		}, nil
-	}
-}
-
-// Check 检查数据是否存在
-func Check(db *gorm.DB) (bool, error) {
-	var count int64
-	result := db.Count(&count)
-	if err := result.Error; err != nil {
-		return false, err
-	}
-	return count > 0, nil
 }

@@ -14,6 +14,27 @@
             "translation": "Websocket connect Closed",
             "translatorComment": "Copied from source.",
             "fuzzy": true
+        },
+        {
+            "id": "检查系统基础配置项是否存在失败",
+            "message": "检查系统基础配置项是否存在失败",
+            "translation": "检查系统基础配置项是否存在失败",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "系统基础配置项已存在",
+            "message": "系统基础配置项已存在",
+            "translation": "系统基础配置项已存在",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
+        },
+        {
+            "id": "服务器发生错误",
+            "message": "服务器发生错误",
+            "translation": "服务器发生错误",
+            "translatorComment": "Copied from source.",
+            "fuzzy": true
         }
     ]
 }

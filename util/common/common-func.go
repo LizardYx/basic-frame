@@ -81,3 +81,10 @@ func (a *Mysql) GetDBConnString() string {
 func (a *WebServer) GetWebServerAddr() string {
 	return fmt.Sprintf("%s:%d", a.Host, a.Port)
 }
+
+func (r *ResponseError) Error() string {
+	if r.ERR != nil {
+		return r.ERR.Error()
+	}
+	return r.Message
+}

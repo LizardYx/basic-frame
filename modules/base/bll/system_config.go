@@ -3,6 +3,8 @@ package bll
 import (
 	"basic-frame/modules/base/dao/model"
 	"basic-frame/modules/base/schema"
+	"basic-frame/util/common"
+	"basic-frame/util/ginx/errors"
 	"context"
 )
 
@@ -19,10 +21,10 @@ func (a *SystemConfig) Query(params schema.SystemConfigQueryParam) (*schema.Syst
 	return a.SystemConfigModel.Query(params)
 }
 
-func (a *SystemConfig) Create(ctx context.Context, item schema.SystemConfig) (uint64, error) {
+func (a *SystemConfig) Create(ctx context.Context, item schema.SystemConfig) (*common.IDResult, error) {
 	// 参数检查
 	if err := a.ParamsValidate(ctx, item); err != nil {
-		return 0, err
+		return nil, err
 	}
 
 	// 创建系统基础配置项
@@ -34,10 +36,9 @@ func (a *SystemConfig) Create(ctx context.Context, item schema.SystemConfig) (ui
 func (a *SystemConfig) ParamsValidate(ctx context.Context, item schema.SystemConfig) error {
 	// 检查系统基础配置项是否存在
 	if systemConfigQueryResult, err := a.Query(schema.SystemConfigQueryParam{}); err != nil {
-		return err
+		return errors.New500Response("检查系统基础配置项是否存在失败")
 	} else if len(systemConfigQueryResult.Data) != 0 {
-		return err
+		return errors.New500Response("系统基础配置项已存在")
 	}
-
 	return nil
 }

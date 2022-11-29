@@ -3,6 +3,8 @@ package model
 import (
 	"basic-frame/modules/base/dao/entity"
 	"basic-frame/modules/base/schema"
+	"basic-frame/util/common"
+	"basic-frame/util/ginx"
 	"basic-frame/util/mysql"
 )
 
@@ -12,10 +14,10 @@ type SystemConfig struct {
 }
 
 func (a *SystemConfig) Query(params schema.SystemConfigQueryParam) (*schema.SystemConfigQueryResult, error) {
-	db := mysql.DB
+	db := mysql.DB.Model(entity.SystemConfig{})
 
 	var list entity.SystemConfigs
-	paginationResult, err := mysql.Paginate(db, params.PaginationParam, &list)
+	paginationResult, err := ginx.Paginate(db, params.PaginationParam, &list)
 	if err != nil {
 		return nil, err
 	}
@@ -26,8 +28,8 @@ func (a *SystemConfig) Query(params schema.SystemConfigQueryParam) (*schema.Syst
 	return qr, nil
 }
 
-func (a *SystemConfig) Create(item schema.SystemConfig) (uint64, error) {
+func (a *SystemConfig) Create(item schema.SystemConfig) (*common.IDResult, error) {
 	eitem := entity.SchemaSystemConfig(item).ToSystemConfig()
 	result := mysql.DB.Create(eitem)
-	return item.ID, result.Error
+	return &common.IDResult{ID: eitem.ID}, result.Error
 }
