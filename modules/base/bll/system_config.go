@@ -28,7 +28,11 @@ func (a *SystemConfig) Create(ctx context.Context, item schema.SystemConfig) (*c
 	}
 
 	// 创建系统基础配置项
-	return a.SystemConfigModel.Create(item)
+	IDResult, err := a.SystemConfigModel.Create(item)
+	if err != nil {
+		return nil, errors.Wrap500Response(err, errors.PrintCallerNameAndLine(), "创建系统基础配置项失败")
+	}
+	return IDResult, nil
 }
 
 // ---------------------------------------- Params  Validate --------------------------------------
@@ -36,9 +40,9 @@ func (a *SystemConfig) Create(ctx context.Context, item schema.SystemConfig) (*c
 func (a *SystemConfig) ParamsValidate(ctx context.Context, item schema.SystemConfig) error {
 	// 检查系统基础配置项是否存在
 	if systemConfigQueryResult, err := a.Query(schema.SystemConfigQueryParam{}); err != nil {
-		return errors.New500Response("检查系统基础配置项是否存在失败")
+		return errors.New("检查系统基础配置项是否存在失败")
 	} else if len(systemConfigQueryResult.Data) != 0 {
-		return errors.New500Response("系统基础配置项已存在")
+		return errors.New("系统基础配置项已存在")
 	}
 	return nil
 }

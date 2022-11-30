@@ -3,6 +3,7 @@ package ginx
 import (
 	"basic-frame/util/common"
 	"basic-frame/util/ginx/errors"
+	"basic-frame/util/logger"
 	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
@@ -13,7 +14,7 @@ import (
 // ParseJSON 解析请求JSON
 func ParseJSON(c *gin.Context, obj interface{}) error {
 	if err := c.ShouldBindJSON(obj); err != nil {
-		return errors.Wrap400Response(err, fmt.Sprintf("解析参数发生错误 - %s", err.Error()))
+		return errors.Wrap400Response(err, "", fmt.Sprintf("解析参数发生错误 - %s", err.Error()))
 	}
 	return nil
 }
@@ -21,7 +22,7 @@ func ParseJSON(c *gin.Context, obj interface{}) error {
 // ParseQuery 解析Query参数
 func ParseQuery(c *gin.Context, obj interface{}) error {
 	if err := c.ShouldBindQuery(obj); err != nil {
-		return errors.Wrap400Response(err, fmt.Sprintf("解析参数发生错误 - %s", err.Error()))
+		return errors.Wrap400Response(err, "", fmt.Sprintf("解析参数发生错误 - %s", err.Error()))
 	}
 	return nil
 }
@@ -118,30 +119,29 @@ func ResJSON(ctx *gin.Context, status int, v interface{}) {
 }
 
 // ResError 响应错误
-func ResError(ctx *gin.Context, err error, status ...int) {
+func ResError(ctx *gin.Context, err error) {
 	var res *common.ResponseError
 
 	if err != nil {
 		if e, ok := err.(*common.ResponseError); ok {
 			res = e
 		} else {
-			res = errors.UnWrapResponse(errors.New500Response("服务器发生错误"))
+			res = errors.UnWrapResponse(errors.New500Response(err.Error()))
 			res.ERR = err
 		}
 	} else {
 		res = errors.UnWrapResponse(errors.New500Response("服务器发生错误"))
 	}
 
-	if len(status) > 0 {
-		res.StatusCode = status[0]
-	}
+	// 日志记录
+	logger.Log.Warningf("%v", res.ERR) // 简化版本链式错误日志
+	//logger.Log.Warningf("%+v", err) // 详细的链式错误日志
+	fmt.Println("----------------------")
+	fmt.Printf("%v\n", res.ERR) // 简化版本链式错误日志
+	//fmt.Printf("%+v\n", err) // 详细的链式错误日志
+	fmt.Println("----------------------")
 
-	if err = res.ERR; err != nil {
-		if res.Message == "" {
-			res.Message = err.Error()
-		}
-	}
-
+	// 创建Response
 	eitem := ErrorItem{
 		Code:    res.Code,
 		Message: res.Message,

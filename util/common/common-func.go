@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"github.com/jinzhu/copier"
 	uuid "github.com/satori/go.uuid"
+	"io"
 	"io/ioutil"
 	"os"
 	"os/exec"
@@ -87,4 +88,18 @@ func (r *ResponseError) Error() string {
 		return r.ERR.Error()
 	}
 	return r.Message
+}
+
+func (r *ResponseError) Format(s fmt.State, verb rune) {
+	switch verb {
+	case 'v':
+		if s.Flag('+') {
+			_, _ = fmt.Fprintf(s, "%+v", r.ERR)
+		}
+		// fallthrough
+	case 's':
+		_, _ = io.WriteString(s, r.ERR.Error())
+	case 'q':
+		_, _ = fmt.Fprintf(s, "%q", r.ERR.Error())
+	}
 }

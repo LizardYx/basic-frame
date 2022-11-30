@@ -5,6 +5,7 @@ import (
 	"basic-frame/modules/base/schema"
 	"basic-frame/util/common"
 	"basic-frame/util/ginx"
+	"basic-frame/util/ginx/errors"
 	"basic-frame/util/mysql"
 )
 
@@ -31,5 +32,5 @@ func (a *SystemConfig) Query(params schema.SystemConfigQueryParam) (*schema.Syst
 func (a *SystemConfig) Create(item schema.SystemConfig) (*common.IDResult, error) {
 	eitem := entity.SchemaSystemConfig(item).ToSystemConfig()
 	result := mysql.DB.Create(eitem)
-	return &common.IDResult{ID: eitem.ID}, result.Error
+	return &common.IDResult{ID: eitem.ID}, errors.New(result.Error.Error())
 }
