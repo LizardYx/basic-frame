@@ -30,7 +30,7 @@ type Mysql struct {
 // WebServer Web服务配置信息
 type WebServer struct {
 	Host         string // Web服务IP地址
-	Port         int    // Web服务端口
+	Port         uint64 // Web服务端口
 	HttpsMode    bool   // 是否启用Https
 	HttpsCrtFile string // Https Crt证书
 	HttpsKeyFile string // Https私钥

@@ -47,10 +47,12 @@ func InitLogger() {
 
 func setLogLevel(logger *logrus.Logger) {
 	switch common.SysConfig.RunMode {
+	case consts.RunModeDebug:
+		logger.SetLevel(logrus.DebugLevel)
 	case consts.RunModeDev:
 		logger.SetLevel(logrus.DebugLevel)
 	case consts.RunModeTest:
-		logger.SetLevel(logrus.DebugLevel)
+		logger.SetLevel(logrus.WarnLevel)
 	case consts.RunModePro:
 		// 只记录 error/fatal/panic 错误
 		logger.SetLevel(logrus.ErrorLevel)

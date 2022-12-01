@@ -2,9 +2,11 @@ package main
 
 import (
 	"basic-frame/config"
+	baseBll "basic-frame/modules/base/bll"
 	"basic-frame/util/logger"
 	"basic-frame/util/mysql"
 	"context"
+	"fmt"
 	"github.com/robfig/cron/v3"
 	"log"
 )
@@ -25,6 +27,12 @@ func main() {
 
 	// DB连接
 	mysql.InitMysql()
+
+	// 初始化系统基础配置
+	if err := baseBll.SystemConfigBll.Init(); err != nil {
+		logger.Log.Warningf("%v", err)
+		fmt.Printf("%v\n", err)
+	}
 
 	// 注册定时任务
 	RegisterCronTask(context.Background())

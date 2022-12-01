@@ -2,14 +2,24 @@ package ginx
 
 import (
 	"basic-frame/util/common"
+	"basic-frame/util/consts"
 	"basic-frame/util/ginx/errors"
+	"basic-frame/util/i18n/Localizer"
 	"basic-frame/util/logger"
-	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 	"net/http"
+	"strconv"
 )
+
+func ParseParamID(c *gin.Context, key string) uint64 {
+	val := c.Param(key)
+	id, err := strconv.ParseUint(val, 10, 64)
+	if err != nil {
+		return 0
+	}
+	return id
+}
 
 // ParseJSON 解析请求JSON
 func ParseJSON(c *gin.Context, obj interface{}) error {
@@ -25,48 +35,6 @@ func ParseQuery(c *gin.Context, obj interface{}) error {
 		return errors.Wrap400Response(err, "", fmt.Sprintf("解析参数发生错误 - %s", err.Error()))
 	}
 	return nil
-}
-
-// Paginate 分页查询
-func Paginate(db *gorm.DB, params common.PaginationParam, out interface{}) (*common.PaginationResult, error) {
-	var count int64
-	err := db.Count(&count).Error
-	if err != nil {
-		return nil, err
-	}
-
-	if params.OnlyCount {
-		// 仅查询count
-		return &common.PaginationResult{Total: count}, nil
-	} else if !params.Pagination {
-		// 查询所有数据
-		err := db.Find(out).Error
-		return nil, err
-	} else {
-		// 分页查询
-		if params.Current == 0 {
-			params.Current = 1
-		} else if params.PageSize <= 0 {
-			params.PageSize = 10
-		}
-		db = db.Offset((params.Current - 1) * params.PageSize).Limit(params.PageSize)
-		err = db.Find(out).Error
-		return &common.PaginationResult{
-			Total:    count,
-			Current:  params.Current,
-			PageSize: params.PageSize,
-		}, nil
-	}
-}
-
-// Check 检查数据是否存在
-func Check(db *gorm.DB) (bool, error) {
-	var count int64
-	result := db.Count(&count)
-	if err := result.Error; err != nil {
-		return false, err
-	}
-	return count > 0, nil
 }
 
 // ------------------------ Response ----------------------------
@@ -89,37 +57,31 @@ type ErrorItem struct {
 }
 
 // ResPaginate 响应分页数据
-func ResPaginate(ctx *gin.Context, v interface{}, pr *common.PaginationResult) {
+func ResPaginate(ctx *gin.Context, params, v interface{}, pr *common.PaginationResult) {
 	list := ListResult{
 		List:       v,
 		Pagination: pr,
 	}
-	ResSuccess(ctx, list)
+	ResSuccess(ctx, params, list)
 }
 
 // ResList 响应列表数据
-func ResList(ctx *gin.Context, v interface{}) {
-	ResSuccess(ctx, ListResult{List: v})
+func ResList(ctx *gin.Context, params, v interface{}) {
+	ResSuccess(ctx, params, ListResult{List: v})
+}
+
+// ResSuccessString 响应操作成功
+func ResSuccessString(ctx *gin.Context, params interface{}, msg string, args ...interface{}) {
+	ResSuccess(ctx, params, Localizer.I18n.Translate(msg, args...))
 }
 
 // ResSuccess 响应成功
-func ResSuccess(ctx *gin.Context, v interface{}) {
-	ResJSON(ctx, http.StatusOK, v)
-}
-
-// ResJSON 响应JSON数据
-func ResJSON(ctx *gin.Context, status int, v interface{}) {
-	buf, err := json.Marshal(v)
-	if err != nil {
-		panic(err)
-	}
-	ctx.Set(fmt.Sprintf("%s/res-body", common.SysConfig.AppName), buf)
-	ctx.Data(status, "application/json; charset=utf-8", buf)
-	ctx.Abort()
+func ResSuccess(ctx *gin.Context, params interface{}, v interface{}) {
+	ResJSON(ctx, http.StatusOK, params, v)
 }
 
 // ResError 响应错误
-func ResError(ctx *gin.Context, err error) {
+func ResError(ctx *gin.Context, params interface{}, err error) {
 	var res *common.ResponseError
 
 	if err != nil {
@@ -134,17 +96,25 @@ func ResError(ctx *gin.Context, err error) {
 	}
 
 	// 日志记录
-	logger.Log.Warningf("%v", res.ERR) // 简化版本链式错误日志
-	//logger.Log.Warningf("%+v", err) // 详细的链式错误日志
-	fmt.Println("----------------------")
-	fmt.Printf("%v\n", res.ERR) // 简化版本链式错误日志
-	//fmt.Printf("%+v\n", err) // 详细的链式错误日志
-	fmt.Println("----------------------")
+	if common.SysConfig.RunMode == consts.RunModeDebug {
+		logger.Log.Warningf("%+v", res.ERR) // 详细的链式错误日志
+		fmt.Printf("%+v\n", res.ERR)        // 详细的链式错误日志
+	} else {
+		logger.Log.Warningf("%v", res.ERR) // 基本错误日志
+		fmt.Printf("%v\n", res.ERR)        // 基本错误日志
+	}
 
 	// 创建Response
 	eitem := ErrorItem{
 		Code:    res.Code,
 		Message: res.Message,
 	}
-	ResJSON(ctx, res.StatusCode, ErrorResult{Error: eitem})
+	ResJSON(ctx, res.StatusCode, params, ErrorResult{Error: eitem})
+}
+
+// ResJSON 响应JSON数据
+func ResJSON(ctx *gin.Context, status int, params, response interface{}) {
+	logger.Log.Infof("Params: %+v", params)
+	logger.Log.Infof("Response: %+v", response)
+	ctx.JSON(status, response)
 }

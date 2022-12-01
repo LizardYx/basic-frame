@@ -60,3 +60,57 @@ func gormLogger() GormLogger.Interface {
 		},
 	)
 }
+
+// Paginate 分页查询
+func Paginate(db *gorm.DB, params common.PaginationParam, out interface{}) (*common.PaginationResult, error) {
+	var count int64
+	err := db.Count(&count).Error
+	if err != nil {
+		return nil, err
+	}
+
+	if params.OnlyCount {
+		// 仅查询count
+		return &common.PaginationResult{Total: count}, nil
+	} else if !params.Pagination {
+		// 查询所有数据
+		err = db.Find(out).Error
+		return nil, err
+	} else {
+		// 分页查询
+		if params.Current == 0 {
+			params.Current = 1
+		} else if params.PageSize <= 0 {
+			params.PageSize = 10
+		}
+		db = db.Offset((params.Current - 1) * params.PageSize).Limit(params.PageSize)
+		err = db.Find(out).Error
+		return &common.PaginationResult{
+			Total:    count,
+			Current:  params.Current,
+			PageSize: params.PageSize,
+		}, nil
+	}
+}
+
+// FindOne 查询单条数据
+func FindOne(db *gorm.DB, out interface{}) (bool, error) {
+	result := db.First(out)
+	if err := result.Error; err != nil {
+		if err == gorm.ErrRecordNotFound {
+			return false, nil
+		}
+		return false, err
+	}
+	return true, nil
+}
+
+// Check 检查数据是否存在
+func Check(db *gorm.DB) (bool, error) {
+	var count int64
+	result := db.Count(&count)
+	if err := result.Error; err != nil {
+		return false, err
+	}
+	return count > 0, nil
+}

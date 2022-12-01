@@ -5,7 +5,6 @@ import (
 	"basic-frame/modules/base/schema"
 	"basic-frame/util/common"
 	"basic-frame/util/ginx/errors"
-	"context"
 )
 
 var SystemConfigBll = &SystemConfig{
@@ -16,33 +15,80 @@ type SystemConfig struct {
 	SystemConfigModel *model.SystemConfig
 }
 
+func (a *SystemConfig) Init() error {
+	// 检查系统基础配置项是否存在
+	if systemConfigQueryResult, err := a.Query(schema.SystemConfigQueryParam{}); err != nil {
+		return errors.WithMessage(err, "检查系统基础配置项是否存在失败")
+	} else if len(systemConfigQueryResult.Data) == 0 {
+		// 如果数据库中没有系统基础配置项,参数检查
+		if common.SysConfig.WebServer.Host == "" || common.SysConfig.WebServer.Port == 0 {
+			return errors.New("Web服务的主机地址、端口不能为空")
+		}
+
+		// 创建系统基础配置项
+		if _, err = a.SystemConfigModel.Create(schema.SystemConfig{
+			WebServerHost: common.SysConfig.WebServer.Host,
+			WebServerPort: common.SysConfig.WebServer.Port,
+			HttpsMode:     common.SysConfig.WebServer.HttpsMode,
+			HttpsCrtFile:  common.SysConfig.WebServer.HttpsCrtFile,
+			HttpsKeyFile:  common.SysConfig.WebServer.HttpsKeyFile,
+			MenuVersion:   common.SysConfig.MenuVersion,
+		}); err != nil {
+			return errors.WithMessage(err, "检查系统基础配置项是否存在失败")
+		}
+	} else {
+		// 如果数据库中有系统基础配置项,将数据写入全局缓存中
+		basicConfig := systemConfigQueryResult.Data[0]
+		common.SysConfig.WebServer = common.WebServer{
+			Host:         basicConfig.WebServerHost,
+			Port:         basicConfig.WebServerPort,
+			HttpsMode:    basicConfig.HttpsMode,
+			HttpsCrtFile: basicConfig.HttpsCrtFile,
+			HttpsKeyFile: basicConfig.HttpsKeyFile,
+		}
+		common.SysConfig.MenuVersion = basicConfig.MenuVersion
+	}
+	return nil
+}
+
 func (a *SystemConfig) Query(params schema.SystemConfigQueryParam) (*schema.SystemConfigQueryResult, error) {
 	// 创建系统基础配置项
 	return a.SystemConfigModel.Query(params)
 }
 
-func (a *SystemConfig) Create(ctx context.Context, item schema.SystemConfig) (*common.IDResult, error) {
+func (a *SystemConfig) Update(id uint64, item schema.SystemConfig) error {
 	// 参数检查
-	if err := a.ParamsValidate(ctx, item); err != nil {
-		return nil, err
+	if err := a.ParamsValidate(item); err != nil {
+		return err
 	}
 
-	// 创建系统基础配置项
-	IDResult, err := a.SystemConfigModel.Create(item)
-	if err != nil {
-		return nil, errors.Wrap500Response(err, errors.PrintCallerNameAndLine(), "创建系统基础配置项失败")
+	// 检查系统基础配置项是否存在
+	if _, err := a.SystemConfigModel.Get(id); err != nil {
+		return errors.WithMessage(err, "获取系统基础配置项信息失败")
 	}
-	return IDResult, nil
+
+	// 更新系统基础配置项
+	if err := a.SystemConfigModel.UpdateByID(id, map[string]interface{}{
+		"web_server_host": item.WebServerHost,
+		"web_server_port": item.WebServerPort,
+		"https_mode":      item.HttpsMode,
+		"https_crt_file":  item.HttpsCrtFile,
+		"https_key_file":  item.HttpsKeyFile,
+	}); err != nil {
+		return errors.WithMessage(err, "更新系统基础配置项失败")
+	}
+
+	return nil
 }
 
 // ---------------------------------------- Params  Validate --------------------------------------
 
-func (a *SystemConfig) ParamsValidate(ctx context.Context, item schema.SystemConfig) error {
-	// 检查系统基础配置项是否存在
-	if systemConfigQueryResult, err := a.Query(schema.SystemConfigQueryParam{}); err != nil {
-		return errors.New("检查系统基础配置项是否存在失败")
-	} else if len(systemConfigQueryResult.Data) != 0 {
-		return errors.New("系统基础配置项已存在")
+func (a *SystemConfig) ParamsValidate(item schema.SystemConfig) error {
+	// 如果启用Https模式
+	if item.HttpsMode {
+		if item.WebServerHost == "" || item.WebServerPort == 0 {
+			return errors.New("启用HTTPS模式时,Web服务IP地址、端口 不能为空")
+		}
 	}
 	return nil
 }

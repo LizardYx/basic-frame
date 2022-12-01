@@ -34,10 +34,10 @@ func (a SystemConfig) ToSchemaSystemConfig() schema.SystemConfig {
 	return *item
 }
 
-func (a SystemConfig) ToSchemaSystemConfigPre() schema.SystemConfigPre {
+func (a SystemConfig) ToSchemaSystemConfigPre() *schema.SystemConfigPre {
 	item := new(schema.SystemConfigPre)
 	_ = common.Copy(a, item)
-	return *item
+	return item
 }
 
 type SystemConfigs []*SystemConfig

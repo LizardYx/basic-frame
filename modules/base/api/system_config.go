@@ -18,29 +18,30 @@ type SystemConfig struct {
 func (a *SystemConfig) Query(ctx *gin.Context) {
 	var params schema.SystemConfigQueryParam
 	if err := ginx.ParseQuery(ctx, &params); err != nil {
-		ginx.ResError(ctx, err)
+		ginx.ResError(ctx, params, err)
 		return
 	}
 
 	params.Pagination = true
 	result, err := a.SystemConfigBll.Query(params)
 	if err != nil {
-		ginx.ResError(ctx, err)
+		ginx.ResError(ctx, params, err)
 		return
 	}
-	ginx.ResPaginate(ctx, result.Data, result.PageResult)
+	ginx.ResList(ctx, params, result.Data)
 }
 
-func (a *SystemConfig) Create(ctx *gin.Context) {
+func (a *SystemConfig) Update(ctx *gin.Context) {
 	var item schema.SystemConfig
-	if err := ginx.ParseJSON(ctx, &item); err != nil {
-		ginx.ResError(ctx, err)
+	if err := ginx.ParseQuery(ctx, &item); err != nil {
+		ginx.ResError(ctx, item, err)
 		return
 	}
-	result, err := a.SystemConfigBll.Create(ctx, item)
+
+	err := a.SystemConfigBll.Update(ginx.ParseParamID(ctx, "id"), item)
 	if err != nil {
-		ginx.ResError(ctx, err)
+		ginx.ResError(ctx, item, err)
 		return
 	}
-	ginx.ResSuccess(ctx, result)
+	ginx.ResSuccessString(ctx, item, "更新成功")
 }
