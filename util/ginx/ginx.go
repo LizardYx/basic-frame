@@ -12,6 +12,34 @@ import (
 	"strconv"
 )
 
+func SetUserInfo(c *gin.Context, userID uint64, userName string) {
+	c.Set("id", userID)
+	c.Set("name", userName)
+}
+
+func GetUserID(c *gin.Context) uint64 {
+	v, isExists := c.Get("id")
+	if !isExists {
+		return 0
+	}
+	if userID, ok := v.(uint64); ok {
+		return userID
+	}
+	return 0
+}
+
+func GetUserName(c *gin.Context) string {
+	v, isExists := c.Get("name")
+	if !isExists {
+		return ""
+	}
+	if userName, ok := v.(string); ok {
+		return userName
+	}
+	return ""
+}
+
+// ParseParamID 获取请求Url中的ID参数
 func ParseParamID(c *gin.Context, key string) uint64 {
 	val := c.Param(key)
 	id, err := strconv.ParseUint(val, 10, 64)
@@ -57,31 +85,31 @@ type ErrorItem struct {
 }
 
 // ResPaginate 响应分页数据
-func ResPaginate(ctx *gin.Context, params, v interface{}, pr *common.PaginationResult) {
+func ResPaginate(c *gin.Context, params, v interface{}, pr *common.PaginationResult) {
 	list := ListResult{
 		List:       v,
 		Pagination: pr,
 	}
-	ResSuccess(ctx, params, list)
+	ResSuccess(c, params, list)
 }
 
 // ResList 响应列表数据
-func ResList(ctx *gin.Context, params, v interface{}) {
-	ResSuccess(ctx, params, ListResult{List: v})
+func ResList(c *gin.Context, params, v interface{}) {
+	ResSuccess(c, params, ListResult{List: v})
 }
 
 // ResSuccessString 响应操作成功
-func ResSuccessString(ctx *gin.Context, params interface{}, msg string, args ...interface{}) {
-	ResSuccess(ctx, params, Localizer.I18n.Translate(msg, args...))
+func ResSuccessString(c *gin.Context, params interface{}, msg string, args ...interface{}) {
+	ResSuccess(c, params, Localizer.I18n.Translate(msg, args...))
 }
 
 // ResSuccess 响应成功
-func ResSuccess(ctx *gin.Context, params interface{}, v interface{}) {
-	ResJSON(ctx, http.StatusOK, params, v)
+func ResSuccess(c *gin.Context, params interface{}, v interface{}) {
+	ResJSON(c, http.StatusOK, params, v)
 }
 
 // ResError 响应错误
-func ResError(ctx *gin.Context, params interface{}, err error) {
+func ResError(c *gin.Context, params interface{}, err error) {
 	var res *common.ResponseError
 
 	if err != nil {
@@ -109,12 +137,12 @@ func ResError(ctx *gin.Context, params interface{}, err error) {
 		Code:    res.Code,
 		Message: res.Message,
 	}
-	ResJSON(ctx, res.StatusCode, params, ErrorResult{Error: eitem})
+	ResJSON(c, res.StatusCode, params, ErrorResult{Error: eitem})
 }
 
 // ResJSON 响应JSON数据
-func ResJSON(ctx *gin.Context, status int, params, response interface{}) {
+func ResJSON(c *gin.Context, status int, params, response interface{}) {
 	logger.Log.Infof("Params: %+v", params)
 	logger.Log.Infof("Response: %+v", response)
-	ctx.JSON(status, response)
+	c.JSON(status, response)
 }

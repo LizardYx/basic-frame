@@ -15,33 +15,33 @@ type SystemConfig struct {
 	SystemConfigBll *bll.SystemConfig
 }
 
-func (a *SystemConfig) Query(ctx *gin.Context) {
+func (a *SystemConfig) Query(c *gin.Context) {
 	var params schema.SystemConfigQueryParam
-	if err := ginx.ParseQuery(ctx, &params); err != nil {
-		ginx.ResError(ctx, params, err)
+	if err := ginx.ParseQuery(c, &params); err != nil {
+		ginx.ResError(c, params, err)
 		return
 	}
 
 	params.Pagination = true
-	result, err := a.SystemConfigBll.Query(params)
+	result, err := a.SystemConfigBll.Query(c, params)
 	if err != nil {
-		ginx.ResError(ctx, params, err)
+		ginx.ResError(c, params, err)
 		return
 	}
-	ginx.ResList(ctx, params, result.Data)
+	ginx.ResList(c, params, result.Data)
 }
 
-func (a *SystemConfig) Update(ctx *gin.Context) {
+func (a *SystemConfig) Update(c *gin.Context) {
 	var item schema.SystemConfig
-	if err := ginx.ParseQuery(ctx, &item); err != nil {
-		ginx.ResError(ctx, item, err)
+	if err := ginx.ParseJSON(c, &item); err != nil {
+		ginx.ResError(c, item, err)
 		return
 	}
 
-	err := a.SystemConfigBll.Update(ginx.ParseParamID(ctx, "id"), item)
+	err := a.SystemConfigBll.Update(c, ginx.ParseParamID(c, "id"), item)
 	if err != nil {
-		ginx.ResError(ctx, item, err)
+		ginx.ResError(c, item, err)
 		return
 	}
-	ginx.ResSuccessString(ctx, item, "更新成功")
+	ginx.ResSuccessString(c, item, "更新成功")
 }

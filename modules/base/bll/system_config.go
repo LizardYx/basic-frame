@@ -5,6 +5,7 @@ import (
 	"basic-frame/modules/base/schema"
 	"basic-frame/util/common"
 	"basic-frame/util/ginx/errors"
+	"github.com/gin-gonic/gin"
 )
 
 var SystemConfigBll = &SystemConfig{
@@ -17,7 +18,7 @@ type SystemConfig struct {
 
 func (a *SystemConfig) Init() error {
 	// 检查系统基础配置项是否存在
-	if systemConfigQueryResult, err := a.Query(schema.SystemConfigQueryParam{}); err != nil {
+	if systemConfigQueryResult, err := a.Query(&gin.Context{}, schema.SystemConfigQueryParam{}); err != nil {
 		return errors.WithMessage(err, "检查系统基础配置项是否存在失败")
 	} else if len(systemConfigQueryResult.Data) == 0 {
 		// 如果数据库中没有系统基础配置项,参数检查
@@ -51,12 +52,12 @@ func (a *SystemConfig) Init() error {
 	return nil
 }
 
-func (a *SystemConfig) Query(params schema.SystemConfigQueryParam) (*schema.SystemConfigQueryResult, error) {
+func (a *SystemConfig) Query(c *gin.Context, params schema.SystemConfigQueryParam) (*schema.SystemConfigQueryResult, error) {
 	// 创建系统基础配置项
 	return a.SystemConfigModel.Query(params)
 }
 
-func (a *SystemConfig) Update(id uint64, item schema.SystemConfig) error {
+func (a *SystemConfig) Update(c *gin.Context, id uint64, item schema.SystemConfig) error {
 	// 参数检查
 	if err := a.ParamsValidate(item); err != nil {
 		return err
