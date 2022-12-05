@@ -6,10 +6,14 @@ import (
 	uuid "github.com/satori/go.uuid"
 	"io"
 	"io/ioutil"
+	"math/rand"
 	"os"
 	"os/exec"
 	"path/filepath"
+	"reflect"
 	"strings"
+	"time"
+	"unsafe"
 )
 
 // GetAppPath 获取程序所在路径
@@ -65,6 +69,27 @@ func CheckIntContain(ss []int, s int) bool {
 func GetUUID() string {
 	var err error
 	return uuid.Must(uuid.NewV4(), err).String()
+}
+
+// GetRandomString 获取随机字符串
+func GetRandomString(l int) string {
+	str := "0123456789AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz"
+	bytes := []byte(str)
+	var result []byte = make([]byte, 0, l)
+	r := rand.New(rand.NewSource(time.Now().UnixNano()))
+	for i := 0; i < l; i++ {
+		result = append(result, bytes[r.Intn(len(bytes))])
+	}
+	return BytesToString(result)
+}
+
+// BytesToString 0 拷贝转换 slice byte 为 string
+func BytesToString(b []byte) (s string) {
+	_bptr := (*reflect.SliceHeader)(unsafe.Pointer(&b))
+	_sptr := (*reflect.StringHeader)(unsafe.Pointer(&s))
+	_sptr.Data = _bptr.Data
+	_sptr.Len = _bptr.Len
+	return s
 }
 
 // Copy 结构体映射

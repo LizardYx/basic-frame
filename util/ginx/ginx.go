@@ -12,13 +12,15 @@ import (
 	"strconv"
 )
 
+// SetUserInfo 将用户ID、用户名称设置在context上下文中
 func SetUserInfo(c *gin.Context, userID uint64, userName string) {
-	c.Set("id", userID)
-	c.Set("name", userName)
+	c.Set("user_id", userID)
+	c.Set("user_name", userName)
 }
 
+// GetUserID 从context上下文中获取用户ID
 func GetUserID(c *gin.Context) uint64 {
-	v, isExists := c.Get("id")
+	v, isExists := c.Get("user_id")
 	if !isExists {
 		return 0
 	}
@@ -28,8 +30,9 @@ func GetUserID(c *gin.Context) uint64 {
 	return 0
 }
 
+// GetUserName 从context上下文中获取用户名称
 func GetUserName(c *gin.Context) string {
-	v, isExists := c.Get("name")
+	v, isExists := c.Get("user_name")
 	if !isExists {
 		return ""
 	}

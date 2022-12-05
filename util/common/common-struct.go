@@ -38,9 +38,8 @@ type WebServer struct {
 
 // JWTAuth JWTAuth认证配置信息
 type JWTAuth struct {
-	SigningMethod string // 加密方式
-	SigningKey    string // 密钥
-	Expired       int    // 过期时间
+	SecretKey string // 密钥
+	Expired   int    // 过期时间(单位:秒)
 }
 
 type LoggerConf struct {

@@ -37,9 +37,8 @@ const (
 
 // JWTAuth默认配置信息
 const (
-	JWTAuthSigningMethod = "HS256"       // JWTAuth加密方式
-	JWTAuthSigningKey    = "basic-frame" // JWTAuth签名
-	JWTAuthExpired       = "604800"      // JWTAuth认证过期时间(秒)
+	JWTAuthSecretKeyLen = 16       // JWTAuth认证密钥长度
+	JWTAuthExpired      = "604800" // JWTAuth认证过期时间(秒)
 )
 
 // Logger默认配置信息

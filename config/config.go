@@ -88,8 +88,7 @@ func createSystemConfigFile() (string, error) {
 	if JWTAuthSection, err = cfg.NewSection("JWTAuth"); err != nil {
 		return fmt.Sprintf("init JWTAuth config to %s failed: ", consts.SystemConfigFileName), err
 	} else {
-		JWTAuthSection.NewKey("SigningMethod", consts.JWTAuthSigningMethod)
-		JWTAuthSection.NewKey("SigningKey", consts.JWTAuthSigningKey)
+		JWTAuthSection.NewKey("SecretKey", common.GetRandomString(consts.JWTAuthSecretKeyLen))
 		JWTAuthSection.NewKey("Expired", consts.JWTAuthExpired)
 	}
 
