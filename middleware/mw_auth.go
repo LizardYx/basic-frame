@@ -2,7 +2,9 @@ package middleware
 
 import (
 	"basic-frame/util/common"
+	"basic-frame/util/ginx"
 	"basic-frame/util/ginx/errors"
+	"github.com/gin-gonic/gin"
 	"github.com/golang-jwt/jwt/v4"
 	"time"
 )
@@ -53,6 +55,26 @@ func ParseToken(token string) (*MyClaims, error) {
 }
 
 // UserJWTAuth 用户登陆验证
-func UserJWTAuth() {
+func UserJWTAuth(skippers ...SkipperFunc) gin.HandlerFunc {
+	return func(c *gin.Context) {
+		if SkipHandler(c, skippers...) {
+			c.Next()
+			return
+		}
 
+		tokenInfo := ginx.GetToken(c)
+		if tokenInfo == "" {
+			ginx.ResError(c, "", errors.NewResponse(401, 401, "Please login in"))
+			c.Abort()
+			return
+		}
+		myClaims, err := ParseToken(tokenInfo)
+		if err != nil {
+			ginx.ResError(c, "", err)
+			c.Abort()
+			return
+		}
+		ginx.SetUserInfo(c, myClaims.UserID, myClaims.UserName)
+		c.Next()
+	}
 }

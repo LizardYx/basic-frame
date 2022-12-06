@@ -53,7 +53,7 @@ func setLogLevel(logger *logrus.Logger) {
 		logger.SetLevel(logrus.DebugLevel)
 	case consts.RunModeTest:
 		logger.SetLevel(logrus.WarnLevel)
-	case consts.RunModePro:
+	case consts.RunModeRelease:
 		// 只记录 error/fatal/panic 错误
 		logger.SetLevel(logrus.ErrorLevel)
 	default:

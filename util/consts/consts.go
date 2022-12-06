@@ -11,10 +11,10 @@ const (
 
 // 运行模式
 const (
-	RunModeDebug = "Debug"      // 系统运行模式(debug)
-	RunModeDev   = "Develop"    // 系统运行模式(开发)
-	RunModeTest  = "Test"       // 系统运行模式(测试)
-	RunModePro   = "Production" // 系统运行模式(线上)
+	RunModeDebug   = "Debug"   // 系统运行模式(debug)
+	RunModeDev     = "Develop" // 系统运行模式(开发)
+	RunModeTest    = "Test"    // 系统运行模式(测试)
+	RunModeRelease = "Release" // 系统运行模式(线上)
 )
 
 // Mysql默认配置信息

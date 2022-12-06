@@ -1,6 +1,7 @@
 package main
 
 import (
+	"basic-frame/middleware"
 	"basic-frame/modules/base"
 	"github.com/gin-gonic/gin"
 )
@@ -24,7 +25,7 @@ func (a *Router) Register(app *gin.Engine) error {
 // RegisterAPI 注册各个模块的API
 func (a *Router) RegisterAPI(app *gin.Engine) {
 	g := app.Group("/api")
-
+	g.Use(middleware.UserJWTAuth(middleware.AllowMethodAndPathPrefixSkipper("PUT", "/api/v1/system-config")))
 	// jwtauth
 	// TODO:
 

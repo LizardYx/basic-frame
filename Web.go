@@ -16,6 +16,10 @@ import (
 
 // InitGinEngine 初始化gin引擎
 func InitGinEngine() *gin.Engine {
+	// 设置gin运行模式
+	gin.SetMode(common.SysConfig.GetGinRunModel())
+
+	// 初始化gin基础配置
 	app := gin.Default()
 
 	// 要在路由组之前全局使用「跨域中间件」, 否则OPTIONS会返回404

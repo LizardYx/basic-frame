@@ -10,6 +10,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"net/http"
 	"strconv"
+	"strings"
 )
 
 // SetUserInfo 将用户ID、用户名称设置在context上下文中
@@ -40,6 +41,17 @@ func GetUserName(c *gin.Context) string {
 		return userName
 	}
 	return ""
+}
+
+// GetToken 获取用户令牌
+func GetToken(c *gin.Context) string {
+	var token string
+	auth := c.GetHeader("Authorization")
+	prefix := "Bearer "
+	if auth != "" && strings.HasPrefix(auth, prefix) {
+		token = auth[len(prefix):]
+	}
+	return token
 }
 
 // ParseParamID 获取请求Url中的ID参数
@@ -128,11 +140,21 @@ func ResError(c *gin.Context, params interface{}, err error) {
 
 	// 日志记录
 	if common.SysConfig.RunMode == consts.RunModeDebug {
-		logger.Log.Warningf("%+v", res.ERR) // 详细的链式错误日志
-		fmt.Printf("%+v\n", res.ERR)        // 详细的链式错误日志
+		if res.ERR != nil {
+			logger.Log.Warningf("%+v", res.ERR) // 详细的链式错误日志
+			fmt.Printf("%+v\n", res.ERR)        // 详细的链式错误日志
+		} else {
+			logger.Log.Warningf("%+v", res.Message) // 详细的链式错误日志
+			fmt.Printf("%+v\n", res.Message)        // 详细的链式错误日志
+		}
 	} else {
-		logger.Log.Warningf("%v", res.ERR) // 基本错误日志
-		fmt.Printf("%v\n", res.ERR)        // 基本错误日志
+		if res.ERR != nil {
+			logger.Log.Warningf("%v", res.ERR) // 基本错误日志
+			fmt.Printf("%v\n", res.ERR)        // 基本错误日志
+		} else {
+			logger.Log.Warningf("%v", res.Message) // 基本错误日志
+			fmt.Printf("%v\n", res.Message)        // 基本错误日志
+		}
 	}
 
 	// 创建Response
@@ -145,7 +167,9 @@ func ResError(c *gin.Context, params interface{}, err error) {
 
 // ResJSON 响应JSON数据
 func ResJSON(c *gin.Context, status int, params, response interface{}) {
-	logger.Log.Infof("Params: %+v", params)
-	logger.Log.Infof("Response: %+v", response)
+	if params != "" && params != nil {
+		logger.Log.Infof("Params: %+v", params)
+		logger.Log.Infof("Response: %+v", response)
+	}
 	c.JSON(status, response)
 }

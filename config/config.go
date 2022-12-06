@@ -120,5 +120,5 @@ func createSystemConfigFile() (string, error) {
 }
 
 func getRunModelDesc() string {
-	return fmt.Sprintf("运行模式(%s:开发模式,%s:测试模式,%s:线上模式)", consts.RunModeDev, consts.RunModeTest, consts.RunModePro)
+	return fmt.Sprintf("运行模式(%s:开发模式,%s:测试模式,%s:线上模式)", consts.RunModeDev, consts.RunModeTest, consts.RunModeRelease)
 }

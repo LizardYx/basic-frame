@@ -1,7 +1,9 @@
 package common
 
 import (
+	"basic-frame/util/consts"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/jinzhu/copier"
 	uuid "github.com/satori/go.uuid"
 	"io"
@@ -127,4 +129,14 @@ func (r *ResponseError) Format(s fmt.State, verb rune) {
 	case 'q':
 		_, _ = fmt.Fprintf(s, "%q", r.ERR.Error())
 	}
+}
+
+func (a *SystemConfig) GetGinRunModel() string {
+	runModel := gin.DebugMode
+	if a.RunMode == consts.RunModeTest {
+		runModel = gin.TestMode
+	} else if a.RunMode == consts.RunModeRelease {
+		runModel = gin.ReleaseMode
+	}
+	return runModel
 }
