@@ -73,3 +73,8 @@ const (
 	WSEventIDConnectSuccess = 1  // Websocket连接成功
 	WSEventIDConnectClosed  = -1 // Websocket连接关闭
 )
+
+// Restful api
+const (
+	ApiOperateSuccess = "operate success"
+)

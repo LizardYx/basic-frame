@@ -13,6 +13,10 @@ import (
 	"strings"
 )
 
+type ParamsID struct {
+	ID uint64
+}
+
 // SetUserInfo 将用户ID、用户名称设置在context上下文中
 func SetUserInfo(c *gin.Context, userID uint64, userName string) {
 	c.Set("user_id", userID)
@@ -111,6 +115,10 @@ func ResPaginate(c *gin.Context, params, v interface{}, pr *common.PaginationRes
 // ResList 响应列表数据
 func ResList(c *gin.Context, params, v interface{}) {
 	ResSuccess(c, params, ListResult{List: v})
+}
+
+func ResOperateSuccess(c *gin.Context, params interface{}) {
+	ResSuccess(c, params, Localizer.I18n.Translate(consts.ApiOperateSuccess))
 }
 
 // ResSuccessString 响应操作成功

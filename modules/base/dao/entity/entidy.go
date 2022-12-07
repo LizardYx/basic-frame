@@ -4,5 +4,6 @@ package entity
 func GetTables() []interface{} {
 	return []interface{}{
 		new(SystemConfig),
+		new(RestfulApi),
 	}
 }
