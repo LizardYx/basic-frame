@@ -5,5 +5,6 @@ func GetTables() []interface{} {
 	return []interface{}{
 		new(SystemConfig),
 		new(RestfulApi),
+		new(Button),
 	}
 }

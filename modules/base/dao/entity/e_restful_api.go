@@ -15,6 +15,14 @@ func (a SchemaRestfulApi) ToRestfulApi() *RestfulApi {
 	return item
 }
 
+type SchemaRestfulApis schema.RestfulApis
+
+func (a SchemaRestfulApis) ToRestfulApis() *RestfulApis {
+	item := new(RestfulApis)
+	_ = common.Copy(a, item)
+	return item
+}
+
 type RestfulApi struct {
 	ID        uint64         `gorm:"primaryKey,autoIncrement;"`
 	UUID      string         `gorm:"index;"`                     // 接口UUID

@@ -16,11 +16,11 @@ type RestfulApi struct {
 	UpdatedAt time.Time `json:"updated_at"`                // 更新时间
 }
 
-type RestfulApis []*RestfulApi
-
 type RestfulApiQueryParam struct {
 	common.PaginationParam
 }
+
+type RestfulApis []*RestfulApi
 
 type RestfulApiQueryResult struct {
 	Data       RestfulApis

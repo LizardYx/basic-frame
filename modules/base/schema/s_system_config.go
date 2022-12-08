@@ -18,11 +18,11 @@ type SystemConfig struct {
 	UpdatedAt     time.Time `json:"updated_at"`                         // 更新时间
 }
 
-type SystemConfigs []*SystemConfig
-
 type SystemConfigQueryParam struct {
 	common.PaginationParam
 }
+
+type SystemConfigs []*SystemConfig
 
 type SystemConfigQueryResult struct {
 	Data       SystemConfigPres

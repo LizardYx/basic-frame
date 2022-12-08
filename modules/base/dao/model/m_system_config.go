@@ -49,7 +49,6 @@ func (a *SystemConfig) Get(id uint64) (*schema.SystemConfigPre, error) {
 }
 
 func (a *SystemConfig) UpdateByID(id uint64, item map[string]interface{}) error {
-	db := mysql.DB.Model(entity.SystemConfig{})
-	result := db.Where("id = ?", id).Updates(item)
+	result := mysql.DB.Model(entity.SystemConfig{ID: id}).Updates(item)
 	return errors.WithStack(result.Error)
 }

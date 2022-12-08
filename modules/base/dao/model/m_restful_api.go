@@ -33,14 +33,12 @@ func (a *RestfulApi) Create(item schema.RestfulApi) (*common.IDResult, error) {
 }
 
 func (a *RestfulApi) UpdateByID(id uint64, item map[string]interface{}) error {
-	db := mysql.DB.Model(entity.RestfulApi{})
-	result := db.Where("id = ?", id).Updates(item)
+	result := mysql.DB.Model(entity.RestfulApi{ID: id}).Updates(item)
 	return errors.WithStack(result.Error)
 }
 
 func (a *RestfulApi) UpdateByUUID(uuid string, item map[string]interface{}) error {
-	db := mysql.DB.Model(entity.RestfulApi{})
-	result := db.Where("uuid = ?", uuid).Updates(item)
+	result := mysql.DB.Model(entity.RestfulApi{UUID: uuid}).Updates(item)
 	return errors.WithStack(result.Error)
 }
 

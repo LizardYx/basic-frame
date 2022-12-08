@@ -17,12 +17,12 @@ type DisabledField struct {
 
 }
 
-type DisabledFields []*DisabledField
-
 type DisabledFieldQueryParam struct {
 	common.PaginationParam
 	UUID string `form:"uuid"` // 按钮UUID
 }
+
+type DisabledFields []*DisabledField
 
 type DisabledFieldQueryResult struct {
 	Data       DisabledFields

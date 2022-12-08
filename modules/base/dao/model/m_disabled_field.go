@@ -16,7 +16,7 @@ type DisabledField struct {
 func (a *DisabledField) Query(params schema.DisabledFieldQueryParam) (*schema.DisabledFieldQueryResult, error) {
 	db := mysql.DB.Model(entity.DisabledField{})
 	if v := params.UUID; v != "" {
-		db.Where("uuid=?", v)
+		db.Where("uuid = ?", v)
 	}
 
 	var list entity.DisabledFields
@@ -50,8 +50,7 @@ func (a *DisabledField) Create(item schema.DisabledField) (*common.IDResult, err
 }
 
 func (a *DisabledField) UpdateByID(id uint64, item map[string]interface{}) error {
-	db := mysql.DB.Model(entity.DisabledField{})
-	result := db.Where("id = ?", id).Updates(item)
+	result := mysql.DB.Model(entity.DisabledField{ID: id}).Updates(item)
 	return errors.WithStack(result.Error)
 }
 
