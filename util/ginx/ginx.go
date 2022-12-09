@@ -139,11 +139,11 @@ func ResError(c *gin.Context, params interface{}, err error) {
 		if e, ok := err.(*common.ResponseError); ok {
 			res = e
 		} else {
-			res = errors.UnWrapResponse(errors.New500Response(err.Error()))
+			res = errors.UnWrapResponse(errors.NewIANAResponse(http.StatusInternalServerError, err.Error()))
 			res.ERR = err
 		}
 	} else {
-		res = errors.UnWrapResponse(errors.New500Response("服务器发生错误"))
+		res = errors.UnWrapResponse(errors.NewIANAResponse(http.StatusInternalServerError, ""))
 	}
 
 	// 日志记录

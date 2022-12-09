@@ -1,6 +1,8 @@
 package errors
 
-import "github.com/pkg/errors"
+import (
+	"github.com/pkg/errors"
+)
 
 // 定义别名
 var (

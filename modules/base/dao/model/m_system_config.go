@@ -15,6 +15,7 @@ type SystemConfig struct {
 
 func (a *SystemConfig) Query(params schema.SystemConfigQueryParam) (*schema.SystemConfigQueryResult, error) {
 	db := mysql.DB.Model(entity.SystemConfig{})
+	db.Order("id DESC")
 
 	var list entity.SystemConfigs
 	paginationResult, err := mysql.Paginate(db, params.PaginationParam, &list)

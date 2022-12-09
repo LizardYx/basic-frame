@@ -18,6 +18,7 @@ func (a *DisabledField) Query(params schema.DisabledFieldQueryParam) (*schema.Di
 	if v := params.UUID; v != "" {
 		db.Where("uuid = ?", v)
 	}
+	db.Order("id DESC")
 
 	var list entity.DisabledFields
 	paginationResult, err := mysql.Paginate(db, params.PaginationParam, &list)

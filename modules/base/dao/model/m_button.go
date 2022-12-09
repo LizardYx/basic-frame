@@ -32,6 +32,7 @@ func (a *Button) Query(params schema.ButtonQueryParam) (*schema.ButtonQueryResul
 	if v := params.Status; v != 0 {
 		db.Where("status = ?", v)
 	}
+	db.Order("id DESC")
 
 	var list entity.Buttons
 	paginationResult, err := mysql.Paginate(db, params.PaginationParam, &list)

@@ -58,8 +58,8 @@ const (
 
 // 超管用户信息
 const (
-	RootName     = "root"    // 超管账号
-	RootPassword = "1234asd" // 超管密码
+	AdminName     = "admin"   // 超管账号
+	AdminPassword = "1234asd" // 超管密码
 )
 
 // i18n配置
@@ -76,5 +76,5 @@ const (
 
 // Restful api
 const (
-	ApiOperateSuccess = "operate success"
+	ApiOperateSuccess = "操作成功"
 )
