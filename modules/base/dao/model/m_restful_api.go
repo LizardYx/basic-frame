@@ -13,6 +13,25 @@ var RestfulApiModel = &RestfulApi{}
 type RestfulApi struct {
 }
 
+func (a *RestfulApi) Query(params schema.RestfulApiQueryParam) (*schema.RestfulApiQueryResult, error) {
+	db := mysql.DB.Model(entity.RestfulApi{})
+	if v := params.UUID; v != "" {
+		db.Where("uuid=?", v)
+	}
+	db.Order("id DESC")
+
+	var list entity.RestfulApis
+	paginationResult, err := mysql.Paginate(db, params.PaginationParam, &list)
+	if err != nil {
+		return nil, errors.New(err.Error())
+	}
+	qr := &schema.RestfulApiQueryResult{
+		Data:       list.ToSchemaRestfulApis(),
+		PageResult: paginationResult,
+	}
+	return qr, nil
+}
+
 func (a *RestfulApi) GetByUUID(uuid string) (*schema.RestfulApi, error) {
 	db := mysql.DB.Model(entity.RestfulApi{UUID: uuid})
 

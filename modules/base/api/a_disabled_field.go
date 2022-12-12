@@ -15,11 +15,9 @@ type DisabledField struct {
 }
 
 func (a *DisabledField) Delete(c *gin.Context) {
-	params := ginx.ParamsID{
-		ID: ginx.ParseParamID(c, "id"),
-	}
-	err := a.DisabledFieldBll.Delete(c, params.ID)
-	if err != nil {
+	var params = ginx.ParamsID{ID: ginx.ParseParamID(c, "id")}
+
+	if err := a.DisabledFieldBll.Delete(c, params.ID); err != nil {
 		ginx.ResError(c, params, err)
 		return
 	}

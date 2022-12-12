@@ -23,10 +23,20 @@ type Router struct {
 
 // Register 模块路由注册
 func (a *Router) Register(api *gin.RouterGroup) {
+
+	ButtonGroup := api.Group("base/button")
+	{
+		ButtonGroup.POST("", a.ButtonApi.Create)
+		ButtonGroup.PUT(":id", a.ButtonApi.Update)
+		ButtonGroup.PUT(":id/batch-update", a.ButtonApi.BatchUpdate)
+		ButtonGroup.DELETE(":id", a.ButtonApi.Delete)
+	}
+
 	DisabledFieldGroup := api.Group("base/disabled_field")
 	{
 		DisabledFieldGroup.DELETE(":id", a.DisabledFieldApi.Delete)
 	}
+
 	SystemConfigGroup := api.Group("base/system-config")
 	{
 		SystemConfigGroup.GET("", a.SystemConfigAPI.Query)

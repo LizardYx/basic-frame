@@ -55,7 +55,7 @@ func gormLogger() GormLogger.Interface {
 		log.New(os.Stdout, "\r\n", log.LstdFlags), // io writer
 		GormLogger.Config{
 			SlowThreshold: time.Second,     // 慢 SQL 阈值
-			LogLevel:      GormLogger.Info, // Log level
+			LogLevel:      GormLogger.Warn, // Log level
 			Colorful:      true,            // 禁用彩色打印
 		},
 	)

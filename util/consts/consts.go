@@ -5,7 +5,7 @@ const (
 	AppName              = "BasicFrame"          // 系统名称
 	AppVersion           = "0.1"                 // 系统版本号
 	RunMode              = RunModeDev            // 系统默认运行模式
-	DefaultLang          = LanguageEn            // 系统默认语言
+	DefaultLang          = LanguageZh            // 系统默认语言
 	SystemConfigFileName = "./config/config.ini" // 系统基础配置文件
 )
 

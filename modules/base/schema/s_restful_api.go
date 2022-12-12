@@ -18,6 +18,7 @@ type RestfulApi struct {
 
 type RestfulApiQueryParam struct {
 	common.PaginationParam
+	UUID string `form:"uuid"` // 接口UUID
 }
 
 type RestfulApis []*RestfulApi

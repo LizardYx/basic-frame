@@ -29,6 +29,12 @@ func (a *SystemConfig) Query(params schema.SystemConfigQueryParam) (*schema.Syst
 	return qr, nil
 }
 
+func (a *SystemConfig) First() (*schema.SystemConfig, error) {
+	var item entity.SystemConfig
+	err := mysql.DB.First(&item).Error
+	return item.ToSchemaSystemConfig(), err
+}
+
 func (a *SystemConfig) Create(item schema.SystemConfig) (*common.IDResult, error) {
 	eitem := entity.SchemaSystemConfig(item).ToSystemConfig()
 	result := mysql.DB.Create(&eitem)

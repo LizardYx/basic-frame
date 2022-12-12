@@ -28,10 +28,10 @@ type SystemConfig struct {
 	DeletedAt     gorm.DeletedAt `gorm:"index"`
 }
 
-func (a SystemConfig) ToSchemaSystemConfig() schema.SystemConfig {
+func (a SystemConfig) ToSchemaSystemConfig() *schema.SystemConfig {
 	item := new(schema.SystemConfig)
 	_ = common.Copy(a, item)
-	return *item
+	return item
 }
 
 func (a SystemConfig) ToSchemaSystemConfigPre() *schema.SystemConfigPre {
