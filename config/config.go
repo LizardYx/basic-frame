@@ -10,20 +10,22 @@ import (
 // LoadSystemConfigFile 加载系统配置文件
 func LoadSystemConfigFile() (string, error) {
 	// 读取系统配置文件
-	cfg, err := ini.Load(consts.SystemConfigFileName)
+	cfg, err := ini.Load(consts.SystemConfigFile)
 	if err != nil {
 		// 未找到系统配置文件，创建默认系统配置文件
 		var errMessage string
 		if errMessage, err = createSystemConfigFile(); err != nil {
 			return errMessage, err
 		} else {
-			cfg, _ = ini.Load(consts.SystemConfigFileName)
+			cfg, _ = ini.Load(consts.SystemConfigFile)
 		}
 	}
 	common.SysConfig.RunMode = cfg.Section("").Key("RunMode").String()
 	common.SysConfig.AppName = cfg.Section("").Key("AppName").String()
 	common.SysConfig.AppVersion = cfg.Section("").Key("AppVersion").MustFloat64()
 	common.SysConfig.DefaultLang = cfg.Section("").Key("DefaultLang").String()
+	common.SysConfig.SystemConfigFile = cfg.Section("").Key("SystemConfigFile").String()
+	common.SysConfig.MenuFile = cfg.Section("").Key("MenuFile").String()
 	// 读取mysql配置部分
 	if err = cfg.Section("Mysql").MapTo(&common.SysConfig.Mysql); err != nil {
 		return "failed to load Mysql config :", err
@@ -58,11 +60,13 @@ func createSystemConfigFile() (string, error) {
 	defaultSection.NewKey("AppName", consts.AppName)
 	defaultSection.NewKey("AppVersion", consts.AppVersion)
 	defaultSection.NewKey("DefaultLang", consts.DefaultLang)
+	defaultSection.NewKey("SystemConfigFile", consts.SystemConfigFile)
+	defaultSection.NewKey("MenuFile", consts.MenuFile)
 
 	// 创建默认mysql配置
 	var mysqlSection *ini.Section
 	if mysqlSection, err = cfg.NewSection("Mysql"); err != nil {
-		return fmt.Sprintf("init Mysql config to %s failed: ", consts.SystemConfigFileName), err
+		return fmt.Sprintf("init Mysql config to %s failed: ", consts.SystemConfigFile), err
 	} else {
 		mysqlSection.NewKey("Host", consts.MysqlHost)
 		mysqlSection.NewKey("Port", consts.MysqlPort)
@@ -74,7 +78,7 @@ func createSystemConfigFile() (string, error) {
 	// 创建默认webServer配置
 	var webServerSection *ini.Section
 	if webServerSection, err = cfg.NewSection("WebServer"); err != nil {
-		return fmt.Sprintf("init WebServer config to %s failed: ", consts.SystemConfigFileName), err
+		return fmt.Sprintf("init WebServer config to %s failed: ", consts.SystemConfigFile), err
 	} else {
 		webServerSection.NewKey("Host", consts.WebServerHost)
 		webServerSection.NewKey("Port", consts.WebServerPort)
@@ -86,7 +90,7 @@ func createSystemConfigFile() (string, error) {
 	// 创建默认JWTAuth配置
 	var JWTAuthSection *ini.Section
 	if JWTAuthSection, err = cfg.NewSection("JWTAuth"); err != nil {
-		return fmt.Sprintf("init JWTAuth config to %s failed: ", consts.SystemConfigFileName), err
+		return fmt.Sprintf("init JWTAuth config to %s failed: ", consts.SystemConfigFile), err
 	} else {
 		JWTAuthSection.NewKey("SecretKey", common.GetRandomString(consts.JWTAuthSecretKeyLen))
 		JWTAuthSection.NewKey("Expired", consts.JWTAuthExpired)
@@ -95,7 +99,7 @@ func createSystemConfigFile() (string, error) {
 	// 创建默认Logger配置
 	var LoggerSection *ini.Section
 	if LoggerSection, err = cfg.NewSection("Logger"); err != nil {
-		return fmt.Sprintf("init Logger config to %s failed: ", consts.SystemConfigFileName), err
+		return fmt.Sprintf("init Logger config to %s failed: ", consts.SystemConfigFile), err
 	} else {
 		LoggerSection.NewKey("RotationTime", consts.LoggerRotationTime)
 		LoggerSection.NewKey("MaxAge", consts.LoggerMaxAge)
@@ -104,7 +108,7 @@ func createSystemConfigFile() (string, error) {
 	// 创建默认SmtpServer配置
 	var SmtpServerSection *ini.Section
 	if SmtpServerSection, err = cfg.NewSection("SmtpServer"); err != nil {
-		return fmt.Sprintf("init SmtpServer config to %s failed: ", consts.SystemConfigFileName), err
+		return fmt.Sprintf("init SmtpServer config to %s failed: ", consts.SystemConfigFile), err
 	} else {
 		SmtpServerSection.NewKey("Enable", consts.SmtpEnable)
 		SmtpServerSection.NewKey("EmailServerName", consts.SmtpServerName)
@@ -113,8 +117,8 @@ func createSystemConfigFile() (string, error) {
 		SmtpServerSection.NewKey("SmtpPassword", consts.SmtpPassword)
 	}
 
-	if err = cfg.SaveTo(consts.SystemConfigFileName); err != nil {
-		return fmt.Sprintf("Create %s file failed: ", consts.SystemConfigFileName), err
+	if err = cfg.SaveTo(consts.SystemConfigFile); err != nil {
+		return fmt.Sprintf("Create %s file failed: ", consts.SystemConfigFile), err
 	}
 	return "", nil
 }

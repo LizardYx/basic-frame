@@ -138,8 +138,12 @@ func (a MenuTree) Init() *MenuTree {
 }
 
 func (a MenuTrees) Init() *MenuTrees {
-	for index, item := range a {
-		*a[index] = *item.Init()
+	if len(a) == 0 {
+		a = make(MenuTrees, 0)
+	} else {
+		for index, item := range a {
+			*a[index] = *item.Init()
+		}
 	}
 	return &a
 }

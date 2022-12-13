@@ -2,11 +2,12 @@ package consts
 
 // 系统默认基础配置信息
 const (
-	AppName              = "BasicFrame"          // 系统名称
-	AppVersion           = "0.1"                 // 系统版本号
-	RunMode              = RunModeDev            // 系统默认运行模式
-	DefaultLang          = LanguageZh            // 系统默认语言
-	SystemConfigFileName = "./config/config.ini" // 系统基础配置文件
+	AppName          = "BasicFrame"          // 系统名称
+	AppVersion       = "0.1"                 // 系统版本号
+	RunMode          = RunModeDev            // 系统默认运行模式
+	DefaultLang      = LanguageZh            // 系统默认语言
+	SystemConfigFile = "./config/config.ini" // 系统基础配置文件
+	MenuFile         = "./config/menu.json"  // 系统菜单文件
 )
 
 // 运行模式

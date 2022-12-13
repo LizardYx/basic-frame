@@ -3,6 +3,7 @@ package main
 import (
 	"basic-frame/config"
 	baseBll "basic-frame/modules/base/bll"
+	casbin_adapter "basic-frame/util/casbin-adapter"
 	"basic-frame/util/logger"
 	"basic-frame/util/mysql"
 	"context"
@@ -29,6 +30,15 @@ func main() {
 		fmt.Printf("%v\n", err)
 	}
 
+	// 初始化Casbin
+	if err := casbin_adapter.InitCasbin(); err != nil {
+		logger.Log.Warningf("%v", err)
+		fmt.Printf("%v\n", err)
+	}
+
+	// 初始化菜单数据
+	go baseBll.MenuBll.InitData()
+
 	// 注册定时任务
 	RegisterCronTask(context.Background())
 
@@ -39,9 +49,6 @@ func main() {
 // RegisterCronTask 注册定时任务
 func RegisterCronTask(ctx context.Context) {
 	c := cron.New()
-
-	// 读取菜单文件
-	// TODO:
 
 	// 任务调度
 	//if _, err := c.AddFunc("@every 3s", Task); err != nil {

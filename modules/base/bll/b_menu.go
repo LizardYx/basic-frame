@@ -4,14 +4,12 @@ import (
 	"basic-frame/modules/base/dao/model"
 	"basic-frame/modules/base/schema"
 	"basic-frame/util/common"
-	"basic-frame/util/consts"
 	"basic-frame/util/ginx"
 	"basic-frame/util/ginx/errors"
 	"basic-frame/util/logger"
 	"basic-frame/util/mysql"
 	"encoding/json"
 	"fmt"
-	"github.com/casbin/casbin/v2"
 	"github.com/gin-gonic/gin"
 	"gorm.io/gorm"
 	"io/ioutil"
@@ -25,7 +23,6 @@ var MenuBll = &Menu{
 }
 
 type Menu struct {
-	Enforcer           *casbin.SyncedEnforcer
 	MenuModel          *model.Menu
 	ButtonModel        *model.Button
 	RestfulApiModel    *model.RestfulApi
@@ -34,12 +31,12 @@ type Menu struct {
 }
 
 // InitData 初始化菜单数据
-func (a *Menu) InitData(c *gin.Context, dataFile string) {
+func (a *Menu) InitData() {
 	loadFileFailed := false
 	sleepTime := 5
 	for {
 		// 读取前端页面菜单配置文件
-		data, err := a.readData(dataFile)
+		data, err := a.readData(common.SysConfig.MenuFile)
 		if err != nil {
 			fmt.Println("读取前端页面菜单配置文件失败")
 			if !loadFileFailed {
@@ -55,7 +52,7 @@ func (a *Menu) InitData(c *gin.Context, dataFile string) {
 		// Json文件中的版本号大于DB中的版本号。则表明Json文件有更新
 		if data.MenuVersion > common.SysConfig.MenuVersion {
 			// 更新菜单树和可禁用字段
-			if err = a.UpdatePermissionTree(c, schema.PermissionTree{
+			if err = a.UpdatePermissionTree(&gin.Context{}, schema.PermissionTree{
 				MenuTrees:      data.MenuTrees,
 				DisabledFields: data.DisabledFields,
 			}); err != nil {
@@ -182,7 +179,7 @@ func (a *Menu) BatchUpdateMenus(c *gin.Context, items schema.Menus) error {
 	if err != nil {
 		return err
 	}
-	LoadCasbinPolicy(c, a.Enforcer)
+	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
 	return err
 }
 
@@ -208,7 +205,7 @@ func (a *Menu) Delete(c *gin.Context, id uint64) error {
 	if err := a.MenuModel.Delete(id); err != nil {
 		return err
 	}
-	LoadCasbinPolicy(c, a.Enforcer)
+	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
 	return nil
 }
 
@@ -276,7 +273,7 @@ func (a *Menu) UpdateMenuTrees(c *gin.Context, parentID *uint64, list schema.Men
 	if err != nil {
 		return err
 	}
-	LoadCasbinPolicy(c, a.Enforcer)
+	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
 	return err
 }
 
@@ -464,13 +461,13 @@ func (a *Menu) GetPermissionTree(c *gin.Context) (*schema.PermissionTree, error)
 	if menuTrees, err := a.MenuModel.QueryMenuTree(); err != nil {
 		return permissionTree, errors.New("获取菜单树失败")
 	} else {
-		permissionTree.MenuTrees = *menuTrees.SortMenuTrees()
+		permissionTree.MenuTrees = *menuTrees.SortMenuTrees().Init()
 	}
 
 	if fieldResult, err := a.DisabledFieldModel.Query(schema.DisabledFieldQueryParam{}); err != nil {
 		return permissionTree, errors.New("获取特殊接口失败")
 	} else {
-		permissionTree.DisabledFields = fieldResult.Data
+		permissionTree.DisabledFields = *fieldResult.Data.Init()
 	}
 	return permissionTree, nil
 }
@@ -540,7 +537,7 @@ func (a *Menu) UpdatePermissionTree(c *gin.Context, item schema.PermissionTree) 
 // UpdatePermissionTreeFile 使用DB中的数据替换配置文件内容
 func (a *Menu) UpdatePermissionTreeFile(c *gin.Context) error {
 	// 判断文件是否存在
-	filePath := consts.SystemConfigFileName
+	filePath := common.SysConfig.MenuFile
 	// 以重写方式打开配置文件，若不存在则创建该文件(不会创建目录)
 	file, errByOpenFile := os.OpenFile(filePath, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if errByOpenFile != nil {
@@ -571,13 +568,13 @@ func (a *Menu) GetPermissionTreeForCreateRole(c *gin.Context) (*schema.Permissio
 	if menuTrees, err := a.MenuModel.QueryMenuTreeForCreateRole(); err != nil {
 		return permissionTree, errors.New("获取菜单树失败")
 	} else {
-		permissionTree.MenuTrees = *menuTrees.SortMenuTrees()
+		permissionTree.MenuTrees = *menuTrees.SortMenuTrees().Init()
 	}
 
 	if fieldResult, err := a.DisabledFieldModel.Query(schema.DisabledFieldQueryParam{}); err != nil {
 		return permissionTree, errors.New("获取特殊接口失败")
 	} else {
-		permissionTree.DisabledFields = fieldResult.Data
+		permissionTree.DisabledFields = *fieldResult.Data.Init()
 	}
 	return permissionTree, nil
 }

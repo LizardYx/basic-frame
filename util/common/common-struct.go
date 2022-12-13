@@ -1,21 +1,26 @@
 package common
 
+import "github.com/casbin/casbin/v2"
+
 var (
 	SysConfig = new(SystemConfig)
 )
 
 // SystemConfig 系统基础配置信息
 type SystemConfig struct {
-	RunMode     string  // App运行模式
-	AppName     string  // App名称
-	AppVersion  float64 // App版本号
-	DefaultLang string  // 系统默认语言
-	MenuVersion float64 // 系统菜单版本号
-	Mysql       Mysql
-	WebServer   WebServer
-	JWTAuth     JWTAuth
-	Logger      LoggerConf
-	SmtpServer  SmtpServer
+	RunMode            string  // App运行模式
+	AppName            string  // App名称
+	AppVersion         float64 // App版本号
+	SystemConfigFile   string  // 系统基础配置文件
+	DefaultLang        string  // 系统默认语言
+	MenuVersion        float64 // 系统菜单版本号
+	MenuFile           string  // 系统菜单文件
+	CasbinSyncEnforcer *casbin.SyncedEnforcer
+	Mysql              Mysql
+	WebServer          WebServer
+	JWTAuth            JWTAuth
+	Logger             LoggerConf
+	SmtpServer         SmtpServer
 }
 
 // Mysql mysql数据库配置信息
