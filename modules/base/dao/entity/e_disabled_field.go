@@ -15,6 +15,14 @@ func (a SchemaDisabledField) ToDisabledField() *DisabledField {
 	return item
 }
 
+type SchemaDisabledFields schema.DisabledFields
+
+func (a SchemaDisabledFields) ToDisabledField() *DisabledFields {
+	item := new(DisabledFields)
+	_ = common.Copy(a, item)
+	return item
+}
+
 type DisabledField struct {
 	ID        uint64         `gorm:"primaryKey,autoIncrement;"`
 	UUID      string         `gorm:"index;"`                     // 可禁用字段UUID

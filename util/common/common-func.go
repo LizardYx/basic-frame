@@ -13,6 +13,7 @@ import (
 	"os/exec"
 	"path/filepath"
 	"reflect"
+	"strconv"
 	"strings"
 	"time"
 	"unsafe"
@@ -97,6 +98,75 @@ func BytesToString(b []byte) (s string) {
 // Copy 结构体映射
 func Copy(s, ts interface{}) error {
 	return copier.Copy(ts, s)
+}
+
+// ContainsString 该项是否已经存在
+func ContainsString(ss []string, s string) bool {
+	for _, v := range ss {
+		if v == s {
+			return true
+		}
+	}
+	return false
+}
+
+// ContainsUint64 该项是否已经存在
+func ContainsUint64(ss []uint64, s uint64) bool {
+	for _, v := range ss {
+		if v == s {
+			return true
+		}
+	}
+	return false
+}
+
+// ContainsInt 该项是否已经存在
+func ContainsInt(ss []int, s int) bool {
+	for _, v := range ss {
+		if v == s {
+			return true
+		}
+	}
+	return false
+}
+
+func StringSliceToString(items []string, sep string) string {
+	var newString string
+
+	for _, item := range items {
+		if newString == "" {
+			newString = item
+		} else {
+			newString = fmt.Sprintf("%s%s%s", newString, sep, item)
+		}
+	}
+	return newString
+}
+
+func UintSliceToString(items []uint64, sep string) string {
+	var newString string
+
+	for _, item := range items {
+		if newString == "" {
+			newString = strconv.FormatUint(item, 10)
+		} else {
+			newString = fmt.Sprintf("%s%s%d", newString, sep, item)
+		}
+	}
+	return newString
+}
+
+func IntSliceToString(items []int, sep string) string {
+	var newString string
+
+	for _, item := range items {
+		if newString == "" {
+			newString = strconv.Itoa(item)
+		} else {
+			newString = fmt.Sprintf("%s%s%d", newString, sep, item)
+		}
+	}
+	return newString
 }
 
 // GetDBConnString 获取Mysql连接字符串
