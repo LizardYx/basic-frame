@@ -1,0 +1,141 @@
+package api
+
+import (
+	"basic-frame/modules/base/bll"
+	"basic-frame/modules/base/schema"
+	"basic-frame/util/ginx"
+	"github.com/gin-gonic/gin"
+)
+
+var RoleApi = &Role{
+	RoleBll: bll.RoleBll,
+}
+
+type Role struct {
+	RoleBll *bll.Role
+}
+
+func (a *Role) Query(c *gin.Context) {
+	var params schema.RoleQueryParam
+	if err := ginx.ParseQuery(c, &params); err != nil {
+		ginx.ResError(c, params, err)
+		return
+	}
+
+	params.Pagination = true
+	result, err := a.RoleBll.Query(c, params)
+	if err != nil {
+		ginx.ResError(c, params, err)
+		return
+	}
+	ginx.ResList(c, params, result.Data)
+}
+
+func (a *Role) Get(c *gin.Context) {
+	item, err := a.RoleBll.Get(c, ginx.ParseParamID(c, "id"))
+	if err != nil {
+		ginx.ResError(c, "", err)
+		return
+	}
+	ginx.ResSuccess(c, "", item)
+}
+
+func (a *Role) Create(c *gin.Context) {
+	var item schema.Role
+	if err := ginx.ParseJSON(c, &item); err != nil {
+		ginx.ResError(c, "", err)
+		return
+	}
+
+	item.Creator = ginx.GetUserID(c)
+	result, err := a.RoleBll.Create(c, item)
+	if err != nil {
+		ginx.ResError(c, "", err)
+		return
+	}
+	ginx.ResSuccess(c, item, result)
+}
+
+func (a *Role) Update(c *gin.Context) {
+	var item schema.Role
+	if err := ginx.ParseJSON(c, &item); err != nil {
+		ginx.ResError(c, item, err)
+		return
+	}
+
+	if err := a.RoleBll.UpdateDetails(c, item); err != nil {
+		ginx.ResError(c, item, err)
+		return
+	}
+	ginx.ResOperateSuccess(c, item)
+}
+
+func (a *Role) UpdateAuditorType(c *gin.Context) {
+	var item schema.UpdateAuditorTypeParam
+	if err := ginx.ParseJSON(c, &item); err != nil {
+		ginx.ResError(c, item, err)
+		return
+	}
+
+	if err := a.RoleBll.UpdateAuditorType(c, ginx.ParseParamID(c, "id"), item); err != nil {
+		ginx.ResError(c, item, err)
+		return
+	}
+	ginx.ResOperateSuccess(c, item)
+}
+
+func (a *Role) Delete(c *gin.Context) {
+	var params = ginx.ParamsID{ID: ginx.ParseParamID(c, "id")}
+
+	if err := a.RoleBll.Delete(c, params.ID); err != nil {
+		ginx.ResError(c, params, err)
+		return
+	}
+	ginx.ResOperateSuccess(c, params)
+}
+
+func (a *Role) UserAddRole(c *gin.Context) {
+	var items []uint64
+	if err := ginx.ParseJSON(c, &items); err != nil {
+		ginx.ResError(c, items, err)
+		return
+	}
+
+	if err := a.RoleBll.UserAddRole(c, ginx.ParseParamID(c, "id"), items); err != nil {
+		ginx.ResError(c, items, err)
+		return
+	}
+	ginx.ResOperateSuccess(c, items)
+}
+
+func (a *Role) UserRemoveRole(c *gin.Context) {
+	var items []uint64
+	if err := ginx.ParseJSON(c, &items); err != nil {
+		ginx.ResError(c, items, err)
+		return
+	}
+
+	if err := a.RoleBll.UserRemoveRole(c, ginx.ParseParamID(c, "id"), items); err != nil {
+		ginx.ResError(c, items, err)
+		return
+	}
+	ginx.ResOperateSuccess(c, items)
+}
+
+func (a *Role) GetRolePermissionTree(c *gin.Context) {
+	// 获取角色信息
+	// TODO: 等待用户表完成
+	//item, err := a.RoleBll.Get(c, ginx.ParseParamID(c, "id"))
+	//if err != nil {
+	//	ginx.ResError(c, "", err)
+	//	return
+	//}
+	// 将菜单和按钮列表，组装成树
+	menuTrees := make(schema.MenuTrees, 0)
+	//parentId := uint64(0)
+	//if err = a.UserBll.GetMenuTreesInfo(&menuTrees, &parentId, item.Menus, item.Buttons); err != nil {
+	//	ginx.ResError(c, "", err)
+	//	return
+	//}
+	ginx.ResSuccess(c, "", menuTrees.Init().SortMenuTrees())
+}

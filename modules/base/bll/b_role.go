@@ -7,7 +7,9 @@ import (
 	"basic-frame/util/common"
 	"basic-frame/util/consts"
 	"basic-frame/util/ginx/errors"
+	"basic-frame/util/mysql"
 	"github.com/gin-gonic/gin"
+	"gorm.io/gorm"
 	"strings"
 )
 
@@ -122,6 +124,277 @@ func (a *Role) UpdateRoleMenu(c *gin.Context, id uint64, items schema.Menus) err
 	}
 
 	return a.RoleModel.UpdateRoleMenu(id, items)
+}
+
+func (a *Role) UpdateRoleButton(c *gin.Context, id uint64, items schema.Buttons) error {
+	// 检查角色是否存在
+	oldItem, err := a.RoleModel.Get(id)
+	if err != nil {
+		return errors.WithMessage(err, "检查角色是否存在失败")
+	} else if oldItem == nil {
+		return errors.New("角色不存在")
+	}
+
+	return a.RoleModel.UpdateRoleButton(id, items)
+}
+
+func (a *Role) UpdateRoleDisabledFields(c *gin.Context, id uint64, items schema.DisabledFields) error {
+	// 检查角色是否存在
+	oldItem, err := a.RoleModel.Get(id)
+	if err != nil {
+		return errors.WithMessage(err, "检查角色是否存在失败")
+	} else if oldItem == nil {
+		return errors.New("角色不存在")
+	}
+
+	return a.RoleModel.UpdateRoleDisabledFields(id, items)
+}
+
+func (a *Role) UpdateDetails(c *gin.Context, item schema.Role) error {
+	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
+		// 检查前端传入的参数是否允许
+		if err := a.RoleDetailInfoCheck(c, &item); err != nil {
+			return err
+		}
+		// 更新角色信息
+		if err := a.Update(c, item.ID, item); err != nil {
+			return err
+		}
+		// 更新角色和菜单的关联
+		if err := a.UpdateRoleMenu(c, item.ID, item.Menus); err != nil {
+			return err
+		}
+		// 更新角色和按钮的关联
+		if err := a.UpdateRoleButton(c, item.ID, item.Buttons); err != nil {
+			return err
+		}
+		// 更新角色和可禁用字段的关联
+		if err := a.UpdateRoleDisabledFields(c, item.ID, item.DisabledFields); err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
+	return nil
+}
+
+func (a *Role) UpdateAuditorType(c *gin.Context, id uint64, item schema.UpdateAuditorTypeParam) error {
+	return mysql.DB.Transaction(func(tx *gorm.DB) error {
+		// 检查该审核类型是否已被其它角色使用
+		if roleQueryResult, err := a.RoleModel.Query(schema.RoleQueryParam{
+			PaginationParam: common.PaginationParam{
+				Pagination: false,
+			},
+			AuditorTypes: common.IntSliceToString([]int{item.AuditorType}, ","),
+			FindAll:      true,
+		}); err != nil {
+			return errors.WithMessage(err, "检查审核类型失败")
+		} else if len(roleQueryResult.Data) != 0 {
+			// 审核类型已被其它角色使用
+			for _, roleInfo := range roleQueryResult.Data {
+				var newAuditorTypes []uint64
+				oldAuditorTypes := common.SplitStringToUint64(roleInfo.AuditorTypes, ",")
+				for _, auditorType := range oldAuditorTypes {
+					if auditorType != uint64(item.AuditorType) {
+						newAuditorTypes = append(newAuditorTypes, auditorType)
+					}
+				}
+				if err = a.RoleModel.UpdateByID(roleInfo.ID, map[string]interface{}{
+					"auditor_types": common.UintSliceToString(newAuditorTypes, ","),
+				}); err != nil {
+					return errors.WithMessage(err, "更新角色审核类型失败")
+				}
+			}
+		}
+
+		// 获取角色信息
+		roleInfo, err := a.RoleModel.Get(id)
+		if err != nil {
+			return errors.WithMessage(err, "获取角色信息失败")
+		}
+
+		// 设置审核类型给角色
+		newAuditorTypes := common.SplitStringToUint64(roleInfo.AuditorTypes, ",")
+		if !common.ContainsUint64(newAuditorTypes, uint64(item.AuditorType)) {
+			newAuditorTypes = append(newAuditorTypes, uint64(item.AuditorType))
+		}
+		if err = a.RoleModel.UpdateByID(id, map[string]interface{}{
+			"auditor_types": common.UintSliceToString(newAuditorTypes, ","),
+		}); err != nil {
+			return errors.WithMessage(err, "更新角色审核类型失败")
+		}
+		return nil
+	})
+}
+
+func (a *Role) UserAddRole(c *gin.Context, roleID uint64, userIDs []uint64) error {
+	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
+		// 获取角色详情
+		item, err := a.RoleModel.Get(roleID)
+		if err != nil {
+			return errors.WithMessage(err, "获取角色信息失败")
+		} else if item == nil {
+			return errors.New("角色不存在")
+		}
+
+		// 更新用户和角色的关联关系
+		// TODO: 等待用户表完成
+		//for _, userID := range userIDs {
+		//	// 用户加入用户组
+		//	if err = a.UserModel.AppendUserRoles(userID, schema.Roles{item}); err != nil {
+		//		return errors.WithMessage(err, "用户加入用户组失败")
+		//	}
+		//}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
+	return nil
+}
+
+func (a *Role) UserRemoveRole(c *gin.Context, roleID uint64, userIDs []uint64) error {
+	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
+		// 获取角色详情
+		item, err := a.RoleModel.Get(roleID)
+		if err != nil {
+			return errors.WithMessage(err, "获取角色信息失败")
+		} else if item == nil {
+			return errors.New("角色不存在")
+		}
+
+		// 将用户的该角色移除
+		// TODO: 等待用户表完成
+		//for _, userID := range userIDs {
+		//	if err = a.UserModel.UserRemoveRole(userID, *roleInfo); err != nil {
+		//		return errors.WithMessage(err, "用户角色移除失败")
+		//	}
+		//}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
+	return nil
+}
+
+func (a *Role) Delete(c *gin.Context, id uint64) error {
+	// 检查角色是否存在
+	oldItem, err := a.RoleModel.Get(id)
+	if err != nil {
+		return errors.WithMessage(err, "检查角色是否存在失败")
+	} else if oldItem == nil {
+		return errors.New("未找到该角色")
+	}
+
+	// 检查是否是审核角色
+	if oldItem.AuditorTypes != "" {
+		return errors.New("审核角色不能删除")
+	}
+
+	// 检查是否有组织绑定了该角色
+	// TODO: 等待组织表完成
+	//if OrgQueryResult, err := a.OrganizationModel.Query(schema.OrganizationQueryParam{
+	//	PaginationParam: common.PaginationParam{},
+	//	RoleID:          id,
+	//}); err != nil {
+	//	return errors.WithMessage(err, "检查角色是否被组织使用失败")
+	//} else if len(OrgQueryResult.Data) != 0 {
+	//	var orgNames string
+	//	for index, item := range OrgQueryResult.Data {
+	//		orgNames += item.Name
+	//		if index != (len(OrgQueryResult.Data) - 1) {
+	//			orgNames += "，"
+	//		}
+	//	}
+	//	return errors.New(fmt.Sprintf("该角色已被组织: %s 使用", orgNames))
+	//}
+
+	// 检查是否有职位绑定了该角色
+	// TODO: 等待职位表完成
+	//if PositionQueryResult, err := a.PositionModel.Query(schema.PositionQueryParam{
+	//	PaginationParam: common.PaginationParam{},
+	//	RoleID:          id,
+	//}); err != nil {
+	//	return errors.WithMessage(err, "检查角色是否被职位使用失败")
+	//} else if len(PositionQueryResult.Data) != 0 {
+	//	var positionNames string
+	//	for index, position := range PositionQueryResult.Data {
+	//		positionNames += position.Name
+	//		if index != (len(PositionQueryResult.Data) - 1) {
+	//			positionNames += "，"
+	//		}
+	//	}
+	//	return errors.New(fmt.Sprintf("该角色已被职位: %s 使用", positionNames))
+	//}
+
+	// 检查是否有用户组绑定了该角色
+	// TODO: 等待用户组表完成
+	//if UserGroupQueryResult, err := a.UserGroupModel.Query(schema.UserGroupQueryParam{
+	//	PaginationParam: common.PaginationParam{},
+	//	RoleID:          id,
+	//}); err != nil {
+	//	return errors.WithMessage(err, "检查角色是否被用户组使用失败")
+	//} else if len(UserGroupQueryResult.Data) != 0 {
+	//	var userGroupNames string
+	//	for index, userGroup := range UserGroupQueryResult.Data {
+	//		userGroupNames += userGroup.Name
+	//		if index != (len(UserGroupQueryResult.Data) - 1) {
+	//			userGroupNames += "，"
+	//		}
+	//	}
+	//	return errors.New(fmt.Sprintf("该角色已被用户组: %s 使用", userGroupNames))
+	//}
+
+	// 检查是否有用户绑定了该角色
+	// TODO: 等待用户表完成
+	//if UserQueryResult, err := a.UserModel.Query(schema.UserQueryParam{
+	//	PaginationParam: common.PaginationParam{},
+	//	RoleID:          id,
+	//}, true); err != nil {
+	//	return errors.WithMessage(err, "检查角色是否被用户使用失败")
+	//} else if len(UserQueryResult.Data) != 0 {
+	//	var userNames string
+	//	for index, user := range UserQueryResult.Data {
+	//		userNames += user.UserName
+	//		if index != (len(UserQueryResult.Data) - 1) {
+	//			userNames += "，"
+	//		}
+	//	}
+	//	return errors.New(fmt.Sprintf("该角色已被用户: %s 使用", userNames))
+	//}
+
+	// 检查是否有安全级别绑定了该角色
+	// TODO: 等待安全级别表完成
+	//if SecurityLevelQueryResult, err := a.SecurityLevelModel.Query(schema.SecurityLevelQueryParam{
+	//	PaginationParam: common.PaginationParam{
+	//		Pagination: false,
+	//	},
+	//	RoleIDs: []uint64{id},
+	//	FindAll: true,
+	//}); err != nil {
+	//	return errors.WithMessage(err, "检查角色是否被安全级别使用失败")
+	//} else if len(SecurityLevelQueryResult.Data) != 0 {
+	//	var securityLevelNames string
+	//	for index, securityLevel := range SecurityLevelQueryResult.Data {
+	//		securityLevelNames += securityLevel.Name
+	//		if index != (len(SecurityLevelQueryResult.Data) - 1) {
+	//			securityLevelNames += "，"
+	//		}
+	//	}
+	//	return errors.New(fmt.Sprintf("该角色已被安全级别: %s 使用", securityLevelNames))
+	//}
+
+	if err := a.RoleModel.Delete(id); err != nil {
+		return errors.WithMessage(err, "删除角色失败")
+	}
+	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
+	return nil
 }
 
 // ---------------------------------------- Params  Validate --------------------------------------

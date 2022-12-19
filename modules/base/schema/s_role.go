@@ -45,6 +45,10 @@ type RoleQueryParam struct {
 	FindAll      bool     `form:"find_all"`      // 是否查找所有数据
 }
 
+type UpdateAuditorTypeParam struct {
+	AuditorType int `json:"auditor_type"` // 审核类型
+}
+
 type Roles []*Role
 
 type RoleQueryResult struct {

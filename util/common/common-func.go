@@ -169,6 +169,25 @@ func IntSliceToString(items []int, sep string) string {
 	return newString
 }
 
+func SplitStringToUint64(str string, sep string) []uint64 {
+	var result []uint64
+	if str == "" {
+		return result
+	}
+	strs := strings.Split(str, sep)
+	for _, v := range strs {
+		if v == "" {
+			continue
+		}
+		num, err := strconv.ParseUint(v, 10, 64)
+		if err != nil {
+			continue
+		}
+		result = append(result, num)
+	}
+	return result
+}
+
 // GetDBConnString 获取Mysql连接字符串
 func (a *Mysql) GetDBConnString() string {
 	return fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=true&loc=Local",
