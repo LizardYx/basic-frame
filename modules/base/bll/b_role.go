@@ -424,7 +424,7 @@ func (a *Role) RoleDetailInfoCheck(c *gin.Context, item *schema.Role) error {
 			PaginationParam: common.PaginationParam{
 				OnlyCount: true,
 			},
-			IDs:    item.Menus.GetIDs(),
+			IDs:    common.UintSliceToString(item.Menus.GetIDs(), ","),
 			Status: consts.BaseStatusDisabled,
 		}); err != nil {
 			return errors.WithMessage(err, "检查菜单是否被禁用失败")

@@ -9,6 +9,7 @@ import (
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
 	"gorm.io/gorm/clause"
+	"strings"
 )
 
 var MenuModel = &Menu{}
@@ -21,8 +22,8 @@ func (a *Menu) Query(params schema.MenuQueryParam) (*schema.MenuQueryResult, err
 	if v := params.ID; v != 0 {
 		db.Where("id=?", v)
 	}
-	if v := params.IDs; len(v) != 0 {
-		db.Where("id IN (?)", v)
+	if v := params.IDs; v != "" {
+		db.Where("id IN (?)", strings.Split(v, ","))
 	}
 	if v := params.UUID; v != "" {
 		db.Where("uuid=?", v)
@@ -41,7 +42,7 @@ func (a *Menu) Query(params schema.MenuQueryParam) (*schema.MenuQueryResult, err
 	var list entity.Menus
 	paginationResult, err := mysql.Paginate(db, params.PaginationParam, &list)
 	if err != nil {
-		return nil, errors.New(err.Error())
+		return nil, errors.WithStack(err)
 	}
 	qr := &schema.MenuQueryResult{
 		Data:       list.ToSchemaMenus(),
@@ -130,7 +131,7 @@ func (a *Menu) CreateMenuTrees(items schema.MenuTrees) error {
 		for _, item := range items {
 			eitem := entity.SchemaMenuTree(*item).ToMenu()
 			if err := db.Create(eitem).Error; err != nil {
-				return err
+				return errors.WithStack(err)
 			}
 		}
 		return nil
@@ -149,7 +150,7 @@ func (a *Menu) UpdateMenuRestfulApis(id uint64, items schema.RestfulApis) error 
 	if err := mysql.DB.Model(&entity.Menu{ID: id}).
 		Association("RestfulApis").
 		Replace(eitem); err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	return nil
 }

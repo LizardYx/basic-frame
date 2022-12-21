@@ -37,7 +37,7 @@ func (a *Button) Query(params schema.ButtonQueryParam) (*schema.ButtonQueryResul
 	var list entity.Buttons
 	paginationResult, err := mysql.Paginate(db, params.PaginationParam, &list)
 	if err != nil {
-		return nil, errors.New(err.Error())
+		return nil, errors.WithStack(err)
 	}
 	qr := &schema.ButtonQueryResult{
 		Data:       list.ToSchemaButtons(),
@@ -87,7 +87,7 @@ func (a *Button) UpdateButtonRestfulApis(id uint64, items schema.RestfulApis) er
 	if err := mysql.DB.Model(&entity.Button{ID: id}).
 		Association("RestfulApis").
 		Replace(eitem); err != nil {
-		return err
+		return errors.WithStack(err)
 	}
 	return nil
 }

@@ -20,7 +20,7 @@ func (a *SystemConfig) Query(params schema.SystemConfigQueryParam) (*schema.Syst
 	var list entity.SystemConfigs
 	paginationResult, err := mysql.Paginate(db, params.PaginationParam, &list)
 	if err != nil {
-		return nil, errors.New(err.Error())
+		return nil, errors.WithStack(err)
 	}
 	qr := &schema.SystemConfigQueryResult{
 		Data:       list.ToSchemaSystemConfigPres(),
@@ -31,8 +31,10 @@ func (a *SystemConfig) Query(params schema.SystemConfigQueryParam) (*schema.Syst
 
 func (a *SystemConfig) First() (*schema.SystemConfig, error) {
 	var item entity.SystemConfig
-	err := mysql.DB.First(&item).Error
-	return item.ToSchemaSystemConfig(), err
+	if err := mysql.DB.First(&item).Error; err != nil {
+		return nil, errors.WithStack(err)
+	}
+	return item.ToSchemaSystemConfig(), nil
 }
 
 func (a *SystemConfig) Create(item schema.SystemConfig) (*common.IDResult, error) {
@@ -48,7 +50,7 @@ func (a *SystemConfig) Get(id uint64) (*schema.SystemConfigPre, error) {
 	var item entity.SystemConfig
 	ok, err := mysql.FindOne(db, &item)
 	if err != nil {
-		return nil, errors.New(err.Error())
+		return nil, errors.WithStack(err)
 	} else if !ok {
 		return nil, errors.New("未找到ID匹配的系统配置项")
 	}

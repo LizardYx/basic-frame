@@ -34,14 +34,14 @@ func (a Menu) Init() *Menu {
 
 type MenuQueryParam struct {
 	common.PaginationParam
-	ID         uint64   `form:"id"`          // 菜单ID
-	IDs        []uint64 `form:"ids"`         // 菜单ID集合
-	UUID       string   `form:"uuid"`        // 菜单UUID
-	ParentID   uint64   `form:"parent_id"`   // 父级菜单ID
-	Router     string   `form:"router"`      // 访问路由
-	Status     int      `form:"status"`      // 状态(1:启用 2:禁用)
-	ShowStatus int      `form:"show_status"` // 显示状态(1:显示 2:隐藏)
-	FindAll    bool     `form:"find_all"`    // 是否查询所有数据
+	ID         uint64 `form:"id"`          // 菜单ID
+	IDs        string `form:"ids"`         // 菜单ID集合
+	UUID       string `form:"uuid"`        // 菜单UUID
+	ParentID   uint64 `form:"parent_id"`   // 父级菜单ID
+	Router     string `form:"router"`      // 访问路由
+	Status     int    `form:"status"`      // 状态(1:启用 2:禁用)
+	ShowStatus int    `form:"show_status"` // 显示状态(1:显示 2:隐藏)
+	FindAll    bool   `form:"find_all"`    // 是否查询所有数据
 }
 
 type Menus []*Menu

@@ -20,14 +20,14 @@ func (a *Role) Query(params schema.RoleQueryParam) (*schema.RoleQueryResult, err
 	if v := params.ID; v != 0 {
 		db = db.Where("id=?", v)
 	}
-	if v := params.IDs; len(v) != 0 {
-		db = db.Where("id IN (?)", v)
+	if v := params.IDs; v != "" {
+		db = db.Where("id IN (?)", strings.Split(v, ","))
 	}
 	if v := params.Type; v != 0 {
 		db = db.Where("type=?", v)
 	}
 	if v := params.Types; len(v) != 0 {
-		db = db.Where("type IN (?)", v)
+		db = db.Where("type IN (?)", strings.Split(v, ","))
 	}
 	if v := params.AuditorTypes; v != "" {
 		auditorTypeList := strings.Split(v, ",")
@@ -51,12 +51,15 @@ func (a *Role) Query(params schema.RoleQueryParam) (*schema.RoleQueryResult, err
 		v = "%" + strings.ToLower(v) + "%"
 		db.Where("lower(name) LIKE ? OR lower(name) LIKE ?", v, v)
 	}
+	if params.FindAll {
+		params.Pagination = false
+	}
 	db.Order("id DESC")
 
 	var list entity.Roles
 	paginationResult, err := mysql.Paginate(db, params.PaginationParam, &list)
 	if err != nil {
-		return nil, errors.New(err.Error())
+		return nil, errors.WithStack(err)
 	}
 	qr := &schema.RoleQueryResult{
 		Data:       list.ToSchemaRoles(),

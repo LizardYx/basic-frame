@@ -151,7 +151,7 @@ func (a *SecurityLevel) SecurityLevelParamsCheck(c *gin.Context, item *schema.Se
 		PaginationParam: common.PaginationParam{
 			Pagination: false,
 		},
-		IDs:     item.Roles.GetIDs(),
+		IDs:     common.UintSliceToString(item.Roles.GetIDs(), ","),
 		Status:  consts.BaseStatusDisabled,
 		FindAll: true,
 	})

@@ -15,6 +15,7 @@ var RouterBase = &Router{
 	ButtonApi:        api.ButtonApi,
 	MenuApi:          api.MenuApi,
 	RoleApi:          api.RoleApi,
+	PositionApi:      api.PositionApi,
 }
 
 // Router 模块路由管理结构体,需要将该结构体注册到全局路由结构体
@@ -27,10 +28,22 @@ type Router struct {
 	ButtonApi        *api.Button
 	MenuApi          *api.Menu
 	RoleApi          *api.Role
+	PositionApi      *api.Position
 }
 
 // Register 模块路由注册
 func (a *Router) Register(api *gin.RouterGroup) {
+
+	PositionGroup := api.Group("base/positions")
+	{
+		PositionGroup.GET("", a.PositionApi.Query)
+		PositionGroup.GET(":id", a.PositionApi.Get)
+		PositionGroup.POST("", a.PositionApi.Create)
+		PositionGroup.PUT(":id", a.PositionApi.Update)
+		PositionGroup.PUT(":id/user-join", a.PositionApi.PositionAddUser)
+		PositionGroup.PUT(":id/user-remove", a.PositionApi.PositionRemoveUser)
+		PositionGroup.DELETE(":id", a.PositionApi.Delete)
+	}
 
 	RoleGroup := api.Group("base/roles")
 	{

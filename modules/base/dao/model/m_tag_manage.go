@@ -34,7 +34,7 @@ func (a *TagManage) Query(params schema.TagManageQueryParam) (*schema.TagManageQ
 	var list entity.TagManages
 	paginationResult, err := mysql.Paginate(db, params.PaginationParam, &list)
 	if err != nil {
-		return nil, errors.New(err.Error())
+		return nil, errors.WithStack(err)
 	}
 	qr := &schema.TagManageQueryResult{
 		Data:       list.ToSchemaTagManages(),

@@ -23,7 +23,7 @@ func (a *DisabledField) Query(params schema.DisabledFieldQueryParam) (*schema.Di
 	var list entity.DisabledFields
 	paginationResult, err := mysql.Paginate(db, params.PaginationParam, &list)
 	if err != nil {
-		return nil, errors.New(err.Error())
+		return nil, errors.WithStack(err)
 	}
 	qr := &schema.DisabledFieldQueryResult{
 		Data:       list.ToSchemaDisabledFields(),

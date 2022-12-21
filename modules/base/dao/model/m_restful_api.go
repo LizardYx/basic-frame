@@ -23,7 +23,7 @@ func (a *RestfulApi) Query(params schema.RestfulApiQueryParam) (*schema.RestfulA
 	var list entity.RestfulApis
 	paginationResult, err := mysql.Paginate(db, params.PaginationParam, &list)
 	if err != nil {
-		return nil, errors.New(err.Error())
+		return nil, errors.WithStack(err)
 	}
 	qr := &schema.RestfulApiQueryResult{
 		Data:       list.ToSchemaRestfulApis(),
@@ -38,7 +38,7 @@ func (a *RestfulApi) GetByUUID(uuid string) (*schema.RestfulApi, error) {
 	var item entity.RestfulApi
 	ok, err := mysql.FindOne(db, &item)
 	if err != nil {
-		return nil, errors.New(err.Error())
+		return nil, errors.WithStack(err)
 	} else if !ok {
 		return nil, errors.New("未找到UUID匹配的RestfulApi")
 	}

@@ -32,17 +32,17 @@ func (a Role) Init() *Role {
 
 type RoleQueryParam struct {
 	common.PaginationParam
-	ID           uint64   `form:"id"`            // 角色ID
-	IDs          []uint64 `form:"ids"`           // 角色ID集合
-	Name         string   `form:"name"`          // 角色名称
-	Type         int      `form:"type"`          // 角色类型
-	Types        []int    `form:"types"`         // 角色类型集合
-	AuditorTypes string   `form:"auditor_types"` // 审核类型集合(逗号分隔)
-	Status       int      `form:"status"`        // 状态(1:启用 2:禁用)
-	Memo         string   `form:"memo"`          // 备注(模糊查询)
-	ShowDetails  bool     `form:"show_details"`  // 是否显示菜单、按钮、可禁用字段信息
-	QueryValue   string   `form:"query_value"`   // 模糊搜索(搜索 角色名称/备注)
-	FindAll      bool     `form:"find_all"`      // 是否查找所有数据
+	ID           uint64 `form:"id"`            // 角色ID
+	IDs          string `form:"ids"`           // 角色ID集合(逗号分隔)
+	Name         string `form:"name"`          // 角色名称
+	Type         int    `form:"type"`          // 角色类型
+	Types        string `form:"types"`         // 角色类型集合(逗号分隔)
+	AuditorTypes string `form:"auditor_types"` // 审核类型集合(逗号分隔)
+	Status       int    `form:"status"`        // 状态(1:启用 2:禁用)
+	Memo         string `form:"memo"`          // 备注(模糊查询)
+	ShowDetails  bool   `form:"show_details"`  // 是否显示菜单、按钮、可禁用字段信息
+	QueryValue   string `form:"query_value"`   // 模糊搜索(搜索 角色名称/备注)
+	FindAll      bool   `form:"find_all"`      // 是否查找所有数据
 }
 
 type UpdateAuditorTypeParam struct {
