@@ -16,6 +16,7 @@ var RouterBase = &Router{
 	MenuApi:          api.MenuApi,
 	RoleApi:          api.RoleApi,
 	PositionApi:      api.PositionApi,
+	OrganizationApi:  api.OrganizationApi,
 }
 
 // Router 模块路由管理结构体,需要将该结构体注册到全局路由结构体
@@ -29,10 +30,27 @@ type Router struct {
 	MenuApi          *api.Menu
 	RoleApi          *api.Role
 	PositionApi      *api.Position
+	OrganizationApi  *api.Organization
 }
 
 // Register 模块路由注册
 func (a *Router) Register(api *gin.RouterGroup) {
+
+	OrganizationGroup := api.Group("base/organizations")
+	{
+		OrganizationGroup.GET("", a.OrganizationApi.Query)
+		OrganizationGroup.GET("/organization-tree/basic-info/:id", a.OrganizationApi.Get)
+		OrganizationGroup.GET("/organization-tree/create-notifications", a.OrganizationApi.GetOrgTreeForCreateNotifications)
+		OrganizationGroup.GET("/organization-tree/create-user", a.OrganizationApi.GetOrganizationTreeForCreateUser)
+		OrganizationGroup.GET("/organization-tree/all", a.OrganizationApi.GetOrganizationTreeWithUser)
+		OrganizationGroup.GET("/organization-tree/edit", a.OrganizationApi.GetOrganizationTree)
+		OrganizationGroup.POST("", a.OrganizationApi.Create)
+		OrganizationGroup.PUT(":id/user-join", a.OrganizationApi.UserJoinOrganization)
+		OrganizationGroup.PUT(":id/user-remove", a.OrganizationApi.UserRemoveOrganization)
+		OrganizationGroup.PUT(":id", a.OrganizationApi.Update)
+		api.PUT("base/organizations", a.OrganizationApi.UpdateOrganizations)
+		OrganizationGroup.DELETE(":id", a.OrganizationApi.Delete)
+	}
 
 	PositionGroup := api.Group("base/positions")
 	{

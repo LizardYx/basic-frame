@@ -43,14 +43,14 @@ func (a *Role) Get(c *gin.Context) {
 func (a *Role) Create(c *gin.Context) {
 	var item schema.Role
 	if err := ginx.ParseJSON(c, &item); err != nil {
-		ginx.ResError(c, "", err)
+		ginx.ResError(c, item, err)
 		return
 	}
 
 	item.Creator = ginx.GetUserID(c)
 	result, err := a.RoleBll.Create(c, item)
 	if err != nil {
-		ginx.ResError(c, "", err)
+		ginx.ResError(c, item, err)
 		return
 	}
 	ginx.ResSuccess(c, item, result)
