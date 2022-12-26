@@ -30,8 +30,10 @@ type DisabledFieldQueryResult struct {
 }
 
 func (a DisabledFields) Init() *DisabledFields {
-	if len(a) == 0 {
-		a = make(DisabledFields, 0)
+	items := make(DisabledFields, 0)
+
+	for _, item := range a {
+		items = append(items, item)
 	}
-	return &a
+	return &items
 }

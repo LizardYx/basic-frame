@@ -16,6 +16,7 @@ type SystemConfig struct {
 	SystemConfigModel *model.SystemConfig
 }
 
+// Init 初始化系统基础配置项
 func (a *SystemConfig) Init() error {
 	// 检查系统基础配置项是否存在
 	if systemConfigQueryResult, err := a.Query(&gin.Context{}, schema.SystemConfigQueryParam{}); err != nil {
@@ -84,6 +85,7 @@ func (a *SystemConfig) Update(c *gin.Context, id uint64, item schema.SystemConfi
 
 // ---------------------------------------- Params  Validate --------------------------------------
 
+// ParamsValidate 参数检查
 func (a *SystemConfig) ParamsValidate(item schema.SystemConfig) error {
 	// 如果启用Https模式
 	if item.HttpsMode {

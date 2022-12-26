@@ -60,14 +60,12 @@ func (a Menus) GetIDs() []uint64 {
 }
 
 func (a Menus) Init() *Menus {
-	if len(a) == 0 {
-		a = make(Menus, 0)
-	} else {
-		for index, menu := range a {
-			a[index] = menu.Init()
-		}
+	items := make(Menus, 0)
+
+	for _, menu := range a {
+		items = append(items, menu.Init())
 	}
-	return &a
+	return &items
 }
 
 // ----------------------------------------MenuTree--------------------------------------

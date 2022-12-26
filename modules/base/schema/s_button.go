@@ -59,14 +59,12 @@ func (a Buttons) GetIDs() []uint64 {
 }
 
 func (a Buttons) Init() *Buttons {
-	if len(a) == 0 {
-		a = make(Buttons, 0)
-	} else {
-		for index, button := range a {
-			a[index] = button.Init()
-		}
+	items := make(Buttons, 0)
+
+	for _, button := range a {
+		items = append(items, button.Init())
 	}
-	return &a
+	return &items
 }
 
 // ---------------------------------------- Response Struct --------------------------------------
@@ -96,7 +94,7 @@ func (a ButtonPre) Init() *ButtonPre {
 	return &a
 }
 
-// SetCreator 设置按钮树操作者
+// SetCreator 设置按钮、子按钮的创建者
 func (a ButtonPre) SetCreator(creator uint64) *ButtonPre {
 	if creator != 0 {
 		a.Creator = creator
@@ -109,6 +107,7 @@ func (a ButtonPre) SetCreator(creator uint64) *ButtonPre {
 	return &a
 }
 
+// GetIDs 获取按钮、子按钮的按钮ID集合
 func (a ButtonPre) GetIDs(buttonIDs *[]uint64) {
 	*buttonIDs = append(*buttonIDs, a.ID)
 	if len(a.SonButtons) != 0 {
@@ -124,6 +123,7 @@ func (a ButtonPre) ToSchemaButton() *Button {
 
 type ButtonPres []*ButtonPre
 
+// GetIDs 获取按钮、子按钮的按钮ID集合
 func (a ButtonPres) GetIDs(buttonIDs *[]uint64) {
 	for _, buttonPreInfo := range a {
 		*buttonIDs = append(*buttonIDs, buttonPreInfo.ID)
@@ -133,7 +133,7 @@ func (a ButtonPres) GetIDs(buttonIDs *[]uint64) {
 	}
 }
 
-// SetCreator 设置按钮树操作者
+// SetCreator 设置按钮、子按钮的创建者
 func (a ButtonPres) SetCreator(creator uint64) *ButtonPres {
 	if creator != 0 {
 		for _, buttonPreInfo := range a {
@@ -143,7 +143,7 @@ func (a ButtonPres) SetCreator(creator uint64) *ButtonPres {
 	return &a
 }
 
-// GetButtonIDsByButtonID 获取按钮的所有子按钮ID集合
+// GetButtonIDsByButtonID 获取指定按钮的子按钮ID集合
 func (a ButtonPres) GetButtonIDsByButtonID(buttonID uint64, sonButtonIDs *[]uint64) {
 	for _, buttonPreInfo := range a {
 		if buttonPreInfo.ID == buttonID {

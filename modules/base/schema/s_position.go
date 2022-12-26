@@ -47,6 +47,7 @@ func (a Positions) GetIDs() []uint64 {
 	return l
 }
 
+// GetRoleIds 获取职位的角色ID集合(已去重)
 func (a Positions) GetRoleIds(roleIDs *[]uint64) {
 	for _, position := range a {
 		if !common.ContainsUint64(*roleIDs, position.RoleID) {
@@ -55,6 +56,7 @@ func (a Positions) GetRoleIds(roleIDs *[]uint64) {
 	}
 }
 
+// GetNames 获取职位名称集合
 func (a Positions) GetNames() []string {
 	var names []string
 	for _, position := range a {
@@ -63,6 +65,7 @@ func (a Positions) GetNames() []string {
 	return names
 }
 
+// GetOrgIDs 获取职位所属的组织ID集合(已去重)
 func (a Positions) GetOrgIDs() []uint64 {
 	var orgIDs []uint64
 

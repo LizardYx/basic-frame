@@ -74,6 +74,7 @@ func (a *SecurityLevel) UpdateByID(id uint64, item map[string]interface{}) error
 	return errors.WithStack(result.Error)
 }
 
+// ReplaceSecurityLevelRoles 更新安全等级关联的角色
 func (a *SecurityLevel) ReplaceSecurityLevelRoles(id uint64, items schema.Roles) error {
 	eitem := entity.SchemaRoles(items).ToRole()
 	if err := mysql.DB.Model(entity.SecurityLevel{ID: id}).

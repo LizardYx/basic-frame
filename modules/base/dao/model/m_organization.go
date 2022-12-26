@@ -93,6 +93,7 @@ func (a *Organization) Delete(id uint64) error {
 
 // ----------------------------------------OrganizationTree-----------------------
 
+// GetOrganizationTree 获取组织树(包含禁用的组织)
 func (a *Organization) GetOrganizationTree() (*schema.Organizations, error) {
 	db := mysql.DB.Model(entity.Organization{}).Order("id DESC")
 	db = db.
@@ -108,6 +109,7 @@ func (a *Organization) GetOrganizationTree() (*schema.Organizations, error) {
 	return &organizationTrees, nil
 }
 
+// GetOrganizationTreeForCreateUser 获取组织树(不包含禁用的组织)
 func (a *Organization) GetOrganizationTreeForCreateUser() (*schema.Organizations, error) {
 	db := mysql.DB.Model(entity.Organization{}).Order("id DESC")
 	db = db.
@@ -123,6 +125,7 @@ func (a *Organization) GetOrganizationTreeForCreateUser() (*schema.Organizations
 	return &organizationTrees, nil
 }
 
+// GetOrgTreeForCreateNotifications 获取组织树(不包含职位和禁用的组织)
 func (a *Organization) GetOrgTreeForCreateNotifications() (*schema.Organizations, error) {
 	db := mysql.DB.Model(entity.Organization{}).Order("id DESC")
 

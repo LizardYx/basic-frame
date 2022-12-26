@@ -29,8 +29,7 @@ type RestfulApiQueryResult struct {
 }
 
 func (a RestfulApis) Init() *RestfulApis {
-	if len(a) == 0 {
-		a = make(RestfulApis, 0)
-	}
+	items := make(RestfulApis, 0)
+	items = append(items, a...)
 	return &a
 }

@@ -64,6 +64,7 @@ func (a SecurityLevels) GetIDs() []uint64 {
 	return l
 }
 
+// Sort 通过Sequence对安全等级进行排序
 func (a SecurityLevels) Sort() *SecurityLevels {
 	sort.SliceStable(a, func(i, j int) bool {
 		return a[i].Sequence > a[j].Sequence

@@ -91,6 +91,7 @@ func (a *Role) UpdateByID(id uint64, item map[string]interface{}) error {
 	return errors.WithStack(result.Error)
 }
 
+// UpdateRoleMenu 更新角色关联的菜单
 func (a *Role) UpdateRoleMenu(id uint64, items schema.Menus) error {
 	eitem := entity.SchemaMenus(items).ToMenu()
 	if err := mysql.DB.Model(entity.Role{ID: id}).
@@ -101,6 +102,7 @@ func (a *Role) UpdateRoleMenu(id uint64, items schema.Menus) error {
 	return nil
 }
 
+// UpdateRoleButton 更新角色关联的按钮
 func (a *Role) UpdateRoleButton(id uint64, items schema.Buttons) error {
 	eitem := entity.SchemaButtons(items).ToButton()
 	if err := mysql.DB.Model(entity.Role{ID: id}).
@@ -111,6 +113,7 @@ func (a *Role) UpdateRoleButton(id uint64, items schema.Buttons) error {
 	return nil
 }
 
+// UpdateRoleDisabledFields 更新角色关联的禁用字段
 func (a *Role) UpdateRoleDisabledFields(id uint64, items schema.DisabledFields) error {
 	eitem := entity.SchemaDisabledFields(items).ToDisabledField()
 	if err := mysql.DB.Model(entity.Role{ID: id}).

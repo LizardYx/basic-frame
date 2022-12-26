@@ -34,6 +34,7 @@ type OrganizationQueryParam struct {
 	FindAll       bool   `form:"find_all"`       // 是否查询所有数据
 }
 
+// GetOrgIDs 获取组织的ID集合,包含子组织(已去重)
 func (a Organization) GetOrgIDs(items *[]uint64) {
 	if !common.ContainsUint64(*items, a.ID) {
 		*items = append(*items, a.ID)
@@ -45,6 +46,7 @@ func (a Organization) GetOrgIDs(items *[]uint64) {
 	}
 }
 
+// SetCreator 设置组织、子组织、职位的创建人
 func (a Organization) SetCreator(creator uint64) *Organization {
 	if creator != 0 {
 		a.Creator = creator
@@ -80,6 +82,7 @@ func (a Organization) Init() *Organization {
 	return &a
 }
 
+// GetRoleIds 获取组织、子组织的角色ID。isTop为True时，还包含当前组织的职位角色
 func (a Organization) GetRoleIds(roleIDs *[]uint64, isTop bool) {
 	if a.RoleID != 0 {
 		*roleIDs = append(*roleIDs, a.RoleID)
@@ -97,6 +100,7 @@ func (a Organization) GetRoleIds(roleIDs *[]uint64, isTop bool) {
 	return
 }
 
+// GetPositionIds 获取组织、子组织的职位ID集合
 func (a Organization) GetPositionIds(positionIDs *[]uint64) {
 	*positionIDs = append(*positionIDs, a.Positions.GetIDs()...)
 	if len(a.SonOrganizations) != 0 {
@@ -107,6 +111,7 @@ func (a Organization) GetPositionIds(positionIDs *[]uint64) {
 	return
 }
 
+// SortOrganization 对组织、子组织的职位进行排序
 func (a Organization) SortOrganization() *Organization {
 	if a.ID != 0 {
 		if len(a.Positions) != 0 {
@@ -138,6 +143,7 @@ func (a Organizations) GetIDs() []uint64 {
 	return l
 }
 
+// GetSonOrgIDs 获取子组织的组织ID集合(已去重)
 func (a Organizations) GetSonOrgIDs() []uint64 {
 	var sonOrgIDs []uint64
 	for _, orgInfo := range a {
@@ -148,6 +154,7 @@ func (a Organizations) GetSonOrgIDs() []uint64 {
 	return sonOrgIDs
 }
 
+// SetCreator 设置组织、子组织、职位的创建人
 func (a Organizations) SetCreator(creator uint64) *Organizations {
 	if creator != 0 {
 		for _, organization := range a {
@@ -158,22 +165,22 @@ func (a Organizations) SetCreator(creator uint64) *Organizations {
 }
 
 func (a Organizations) Init() *Organizations {
-	if len(a) == 0 {
-		a = make(Organizations, 0)
-	} else {
-		for index, organization := range a {
-			a[index] = organization.Init()
-		}
+	items := make(Organizations, 0)
+
+	for _, organization := range a {
+		items = append(items, organization.Init())
 	}
-	return &a
+	return &items
 }
 
+// GetRoleIds 获取组织、子组织、当前组织职位的角色ID
 func (a Organizations) GetRoleIds(roleIDs *[]uint64) {
-	for _, Organization := range a {
-		Organization.GetRoleIds(roleIDs, true)
+	for _, organization := range a {
+		organization.GetRoleIds(roleIDs, true)
 	}
 }
 
+// SortOrganizations 对所有数据进行排序
 func (a Organizations) SortOrganizations() *Organizations {
 	if len(a) != 0 {
 		for index, OrgInfo := range a {

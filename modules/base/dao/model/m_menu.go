@@ -63,6 +63,7 @@ func (a *Menu) Get(id uint64) (*schema.Menu, error) {
 	return item.ToSchemaMenu(), nil
 }
 
+// GetRoleRestfulApis 获取角色的RestfulApis信息
 func (a *Menu) GetRoleRestfulApis(ids []uint64) (*schema.MenuTrees, error) {
 	db := mysql.DB.Model(entity.Menu{}).Where("id IN (?)", ids).Preload("RestfulApis")
 

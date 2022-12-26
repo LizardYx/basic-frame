@@ -100,6 +100,23 @@ func Copy(s, ts interface{}) error {
 	return copier.Copy(ts, s)
 }
 
+func RemoveRepeatedElement(arr []uint64) (newArr []uint64) {
+	newArr = make([]uint64, 0)
+	for i := 0; i < len(arr); i++ {
+		repeat := false
+		for j := i + 1; j < len(arr); j++ {
+			if arr[i] == arr[j] {
+				repeat = true
+				break
+			}
+		}
+		if !repeat {
+			newArr = append(newArr, arr[i])
+		}
+	}
+	return
+}
+
 // ContainsString 该项是否已经存在
 func ContainsString(ss []string, s string) bool {
 	for _, v := range ss {

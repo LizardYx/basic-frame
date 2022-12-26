@@ -65,12 +65,10 @@ func (a Roles) GetIDs() []uint64 {
 }
 
 func (a Roles) Init() *Roles {
-	if len(a) == 0 {
-		a = make(Roles, 0)
-	} else {
-		for index, role := range a {
-			a[index] = role.Init()
-		}
+	items := make(Roles, 0)
+
+	for _, role := range a {
+		items = append(items, role.Init())
 	}
-	return &a
+	return &items
 }

@@ -58,6 +58,7 @@ func (a *Button) Get(id uint64) (*schema.Button, error) {
 	return item.ToSchemaButton(), nil
 }
 
+// GetButtonRestfulApis 获取按钮的所有RestfulApis
 func (a *Button) GetButtonRestfulApis(ids []uint64) (*schema.ButtonPres, error) {
 	db := mysql.DB.Where("id IN (?)", ids).Preload("RestfulApis")
 
@@ -82,6 +83,7 @@ func (a *Button) CreateButtonPre(item schema.ButtonPre) (*common.IDResult, error
 	return &common.IDResult{ID: eitem.ID}, errors.WithStack(result.Error)
 }
 
+// UpdateButtonRestfulApis 更新指定按钮的RestfulApis
 func (a *Button) UpdateButtonRestfulApis(id uint64, items schema.RestfulApis) error {
 	eitem := entity.SchemaRestfulApis(items).ToRestfulApis()
 	if err := mysql.DB.Model(&entity.Button{ID: id}).
@@ -92,6 +94,7 @@ func (a *Button) UpdateButtonRestfulApis(id uint64, items schema.RestfulApis) er
 	return nil
 }
 
+// UpdateButtonPre 更新按钮和按钮关联的RestfulApis信息
 func (a *Button) UpdateButtonPre(item schema.ButtonPre) error {
 	return mysql.DB.Transaction(func(tx *gorm.DB) error {
 		// 检查Button是否存在

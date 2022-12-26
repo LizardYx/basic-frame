@@ -47,8 +47,8 @@ type SystemConfigPre struct {
 type SystemConfigPres []*SystemConfigPre
 
 func (a SystemConfigPres) Init() *SystemConfigPres {
-	if len(a) == 0 {
-		a = make(SystemConfigPres, 0)
-	}
-	return &a
+	items := make(SystemConfigPres, 0)
+
+	items = append(items, a...)
+	return &items
 }

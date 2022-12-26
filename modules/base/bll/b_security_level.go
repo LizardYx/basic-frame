@@ -39,6 +39,7 @@ func (a *SecurityLevel) Get(c *gin.Context, id uint64) (*schema.SecurityLevel, e
 	return item, nil
 }
 
+// GetUserSecurityLevels 获取指定用户的所有安全等级
 func (a *SecurityLevel) GetUserSecurityLevels(c *gin.Context, userID uint64) (schema.SecurityLevels, error) {
 	// 获取用户的角色ID集合
 	// TODO: 等待用户表完成
