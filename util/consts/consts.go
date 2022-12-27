@@ -40,6 +40,7 @@ const (
 const (
 	JWTAuthSecretKeyLen = 16       // JWTAuth认证密钥长度
 	JWTAuthExpired      = "604800" // JWTAuth认证过期时间(秒)
+	JWTAuthType         = "Bearer" // JWTAuth认证类型
 )
 
 // Logger默认配置信息

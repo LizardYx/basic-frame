@@ -6,10 +6,12 @@ import (
 	"crypto/cipher"
 	"crypto/rand"
 	"crypto/rsa"
+	"crypto/sha1"
 	"crypto/x509"
 	"encoding/json"
 	"encoding/pem"
 	"errors"
+	"fmt"
 )
 
 // RsaEncrypt 加密
@@ -146,4 +148,16 @@ func CreateRandomChars(length int) string {
 			}
 		}
 	}
+}
+
+// SHA1 SHA1哈希值
+func SHA1(b []byte) string {
+	h := sha1.New()
+	_, _ = h.Write(b)
+	return fmt.Sprintf("%x", h.Sum(nil))
+}
+
+// SHA1String SHA1哈希值
+func SHA1String(s string) string {
+	return SHA1([]byte(s))
 }

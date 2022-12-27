@@ -44,6 +44,7 @@ type UserQueryParam struct {
 	SequenceSort   int    `form:"sequence_sort"`    // 按权重排序(1:升序排序 2:降序排序)
 	QueryValue     string `form:"query_value"`      // 模糊搜索(搜索 用户名称/用户昵称/移动手机/QQ账号/邮箱账号)
 	FindAll        bool   `form:"find_all"`         // 是否查找所有
+	FindDeleted    bool   `form:"find_deleted"`     // 是否查找已经删除的用户
 }
 
 type SubUserQueryParam struct {
