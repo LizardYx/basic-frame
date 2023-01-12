@@ -65,8 +65,10 @@ func (a *SystemConfig) Update(c *gin.Context, id uint64, item schema.SystemConfi
 	}
 
 	// 检查系统基础配置项是否存在
-	if _, err := a.SystemConfigModel.Get(id); err != nil {
+	if oldItem, err := a.SystemConfigModel.Get(id); err != nil {
 		return errors.WithMessage(err, "获取系统基础配置项信息失败")
+	} else if oldItem == nil {
+		return errors.New("系统基础配置项不存在")
 	}
 
 	// 更新系统基础配置项

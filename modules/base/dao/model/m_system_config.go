@@ -52,7 +52,7 @@ func (a *SystemConfig) Get(id uint64) (*schema.SystemConfigPre, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	} else if !ok {
-		return nil, errors.New("未找到ID匹配的系统配置项")
+		return nil, nil
 	}
 	return item.ToSchemaSystemConfigPre(), nil
 }

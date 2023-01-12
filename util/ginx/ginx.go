@@ -177,6 +177,8 @@ func ResError(c *gin.Context, params interface{}, err error) {
 func ResJSON(c *gin.Context, status int, params, response interface{}) {
 	if params != "" && params != nil {
 		logger.Log.Infof("Params: %+v", params)
+	}
+	if response != "" && response != nil {
 		logger.Log.Infof("Response: %+v", response)
 	}
 	c.JSON(status, response)

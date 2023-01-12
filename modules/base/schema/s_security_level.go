@@ -23,15 +23,7 @@ func (a SecurityLevel) Init() *SecurityLevel {
 		a.Roles = make(Roles, 0)
 	} else {
 		for index, _ := range a.Roles {
-			if len(a.Roles[index].Menus) == 0 {
-				a.Roles[index].Menus = make(Menus, 0)
-			}
-			if len(a.Roles[index].Buttons) == 0 {
-				a.Roles[index].Buttons = make(Buttons, 0)
-			}
-			if len(a.Roles[index].DisabledFields) == 0 {
-				a.Roles[index].DisabledFields = make(DisabledFields, 0)
-			}
+			a.Roles[index].Init()
 		}
 	}
 	return &a

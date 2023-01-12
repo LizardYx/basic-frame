@@ -57,9 +57,6 @@ func (a *SecurityLevel) GetUserSecurityLevels(c *gin.Context, userID uint64) (sc
 	// 获取安全级别集合
 	securityLevels := make(schema.SecurityLevels, 0)
 	if SecurityLevelQueryResult, err := a.Query(c, schema.SecurityLevelQueryParam{
-		PaginationParam: common.PaginationParam{
-			Pagination: false,
-		},
 		RoleIDs: common.UintSliceToString(roleIDs, ","),
 		Status:  consts.BaseStatusEnable,
 		FindAll: true,
@@ -76,27 +73,26 @@ func (a *SecurityLevel) Create(c *gin.Context, item schema.SecurityLevel) (*comm
 	if err := a.SecurityLevelParamsCheck(c, &item); err != nil {
 		return nil, err
 	}
+
+	// 创建安全等级
 	return a.SecurityLevelModel.Create(item)
 }
 
 func (a *SecurityLevel) Update(c *gin.Context, id uint64, item schema.SecurityLevel) error {
-	// 检查安全级别是否存在
-	oldItem, err := a.SecurityLevelModel.Get(id)
-	if err != nil {
-		return errors.WithMessage(err, "获取安全等级信息失败")
-	} else if oldItem == nil {
-		return errors.New("未找到该安全等级")
+	// 参数检查
+	if err := a.SecurityLevelParamsCheck(c, &item); err != nil {
+		return err
 	}
 
-	// 参数检查
-	if err = a.SecurityLevelParamsCheck(c, &item); err != nil {
+	// 检查安全级别是否存在
+	if _, err := a.Get(c, id); err != nil {
 		return err
 	}
 
 	// 更新安全级别和关联的角色信息
 	return mysql.DB.Transaction(func(tx *gorm.DB) error {
 		// 更新安全等级基本信息
-		if err = a.SecurityLevelModel.UpdateByID(id, map[string]interface{}{
+		if err := a.SecurityLevelModel.UpdateByID(id, map[string]interface{}{
 			"name":     item.Name,
 			"sequence": item.Sequence,
 			"status":   item.Status,
@@ -106,7 +102,7 @@ func (a *SecurityLevel) Update(c *gin.Context, id uint64, item schema.SecurityLe
 		}
 
 		// 更新安全等级关联的角色
-		if err = a.ReplaceSecurityLevelRoles(c, id, item.Roles); err != nil {
+		if err := a.ReplaceSecurityLevelRoles(c, id, item.Roles); err != nil {
 			return err
 		}
 		return nil
@@ -119,23 +115,23 @@ func (a *SecurityLevel) ReplaceSecurityLevelRoles(c *gin.Context, id uint64, ite
 	if _, err := a.Get(c, id); err != nil {
 		return err
 	}
+
+	// 更新安全等级关联的角色
 	return a.SecurityLevelModel.ReplaceSecurityLevelRoles(id, items)
 }
 
 func (a *SecurityLevel) Delete(c *gin.Context, id uint64) error {
 	// 检查安全级别是否存在
-	oldItem, err := a.SecurityLevelModel.Get(id)
-	if err != nil {
-		return errors.WithMessage(err, "获取安全等级信息失败")
-	} else if oldItem == nil {
-		return errors.New("未找到该安全等级")
-	}
-
-	// 判断安全级别是否被任务、项目、项目集等使用
-	if err = a.SecurityLevelModel.SecurityLevelUsed(id); err != nil {
+	if _, err := a.Get(c, id); err != nil {
 		return err
 	}
 
+	// 判断安全级别是否被任务、项目、项目集等使用
+	if err := a.SecurityLevelModel.SecurityLevelUsed(id); err != nil {
+		return err
+	}
+
+	// 删除安全等级
 	return a.SecurityLevelModel.Delete(id)
 }
 
@@ -148,25 +144,20 @@ func (a *SecurityLevel) SecurityLevelParamsCheck(c *gin.Context, item *schema.Se
 		return errors.New("安全级别的名称不能为空")
 	}
 	// 检查角色是否被禁用
-	RoleQueryResult, err := a.RoleModel.Query(schema.RoleQueryParam{
-		PaginationParam: common.PaginationParam{
-			Pagination: false,
-		},
-		IDs:     common.UintSliceToString(item.Roles.GetIDs(), ","),
-		Status:  consts.BaseStatusDisabled,
-		FindAll: true,
-	})
-	if err != nil {
-		return errors.WithMessage(err, "检查角色是否被禁用失败")
-	} else if len(RoleQueryResult.Data) != 0 {
-		var roleNames string
-		for index, roleInfo := range RoleQueryResult.Data {
-			roleNames += roleInfo.Name
-			if index != (len(RoleQueryResult.Data) - 1) {
-				roleNames += ", "
+	if len(item.Roles) != 0 {
+		if RoleQueryResult, err := a.RoleModel.Query(schema.RoleQueryParam{
+			IDs:     common.UintSliceToString(item.Roles.GetIDs(), ","),
+			Status:  consts.BaseStatusDisabled,
+			FindAll: true,
+		}); err != nil {
+			return errors.WithMessage(err, "检查角色是否被禁用失败")
+		} else if len(RoleQueryResult.Data) != 0 {
+			var roleNames []string
+			for _, roleInfo := range RoleQueryResult.Data {
+				roleNames = append(roleNames, roleInfo.Name)
 			}
+			return errors.New(fmt.Sprintf("角色: %s 已被禁用", common.StringSliceToString(roleNames, ",")))
 		}
-		return errors.New(fmt.Sprintf("角色: %s 已被禁用", roleNames))
 	}
 	return nil
 }

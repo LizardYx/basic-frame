@@ -33,20 +33,19 @@ func (a *TagManage) Get(c *gin.Context, id uint64) (*schema.TagManage, error) {
 }
 
 func (a *TagManage) Create(c *gin.Context, item schema.TagManage) (*common.IDResult, error) {
+	// 标签参数验证
+	if err := a.TagParamsValidate(c, &item); err != nil {
+		return nil, err
+	}
+
 	// 检查标签是否存在
 	if TagManageQueryResult, err := a.Query(c, schema.TagManageQueryParam{
-		PaginationParam: common.PaginationParam{},
-		Type:            item.Type,
-		Value:           item.Value,
+		Type:  item.Type,
+		Value: item.Value,
 	}); err != nil {
 		return nil, errors.WithMessage(err, "检查标签是否存在失败")
 	} else if len(TagManageQueryResult.Data) != 0 {
 		return nil, errors.New("标签已存在")
-	}
-
-	// 标签参数验证
-	if err := a.TagParamsValidate(c, &item); err != nil {
-		return nil, err
 	}
 
 	// 创建标签
@@ -54,6 +53,11 @@ func (a *TagManage) Create(c *gin.Context, item schema.TagManage) (*common.IDRes
 }
 
 func (a *TagManage) Update(c *gin.Context, id uint64, item schema.TagManage) error {
+	// 标签参数检查
+	if err := a.TagParamsValidate(c, &item); err != nil {
+		return err
+	}
+
 	// 检查标签是否存在
 	oldItem, err := a.TagManageModel.Get(id)
 	if err != nil {
@@ -62,11 +66,6 @@ func (a *TagManage) Update(c *gin.Context, id uint64, item schema.TagManage) err
 		return errors.New("未找到该标签")
 	} else {
 		item.Type = oldItem.Type
-	}
-
-	// 标签参数检查
-	if err = a.TagParamsValidate(c, &item); err != nil {
-		return err
 	}
 
 	// 更新标签
@@ -131,16 +130,6 @@ func (a *TagManage) TagParamsValidate(c *gin.Context, item *schema.TagManage) er
 	// 检查标签值是否为空
 	if item.Value = strings.TrimSpace(item.Value); item.Value == "" {
 		return errors.New("标签值不能为空")
-	}
-
-	// 检查标签是否存在
-	if TagManageQueryResult, err := a.TagManageModel.Query(schema.TagManageQueryParam{
-		Type:  item.Type,
-		Value: item.Value,
-	}); err != nil {
-		return errors.WithMessage(err, "检查标签是否存在失败")
-	} else if len(TagManageQueryResult.Data) != 0 {
-		return errors.New("标签已经存在")
 	}
 	return nil
 }

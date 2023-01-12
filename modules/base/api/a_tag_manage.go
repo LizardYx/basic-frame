@@ -43,14 +43,14 @@ func (a *TagManage) Get(c *gin.Context) {
 func (a *TagManage) Create(c *gin.Context) {
 	var item schema.TagManage
 	if err := ginx.ParseJSON(c, &item); err != nil {
-		ginx.ResError(c, "", err)
+		ginx.ResError(c, item, err)
 		return
 	}
 
 	item.Creator = ginx.GetUserID(c)
 	result, err := a.TagManageBll.Create(c, item)
 	if err != nil {
-		ginx.ResError(c, "", err)
+		ginx.ResError(c, item, err)
 		return
 	}
 	ginx.ResSuccess(c, item, result)
@@ -71,11 +71,9 @@ func (a *TagManage) Update(c *gin.Context) {
 }
 
 func (a *TagManage) Delete(c *gin.Context) {
-	var params = ginx.ParamsID{ID: ginx.ParseParamID(c, "id")}
-
-	if err := a.TagManageBll.Delete(c, params.ID); err != nil {
-		ginx.ResError(c, params, err)
+	if err := a.TagManageBll.Delete(c, ginx.ParseParamID(c, "id")); err != nil {
+		ginx.ResError(c, "", err)
 		return
 	}
-	ginx.ResOperateSuccess(c, params)
+	ginx.ResOperateSuccess(c, "")
 }

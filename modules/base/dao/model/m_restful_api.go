@@ -40,7 +40,7 @@ func (a *RestfulApi) GetByUUID(uuid string) (*schema.RestfulApi, error) {
 	if err != nil {
 		return nil, errors.WithStack(err)
 	} else if !ok {
-		return nil, errors.New("未找到UUID匹配的RestfulApi")
+		return nil, nil
 	}
 	return item.ToSchemaRestfulApi(), nil
 }

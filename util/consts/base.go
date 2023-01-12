@@ -6,6 +6,8 @@ const (
 	BaseStatusDisabled = 2 // 禁用状态
 )
 
+var BaseStatusSlice = []int{BaseStatusEnable, BaseStatusDisabled}
+
 // 角色类型
 const (
 	RoleTypeForUser      = 1 // 用户使用的角色
