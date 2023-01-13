@@ -69,16 +69,8 @@ func (a Organization) Init() *Organization {
 		parentID := uint64(0)
 		a.ParentID = &parentID
 	}
-	if len(a.Positions) == 0 {
-		a.Positions = make(Positions, 0)
-	}
-	if len(a.SonOrganizations) == 0 {
-		a.SonOrganizations = make(Organizations, 0)
-	} else {
-		for index, sonOrganization := range a.SonOrganizations {
-			a.SonOrganizations[index] = sonOrganization.Init()
-		}
-	}
+	a.Positions = *a.Positions.Init()
+	a.SonOrganizations = *a.SonOrganizations.Init()
 	return &a
 }
 
@@ -128,6 +120,17 @@ func (a Organization) SortOrganization() *Organization {
 	return &a
 }
 
+func (a Organization) ToSchemaOrgTree() *OrganizationTree {
+	item := new(OrganizationTree)
+	_ = common.Copy(a, item)
+	if len(a.SonOrganizations) != 0 {
+		for _, sonOrgInfo := range a.SonOrganizations {
+			item.SonOrganizationTrees = append(item.SonOrganizationTrees, sonOrgInfo.ToSchemaOrgTree())
+		}
+	}
+	return item.Init()
+}
+
 type Organizations []*Organization
 
 type OrganizationQueryResult struct {
@@ -166,7 +169,6 @@ func (a Organizations) SetCreator(creator uint64) *Organizations {
 
 func (a Organizations) Init() *Organizations {
 	items := make(Organizations, 0)
-
 	for _, organization := range a {
 		items = append(items, organization.Init())
 	}
@@ -200,36 +202,6 @@ func (a Organizations) SortOrganizations() *Organizations {
 	return &a
 }
 
-// OrganizationTree TODO: 等待用户表完成
-type OrganizationTree struct {
-	ID        uint64    `json:"id"`                      // 唯一标识
-	Name      string    `json:"name" binding:"required"` // 组织名称
-	RoleID    uint64    `json:"role_id"`                 // 组织的基础角色
-	Sequence  int       `json:"sequence"`                // 排序值
-	ParentID  *uint64   `json:"parent_id"`               // 父级组织ID
-	Status    int       `json:"status"`                  // 状态(1:启用 2:禁用)
-	Memo      string    `json:"memo"`                    // 备注
-	Creator   uint64    `json:"creator"`                 // 创建者
-	CreatedAt time.Time `json:"created_at"`              // 创建时间
-	UpdatedAt time.Time `json:"updated_at"`              // 更新时间
-	Positions Positions `json:"positions"`               // 组织的职位列表
-	//Users                Users             `json:"users"`                   // 组织用户列表
-	SonOrganizationTrees OrganizationTrees `json:"son_organization_trees"` // 下属组织列表
-}
-
-type OrganizationTrees []*OrganizationTree
-
-func (a Organization) ToSchemaOrgTree() *OrganizationTree {
-	item := new(OrganizationTree)
-	_ = common.Copy(a, item)
-	if len(a.SonOrganizations) != 0 {
-		for _, sonOrgInfo := range a.SonOrganizations {
-			item.SonOrganizationTrees = append(item.SonOrganizationTrees, sonOrgInfo.ToSchemaOrgTree())
-		}
-	}
-	return item.Init()
-}
-
 func (a Organizations) ToSchemaOrgTrees() *OrganizationTrees {
 	OrgTrees := new(OrganizationTrees)
 	for _, organization := range a {
@@ -238,58 +210,71 @@ func (a Organizations) ToSchemaOrgTrees() *OrganizationTrees {
 	return OrgTrees
 }
 
+type OrganizationTree struct {
+	ID                   uint64            `json:"id"`                      // 唯一标识
+	Name                 string            `json:"name" binding:"required"` // 组织名称
+	RoleID               uint64            `json:"role_id"`                 // 组织的基础角色
+	Sequence             int               `json:"sequence"`                // 排序值
+	ParentID             *uint64           `json:"parent_id"`               // 父级组织ID
+	Status               int               `json:"status"`                  // 状态(1:启用 2:禁用)
+	Memo                 string            `json:"memo"`                    // 备注
+	Creator              uint64            `json:"creator"`                 // 创建者
+	CreatedAt            time.Time         `json:"created_at"`              // 创建时间
+	UpdatedAt            time.Time         `json:"updated_at"`              // 更新时间
+	Positions            Positions         `json:"positions"`               // 组织的职位列表
+	Users                Users             `json:"users"`                   // 组织用户列表
+	SonOrganizationTrees OrganizationTrees `json:"son_organization_trees"`  // 下属组织列表
+}
+
 func (a OrganizationTree) Init() *OrganizationTree {
 	if a.ParentID == nil {
 		parentID := uint64(0)
 		a.ParentID = &parentID
 	}
-	if len(a.Positions) == 0 {
-		a.Positions = make(Positions, 0)
-	}
-	// TODO: 等待用户表完成
-	//if len(a.Users) == 0 {
-	//	a.Users = make(Users, 0)
-	//}
-	if len(a.SonOrganizationTrees) == 0 {
-		a.SonOrganizationTrees = make(OrganizationTrees, 0)
-	} else {
-		for index, sonOrganization := range a.SonOrganizationTrees {
-			a.SonOrganizationTrees[index] = sonOrganization.Init()
-		}
-	}
+	a.Positions = *a.Positions.Init()
+	a.Users = *a.Users.Init()
+	a.SonOrganizationTrees = *a.SonOrganizationTrees.Init()
 	return &a
 }
 
-// TODO: 等待用户表完成
-//func (a OrganizationTrees) AddUserToTree(users Users) {
-//	for _, OrgTreeInfo := range a {
-//		for _, userInfo := range users {
-//			newUser := OrgTreeInfo.AddUserToTree(*userInfo)
-//			if newUser.ID != 0 {
-//				OrgTreeInfo.Users = append(OrgTreeInfo.Users, &newUser)
-//			}
-//		}
-//		if len(OrgTreeInfo.SonOrganizationTrees) != 0 {
-//			OrgTreeInfo.SonOrganizationTrees.AddUserToTree(users)
-//		}
-//	}
-//}
+func (a OrganizationTree) AddUserToTree(user User) User {
+	var newUser User
+	for _, organizationInfo := range user.Organizations {
+		if organizationInfo.ID == a.ID {
+			newUser = user
+			newUser.Positions = make(Positions, 0)
+		}
+	}
+	if newUser.ID != 0 {
+		for _, positionInfo := range user.Positions {
+			if positionInfo.OrganizationID == a.ID {
+				newUser.Positions = append(newUser.Positions, positionInfo)
+			}
+		}
+	}
+	return newUser
+}
 
-// TODO: 等待用户表完成
-//func (a OrganizationTree) AddUserToTree(user User) User {
-//	var newUser User
-//	for _, organizationInfo := range user.Organizations {
-//		if organizationInfo.ID == a.ID {
-//			newUser = user
-//			newUser.Positions = make(Positions, 0)
-//		}
-//	}
-//	if newUser.ID != 0 {
-//		for _, positionInfo := range user.Positions {
-//			if positionInfo.OrganizationID == a.ID {
-//				newUser.Positions = append(newUser.Positions, positionInfo)
-//			}
-//		}
-//	}
-//	return newUser
-//}
+type OrganizationTrees []*OrganizationTree
+
+func (a OrganizationTrees) Init() *OrganizationTrees {
+	items := make(OrganizationTrees, 0)
+	for _, item := range a {
+		items = append(items, item.Init())
+	}
+	return &items
+}
+
+func (a OrganizationTrees) AddUserToTree(users Users) {
+	for _, OrgTreeInfo := range a {
+		for _, userInfo := range users {
+			newUser := OrgTreeInfo.AddUserToTree(*userInfo)
+			if newUser.ID != 0 {
+				OrgTreeInfo.Users = append(OrgTreeInfo.Users, &newUser)
+			}
+		}
+		if len(OrgTreeInfo.SonOrganizationTrees) != 0 {
+			OrgTreeInfo.SonOrganizationTrees.AddUserToTree(users)
+		}
+	}
+}

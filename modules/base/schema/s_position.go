@@ -39,6 +39,12 @@ type PositionQueryResult struct {
 	PageResult *common.PaginationResult
 }
 
+func (a Positions) Init() *Positions {
+	items := make(Positions, 0)
+	items = append(items, a...)
+	return &items
+}
+
 func (a Positions) GetIDs() []uint64 {
 	l := make([]uint64, len(a))
 	for i, j := range a {

@@ -102,12 +102,10 @@ func (a *Button) UpdateButtonPre(item schema.ButtonPre) error {
 			return err
 		} else if oldItem == nil {
 			return errors.New("未找到该按钮")
-		} else {
-			if item.ParentID != nil {
-				parentID := uint64(0)
-				if item.ParentID == &parentID {
-					item.ParentID = nil
-				}
+		} else if item.ParentID != nil {
+			parentID := uint64(0)
+			if item.ParentID == &parentID {
+				item.ParentID = nil
 			}
 		}
 

@@ -81,16 +81,8 @@ func (a ButtonPre) Init() *ButtonPre {
 		parentID := uint64(0)
 		a.ParentID = &parentID
 	}
-	if len(a.RestfulApis) == 0 {
-		a.RestfulApis = make(RestfulApis, 0)
-	}
-	if len(a.SonButtons) == 0 {
-		a.SonButtons = make(ButtonPres, 0)
-	} else {
-		for index, sonButtonTree := range a.SonButtons {
-			a.SonButtons[index] = sonButtonTree.Init()
-		}
-	}
+	a.RestfulApis = *a.RestfulApis.Init()
+	a.SonButtons = *a.SonButtons.Init()
 	return &a
 }
 
@@ -98,10 +90,8 @@ func (a ButtonPre) Init() *ButtonPre {
 func (a ButtonPre) SetCreator(creator uint64) *ButtonPre {
 	if creator != 0 {
 		a.Creator = creator
-		if len(a.SonButtons) != 0 {
-			for _, sonButton := range a.SonButtons {
-				sonButton.SetCreator(creator)
-			}
+		for _, sonButton := range a.SonButtons {
+			sonButton.SetCreator(creator)
 		}
 	}
 	return &a
@@ -122,6 +112,14 @@ func (a ButtonPre) ToSchemaButton() *Button {
 }
 
 type ButtonPres []*ButtonPre
+
+func (a ButtonPres) Init() *ButtonPres {
+	items := make(ButtonPres, 0)
+	for _, item := range a {
+		items = append(items, item.Init())
+	}
+	return &items
+}
 
 // GetIDs 获取按钮、子按钮的按钮ID集合
 func (a ButtonPres) GetIDs(buttonIDs *[]uint64) {

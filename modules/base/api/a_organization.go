@@ -86,12 +86,11 @@ func (a *Organization) UpdateOrganizations(c *gin.Context) {
 }
 
 func (a *Organization) Delete(c *gin.Context) {
-	var params = ginx.ParamsID{ID: ginx.ParseParamID(c, "id")}
 	if err := a.OrganizationBll.Delete(c, ginx.ParseParamID(c, "id")); err != nil {
-		ginx.ResError(c, params, err)
+		ginx.ResError(c, "", err)
 		return
 	}
-	ginx.ResOperateSuccess(c, params)
+	ginx.ResOperateSuccess(c, "")
 }
 
 func (a *Organization) UserJoinOrganization(c *gin.Context) {

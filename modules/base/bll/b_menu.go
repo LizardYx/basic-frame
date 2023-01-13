@@ -41,6 +41,7 @@ func (a *Menu) InitData() {
 			fmt.Println("读取前端页面菜单配置文件失败")
 			if !loadFileFailed {
 				logger.Log.Warning("读取前端页面菜单配置文件失败")
+				loadFileFailed = true
 			}
 			if sleepTime < 10 {
 				sleepTime += 5
@@ -48,7 +49,10 @@ func (a *Menu) InitData() {
 			time.Sleep(time.Duration(sleepTime) * time.Second)
 			continue
 		}
-		loadFileFailed = false
+		if loadFileFailed {
+			loadFileFailed = false
+			logger.Log.Warning("读取前端页面菜单配置文件成功")
+		}
 		// Json文件中的版本号大于DB中的版本号。则表明Json文件有更新
 		if data.MenuVersion > common.SysConfig.MenuVersion {
 			// 更新菜单树和可禁用字段
@@ -118,7 +122,7 @@ func (a *Menu) Query(c *gin.Context, params schema.MenuQueryParam) (*schema.Menu
 func (a *Menu) Get(c *gin.Context, id uint64) (*schema.Menu, error) {
 	item, err := a.MenuModel.Get(id)
 	if err != nil {
-		return nil, err
+		return nil, errors.WithMessage(err, "获取菜单信息失败")
 	} else if item == nil {
 		return nil, errors.New("未找到菜单信息")
 	}
@@ -131,28 +135,19 @@ func (a *Menu) Create(c *gin.Context, item schema.Menu) (*common.IDResult, error
 	return a.MenuModel.Create(item)
 }
 
+// Update 更新菜单基本信息
 func (a *Menu) Update(c *gin.Context, id uint64, item schema.Menu) error {
-	// 检查菜单是否存在
-	oldItem, err := a.MenuModel.Get(id)
-	if err != nil {
-		return err
-	} else if oldItem == nil {
-		return errors.New("未找到菜单信息")
-	}
-
 	// 参数检查
-	item.Name = strings.TrimSpace(item.Name)
-	if item.Name == "" {
-		return errors.New("菜单名称不能为空")
-	}
-	if item.ParentID != nil {
-		parentID := uint64(0)
-		if *item.ParentID == parentID {
-			item.ParentID = nil
-		}
+	if err := a.MenuParamsCheck(c, &item); err != nil {
+		return err
 	}
 
-	// 更新菜单信息
+	// 检查菜单是否存在
+	if _, err := a.Get(c, id); err != nil {
+		return err
+	}
+
+	// 更新菜单基本信息
 	return a.MenuModel.UpdateByID(id, map[string]interface{}{
 		"select":      item.Select,
 		"name":        item.Name,
@@ -167,6 +162,7 @@ func (a *Menu) Update(c *gin.Context, id uint64, item schema.Menu) error {
 	})
 }
 
+// BatchUpdateMenus 批量更新菜单基本信息
 func (a *Menu) BatchUpdateMenus(c *gin.Context, items schema.Menus) error {
 	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
 		for _, item := range items {
@@ -180,17 +176,16 @@ func (a *Menu) BatchUpdateMenus(c *gin.Context, items schema.Menus) error {
 		return err
 	}
 	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
-	return err
+	return nil
 }
 
 // Delete 删除菜单、菜单调用的Api关联以及菜单的按钮
 func (a *Menu) Delete(c *gin.Context, id uint64) error {
 	// 查询该菜单是否存在
-	if oldItem, err := a.MenuModel.Get(id); err != nil {
-		return errors.New("删除菜单失败")
-	} else if oldItem == nil {
-		return errors.New("未找到菜单信息")
+	if _, err := a.Get(c, id); err != nil {
+		return err
 	}
+
 	// 查询菜单是否有子项
 	if MenuQueryResult, err := a.MenuModel.Query(schema.MenuQueryParam{
 		PaginationParam: common.PaginationParam{
@@ -198,10 +193,12 @@ func (a *Menu) Delete(c *gin.Context, id uint64) error {
 		},
 		ParentID: id,
 	}); err != nil {
-		return errors.New("删除菜单失败")
+		return errors.WithMessage(err, "查询菜单是否有子项失败")
 	} else if MenuQueryResult.PageResult.Total != 0 {
 		return errors.New("该菜单含有子项，请先删除子项")
 	}
+
+	// 删除菜单、菜单调用的Api关联以及菜单的按钮
 	if err := a.MenuModel.Delete(id); err != nil {
 		return err
 	}
@@ -243,7 +240,7 @@ func (a *Menu) UpdateMenuTrees(c *gin.Context, parentID *uint64, list schema.Men
 					// 菜单存在，更新菜单及菜单关联的Api
 					fmt.Println("更新菜单及菜单关联的Api:", item.Name)
 					item.ID = MenuQueryResult.Data[0].ID
-					if err := a.UpdateMenuTree(c, *item); err != nil {
+					if err = a.UpdateMenuTree(c, *item); err != nil {
 						return errors.New(fmt.Sprintf("更新菜单: %s 及菜单关联的Api失败", item.Name))
 					}
 				} else {
@@ -317,7 +314,7 @@ func (a *Menu) createButtons(c *gin.Context, MenuID uint64, parentID *uint64, li
 				} else if len(ButtonQueryResult.Data) != 0 {
 					// 更新按钮的Api信息
 					if len(item.RestfulApis) != 0 {
-						if err := a.UpdateRestfulApis(c, &item.RestfulApis); err != nil {
+						if err = a.UpdateRestfulApis(c, &item.RestfulApis); err != nil {
 							return errors.New(fmt.Sprintf("更新按钮: %s 关联的Api失败", item.Name))
 						}
 					}
@@ -379,12 +376,12 @@ func (a *Menu) CreateMenuTree(c *gin.Context, item schema.MenuTree) (*common.IDR
 
 // UpdateMenuRestfulApis 更新菜单关联的Api
 func (a *Menu) UpdateMenuRestfulApis(c *gin.Context, id uint64, item schema.RestfulApis) error {
-	oldItem, err := a.MenuModel.Get(id)
-	if err != nil {
+	// 检查菜单是否存在
+	if _, err := a.Get(c, id); err != nil {
 		return err
-	} else if oldItem == nil {
-		return errors.New("未找到菜单信息")
 	}
+
+	// 更新菜单关联的Api
 	return a.MenuModel.UpdateMenuRestfulApis(id, item)
 }
 
@@ -395,12 +392,14 @@ func (a *Menu) UpdateMenuTree(c *gin.Context, item schema.MenuTree) error {
 		if err := a.Update(c, item.ID, *item.ToSchemaMenu()); err != nil {
 			return err
 		}
+
 		// 更新RestfulApi信息
 		if len(item.RestfulApis) != 0 {
 			if err := a.UpdateRestfulApis(c, &item.RestfulApis); err != nil {
 				return err
 			}
 		}
+
 		// 更新菜单与RestfulApi关联信息
 		if err := a.UpdateMenuRestfulApis(c, item.ID, item.RestfulApis); err != nil {
 			return err
@@ -523,7 +522,7 @@ func (a *Menu) UpdatePermissionTree(c *gin.Context, item schema.PermissionTree) 
 					} else {
 						// 新增可禁用字段
 						disabledField.Creator = ginx.GetUserID(c)
-						if _, err := a.DisabledFieldModel.Create(*disabledField); err != nil {
+						if _, err = a.DisabledFieldModel.Create(*disabledField); err != nil {
 							return errors.New(fmt.Sprintf("创建可禁用字段: %s 失败", disabledField.KeyName))
 						}
 					}
@@ -552,7 +551,7 @@ func (a *Menu) UpdatePermissionTreeFile(c *gin.Context) error {
 	if fileContent, err := json.Marshal(menuTreeJson); err != nil {
 		return errors.New("获取配置文件失败")
 	} else {
-		if err := ioutil.WriteFile(filePath, fileContent, 0666); err != nil {
+		if err = ioutil.WriteFile(filePath, fileContent, 0666); err != nil {
 			return errors.New("获取配置文件失败")
 		}
 	}
@@ -590,6 +589,7 @@ func (a *Menu) GetMenuJson(c *gin.Context) (*schema.MenuTreeJson, error) {
 		menuTreeJson.MenuTrees = *permissionTree.MenuTrees.SortMenuTrees()
 		menuTreeJson.DisabledFields = permissionTree.DisabledFields
 	}
+
 	// 获取菜单版本号
 	if systemBaseConfig, err := a.SystemConfigModel.First(); err != nil {
 		return &menuTreeJson, errors.New("获取系统版本号失败")
@@ -597,4 +597,24 @@ func (a *Menu) GetMenuJson(c *gin.Context) (*schema.MenuTreeJson, error) {
 		menuTreeJson.MenuVersion = systemBaseConfig.MenuVersion
 	}
 	return &menuTreeJson, nil
+}
+
+// ---------------------------------------- Params  Validate --------------------------------------
+
+func (a *Menu) MenuParamsCheck(c *gin.Context, item *schema.Menu) error {
+	// 参数检查
+	item.Name = strings.TrimSpace(item.Name)
+	if item.Name == "" {
+		return errors.New("菜单名称不能为空")
+	}
+
+	// 检查父菜单ID
+	if item.ParentID != nil {
+		parentID := uint64(0)
+		if *item.ParentID == parentID {
+			item.ParentID = nil
+		}
+	}
+
+	return nil
 }

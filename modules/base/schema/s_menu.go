@@ -115,38 +115,21 @@ func (a MenuTree) Init() *MenuTree {
 		parentID := uint64(0)
 		a.ParentID = &parentID
 	}
-	if len(a.RestfulApis) == 0 {
-		a.RestfulApis = make(RestfulApis, 0)
-	}
-	if len(a.Buttons) == 0 {
-		a.Buttons = make(ButtonPres, 0)
-	} else {
-		for index, buttonTree := range a.Buttons {
-			a.Buttons[index] = buttonTree.Init()
-		}
-	}
-	if len(a.SonMenus) == 0 {
-		a.SonMenus = make(MenuTrees, 0)
-	} else {
-		for index, sonMenuTree := range a.SonMenus {
-			a.SonMenus[index] = sonMenuTree.Init()
-		}
-	}
+	a.RestfulApis = *a.RestfulApis.Init()
+	a.Buttons = *a.Buttons.Init()
+	a.SonMenus = *a.SonMenus.Init()
 	return &a
 }
 
 func (a MenuTrees) Init() *MenuTrees {
-	if len(a) == 0 {
-		a = make(MenuTrees, 0)
-	} else {
-		for index, item := range a {
-			*a[index] = *item.Init()
-		}
+	items := make(MenuTrees, 0)
+	for _, item := range a {
+		items = append(items, item.Init())
 	}
-	return &a
+	return &items
 }
 
-// SetCreator 设置菜单树操作者
+// SetCreator 设置菜单、按钮的创建者
 func (a MenuTree) SetCreator(creator uint64) *MenuTree {
 	if creator != 0 {
 		a.Creator = creator
@@ -162,7 +145,7 @@ func (a MenuTree) SetCreator(creator uint64) *MenuTree {
 	return &a
 }
 
-// SetCreator 设置菜单树操作者
+// SetCreator 设置菜单、按钮的创建者
 func (a MenuTrees) SetCreator(creator uint64) *MenuTrees {
 	if creator != 0 {
 		for _, menuTree := range a {

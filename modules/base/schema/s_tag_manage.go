@@ -41,8 +41,6 @@ func (a TagManages) GetIDs() []uint64 {
 
 func (a TagManages) Init() *TagManages {
 	items := make(TagManages, 0)
-	for _, role := range a {
-		items = append(items, role)
-	}
+	items = append(items, a...)
 	return &items
 }

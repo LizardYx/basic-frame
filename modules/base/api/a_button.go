@@ -60,11 +60,9 @@ func (a *Button) BatchUpdate(c *gin.Context) {
 }
 
 func (a *Button) Delete(c *gin.Context) {
-	var params = ginx.ParamsID{ID: ginx.ParseParamID(c, "id")}
-
-	if err := a.ButtonBll.Delete(c, params.ID); err != nil {
-		ginx.ResError(c, params, err)
+	if err := a.ButtonBll.Delete(c, ginx.ParseParamID(c, "id")); err != nil {
+		ginx.ResError(c, "", err)
 		return
 	}
-	ginx.ResOperateSuccess(c, params)
+	ginx.ResOperateSuccess(c, "")
 }

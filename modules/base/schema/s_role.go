@@ -24,9 +24,7 @@ type Role struct {
 func (a Role) Init() *Role {
 	a.Menus = *a.Menus.Init()
 	a.Buttons = *a.Buttons.Init()
-	if len(a.DisabledFields) == 0 {
-		a.DisabledFields = make(DisabledFields, 0)
-	}
+	a.DisabledFields = *a.DisabledFields.Init()
 	return &a
 }
 

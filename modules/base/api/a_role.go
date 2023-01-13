@@ -32,7 +32,7 @@ func (a *Role) Query(c *gin.Context) {
 }
 
 func (a *Role) Get(c *gin.Context) {
-	item, err := a.RoleBll.Get(c, ginx.ParseParamID(c, "id"))
+	item, err := a.RoleBll.GetAll(c, ginx.ParseParamID(c, "id"))
 	if err != nil {
 		ginx.ResError(c, "", err)
 		return
@@ -85,13 +85,11 @@ func (a *Role) UpdateAuditorType(c *gin.Context) {
 }
 
 func (a *Role) Delete(c *gin.Context) {
-	var params = ginx.ParamsID{ID: ginx.ParseParamID(c, "id")}
-
-	if err := a.RoleBll.Delete(c, params.ID); err != nil {
-		ginx.ResError(c, params, err)
+	if err := a.RoleBll.Delete(c, ginx.ParseParamID(c, "id")); err != nil {
+		ginx.ResError(c, "", err)
 		return
 	}
-	ginx.ResOperateSuccess(c, params)
+	ginx.ResOperateSuccess(c, "")
 }
 
 func (a *Role) UserAddRole(c *gin.Context) {
@@ -130,6 +128,7 @@ func (a *Role) GetRolePermissionTree(c *gin.Context) {
 	//	ginx.ResError(c, "", err)
 	//	return
 	//}
+
 	// 将菜单和按钮列表，组装成树
 	menuTrees := make(schema.MenuTrees, 0)
 	//parentId := uint64(0)
