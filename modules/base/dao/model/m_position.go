@@ -4,6 +4,7 @@ import (
 	"basic-frame/modules/base/dao/entity"
 	"basic-frame/modules/base/schema"
 	"basic-frame/util/common"
+	"basic-frame/util/consts"
 	"basic-frame/util/mysql"
 	"github.com/pkg/errors"
 	"strings"
@@ -39,8 +40,8 @@ func (a *Position) Query(params schema.PositionQueryParam) (*schema.PositionQuer
 		v = "%" + strings.ToLower(v) + "%"
 		db = db.Where("lower(name) LIKE ? OR lower(memo) LIKE ?", v, v)
 	}
-	if v := params.SequenceSort; v == 1 || v == 2 {
-		if v == 1 {
+	if v := params.SequenceSort; common.ContainsInt(consts.BaseSortSlice, v) {
+		if v == consts.BaseAscSort {
 			db.Order("sequence ASC")
 		} else {
 			db.Order("sequence DESC")

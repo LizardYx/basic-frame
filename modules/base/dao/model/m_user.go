@@ -4,6 +4,7 @@ import (
 	"basic-frame/modules/base/dao/entity"
 	"basic-frame/modules/base/schema"
 	"basic-frame/util/common"
+	"basic-frame/util/consts"
 	"basic-frame/util/mysql"
 	"github.com/pkg/errors"
 	"gorm.io/gorm/clause"
@@ -90,8 +91,8 @@ func (a *User) Query(params schema.UserQueryParam) (*schema.UserQueryResult, err
 	if v := params.FindDeleted; v {
 		db = db.Unscoped()
 	}
-	if v := params.SequenceSort; v == 1 || v == 2 {
-		if v == 1 {
+	if v := params.SequenceSort; common.ContainsInt(consts.BaseSortSlice, v) {
+		if v == consts.BaseAscSort {
 			db.Order("sequence ASC")
 		} else {
 			db.Order("sequence DESC")

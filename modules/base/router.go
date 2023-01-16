@@ -7,34 +7,41 @@ import (
 
 // RouterBase 模块路由实例,需要将该实例注册到全局路由实例中
 var RouterBase = &Router{
-	SystemConfigApi:  api.SystemConfigApi,
-	TagManageApi:     api.TagManageApi,
-	SecurityLevelApi: api.SecurityLevelApi,
-	DisabledFieldApi: api.DisabledFieldApi,
-	RestfulApi:       api.RestfulApiApi,
-	ButtonApi:        api.ButtonApi,
-	MenuApi:          api.MenuApi,
-	RoleApi:          api.RoleApi,
-	PositionApi:      api.PositionApi,
-	OrganizationApi:  api.OrganizationApi,
+	SystemConfigApi:   api.SystemConfigApi,
+	TagManageApi:      api.TagManageApi,
+	SecurityLevelApi:  api.SecurityLevelApi,
+	DisabledFieldApi:  api.DisabledFieldApi,
+	RestfulApi:        api.RestfulApiApi,
+	ButtonApi:         api.ButtonApi,
+	MenuApi:           api.MenuApi,
+	RoleApi:           api.RoleApi,
+	PositionApi:       api.PositionApi,
+	OrganizationApi:   api.OrganizationApi,
+	UserExtendInfoApi: api.UserExtendInfoApi,
 }
 
 // Router 模块路由管理结构体,需要将该结构体注册到全局路由结构体
 type Router struct {
-	SystemConfigApi  *api.SystemConfig
-	TagManageApi     *api.TagManage
-	SecurityLevelApi *api.SecurityLevel
-	DisabledFieldApi *api.DisabledField
-	RestfulApi       *api.RestfulApi
-	ButtonApi        *api.Button
-	MenuApi          *api.Menu
-	RoleApi          *api.Role
-	PositionApi      *api.Position
-	OrganizationApi  *api.Organization
+	SystemConfigApi   *api.SystemConfig
+	TagManageApi      *api.TagManage
+	SecurityLevelApi  *api.SecurityLevel
+	DisabledFieldApi  *api.DisabledField
+	RestfulApi        *api.RestfulApi
+	ButtonApi         *api.Button
+	MenuApi           *api.Menu
+	RoleApi           *api.Role
+	PositionApi       *api.Position
+	OrganizationApi   *api.Organization
+	UserExtendInfoApi *api.UserExtendInfo
 }
 
 // Register 模块路由注册
 func (a *Router) Register(api *gin.RouterGroup) {
+
+	UserExtendInfoGroup := api.Group("base/user-extend-infos")
+	{
+		UserExtendInfoGroup.PUT(":id", a.UserExtendInfoApi.Update)
+	}
 
 	OrganizationGroup := api.Group("base/organizations")
 	{

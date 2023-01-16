@@ -43,14 +43,14 @@ func (a *Position) Get(c *gin.Context) {
 func (a *Position) Create(c *gin.Context) {
 	var item schema.Position
 	if err := ginx.ParseJSON(c, &item); err != nil {
-		ginx.ResError(c, "", err)
+		ginx.ResError(c, item, err)
 		return
 	}
 
 	item.Creator = ginx.GetUserID(c)
 	result, err := a.PositionBll.Create(c, item)
 	if err != nil {
-		ginx.ResError(c, "", err)
+		ginx.ResError(c, item, err)
 		return
 	}
 	ginx.ResSuccess(c, item, result)
@@ -97,11 +97,9 @@ func (a *Position) PositionRemoveUser(c *gin.Context) {
 }
 
 func (a *Position) Delete(c *gin.Context) {
-	var params = ginx.ParamsID{ID: ginx.ParseParamID(c, "id")}
-
-	if err := a.PositionBll.Delete(c, params.ID); err != nil {
-		ginx.ResError(c, params, err)
+	if err := a.PositionBll.Delete(c, ginx.ParseParamID(c, "id")); err != nil {
+		ginx.ResError(c, "", err)
 		return
 	}
-	ginx.ResOperateSuccess(c, params)
+	ginx.ResOperateSuccess(c, "")
 }

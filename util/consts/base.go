@@ -17,3 +17,11 @@ const (
 )
 
 var RoleTypes = []uint64{RoleTypeForUser, RoleTypeForOrg, RoleTypeForPosition, RoleTypeForUserGroup}
+
+// 排序方式
+const (
+	BaseAscSort  = 1 // 排序(升序)
+	BaseDescSort = 2 // 排序(降序)
+)
+
+var BaseSortSlice = []int{BaseAscSort, BaseDescSort}

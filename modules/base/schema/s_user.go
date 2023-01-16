@@ -81,21 +81,9 @@ type LoginRes struct {
 }
 
 func (a User) Init() *User {
-	if len(a.Organizations) == 0 {
-		a.Organizations = make(Organizations, 0)
-	} else {
-		a.Organizations = *a.Organizations.Init()
-	}
-
-	if len(a.Positions) == 0 {
-		a.Positions = make(Positions, 0)
-	}
-
-	if len(a.Roles) == 0 {
-		a.Roles = make(Roles, 0)
-	} else {
-		a.Roles = *a.Roles.Init()
-	}
+	a.Organizations = *a.Organizations.Init()
+	a.Positions = *a.Positions.Init()
+	a.Roles = *a.Roles.Init()
 
 	// TODO: 等待用户组完成
 	//if len(a.UserGroups) == 0 {

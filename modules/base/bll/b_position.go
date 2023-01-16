@@ -13,13 +13,15 @@ import (
 )
 
 var PositionBll = &Position{
-	PositionModel: model.PositionModel,
-	RoleModel:     model.RoleModel,
+	OrganizationModel: model.OrganizationModel,
+	PositionModel:     model.PositionModel,
+	RoleModel:         model.RoleModel,
 }
 
 type Position struct {
-	PositionModel *model.Position
-	RoleModel     *model.Role
+	OrganizationModel *model.Organization
+	PositionModel     *model.Position
+	RoleModel         *model.Role
 }
 
 func (a *Position) Query(c *gin.Context, params schema.PositionQueryParam) (*schema.PositionQueryResult, error) {
@@ -42,6 +44,8 @@ func (a *Position) Create(c *gin.Context, item schema.Position) (*common.IDResul
 	if err := a.PositionParamsCheck(c, &item); err != nil {
 		return nil, err
 	}
+
+	// 创建职位
 	IDResult, err := a.PositionModel.Create(item)
 	if err != nil {
 		return nil, err
@@ -168,9 +172,8 @@ func (a *Position) PositionParamsCheck(c *gin.Context, item *schema.Position) er
 	// 检查角色是否可用
 	if item.RoleID != 0 {
 		if RoleQueryResult, err := a.RoleModel.Query(schema.RoleQueryParam{
-			PaginationParam: common.PaginationParam{},
-			ID:              item.RoleID,
-			Status:          consts.BaseStatusEnable,
+			ID:     item.RoleID,
+			Status: consts.BaseStatusEnable,
 		}); err != nil {
 			return errors.WithMessage(err, "检查角色是否可用失败")
 		} else if len(RoleQueryResult.Data) == 0 {
@@ -179,20 +182,20 @@ func (a *Position) PositionParamsCheck(c *gin.Context, item *schema.Position) er
 			return errors.New("角色类型错误")
 		}
 	}
+
 	// 检查组织是否可用
-	// TODO: 等待组织表完成
-	//if item.OrganizationID != 0 {
-	//	if OrganizationQueryResult, err := a.OrganizationModel.Query(schema.OrganizationQueryParam{
-	//		PaginationParam: common.PaginationParam{
-	//			OnlyCount: true,
-	//		},
-	//		ID:     item.OrganizationID,
-	//		Status: consts.BaseStatusDisabled,
-	//	}); err != nil {
-	//		return err
-	//	} else if OrganizationQueryResult.PageResult.Total != 0 {
-	//		return errors.New("该组织已被禁用")
-	//	}
-	//}
+	if item.OrganizationID != 0 {
+		if OrganizationQueryResult, err := a.OrganizationModel.Query(schema.OrganizationQueryParam{
+			PaginationParam: common.PaginationParam{
+				OnlyCount: true,
+			},
+			ID:     item.OrganizationID,
+			Status: consts.BaseStatusDisabled,
+		}); err != nil {
+			return err
+		} else if OrganizationQueryResult.PageResult.Total != 0 {
+			return errors.New("该组织已被禁用")
+		}
+	}
 	return nil
 }
