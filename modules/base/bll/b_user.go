@@ -6,6 +6,7 @@ import (
 	"basic-frame/modules/base/schema"
 	"basic-frame/util/common"
 	"basic-frame/util/consts"
+	"basic-frame/util/ginx"
 	"basic-frame/util/ginx/errors"
 	"basic-frame/util/mysql"
 	"basic-frame/util/secret"
@@ -18,6 +19,8 @@ import (
 )
 
 var UserBll = &User{
+	ButtonModel:         model.ButtonModel,
+	MenuModel:           model.MenuModel,
 	RoleModel:           model.RoleModel,
 	OrganizationModel:   model.OrganizationModel,
 	PositionModel:       model.PositionModel,
@@ -26,6 +29,8 @@ var UserBll = &User{
 }
 
 type User struct {
+	ButtonModel         *model.Button
+	MenuModel           *model.Menu
 	RoleModel           *model.Role
 	OrganizationModel   *model.Organization
 	PositionModel       *model.Position
@@ -139,6 +144,7 @@ func (a *User) GetSubUsers(c *gin.Context, userID uint64, params schema.SubUserQ
 	}, nil
 }
 
+// Init 创建超管用户
 func (a *User) Init(c *gin.Context) error {
 	// 检查超管用户是否创建
 	if UserQueryResult, err := a.Query(c, schema.UserQueryParam{
@@ -185,9 +191,12 @@ func (a *User) Create(c *gin.Context, item schema.User) (*common.IDResult, error
 	var IDResult *common.IDResult
 	var err error
 	_ = mysql.DB.Transaction(func(tx *gorm.DB) error {
+		// 创建用户
 		if IDResult, err = a.UserModel.Create(item); err != nil {
 			return err
 		}
+
+		// 创建用户扩展信息
 		if _, err = a.UserExtendInfoModel.Create(schema.UserExtendInfo{UserID: IDResult.ID, RealName: item.UserName}); err != nil {
 			return err
 		}
@@ -198,6 +207,326 @@ func (a *User) Create(c *gin.Context, item schema.User) (*common.IDResult, error
 	}
 	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
 	return IDResult, nil
+}
+
+// Update 更新用户基础信息
+func (a *User) Update(c *gin.Context, id uint64, item schema.User) error {
+	// 检查用户是否存在
+	if _, err := a.Get(c, id); err != nil {
+		return err
+	}
+
+	// 更新用户信息
+	if err := a.UserModel.UpdateByID(id, map[string]interface{}{
+		"status":   item.Status,
+		"sequence": item.Sequence,
+	}); err != nil {
+		return err
+	}
+	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
+	return nil
+}
+
+func (a *User) UpdateStatus(c *gin.Context, id uint64, newStatus int) error {
+	// 检查用户是否存在
+	if oldItem, err := a.Get(c, id); err != nil {
+		return err
+	} else if oldItem.Status == newStatus {
+		if newStatus == consts.BaseStatusEnable {
+			return errors.New("用户已启用，请勿重复操作")
+		} else {
+			return errors.New("用户已禁用，请勿重复操作")
+		}
+	}
+
+	// 更新用户状态
+	return a.UserModel.UpdateByID(id, map[string]interface{}{
+		"status": newStatus,
+	})
+}
+
+func (a *User) UpdatePassword(c *gin.Context, id uint64, item schema.UpdatePasswordParam) error {
+	item.NewPassword = strings.TrimSpace(item.NewPassword)
+
+	// 检查用户是否存在
+	if oldItem, err := a.Get(c, id); err != nil {
+		return err
+	} else if secret.SHA1String(item.OldPassword) != oldItem.Password {
+		return errors.New("旧密码不正确")
+	} else if item.NewPassword == "" {
+		return errors.New("新密码不能为空")
+	}
+
+	// 更新用户信息
+	item.NewPassword = secret.SHA1String(item.NewPassword)
+	return a.UserModel.UpdateByID(id, map[string]interface{}{
+		"password": item.NewPassword,
+	})
+}
+
+func (a *User) Delete(c *gin.Context, id uint64) error {
+	// 检查用户是否存在
+	if oldItem, err := a.Get(c, id); err != nil {
+		return err
+	} else if oldItem.UserName == consts.AdminName {
+		// 检查是否是超管
+		return errors.New("超管用户不允许删除")
+	}
+
+	// 删除用户、用户扩展信息
+	if err := a.UserModel.Delete(id); err != nil {
+		return err
+	}
+	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
+	return nil
+}
+
+// ---------------------------------------- User Organization --------------------------------------
+
+// GetMenuTreesInfo 获取菜单树顶层结构
+func (a *User) GetMenuTreesInfo(MenuTrees *schema.MenuTrees, parentId *uint64, menus schema.Menus, buttons schema.Buttons) error {
+	for _, menu := range menus {
+		if menu.ShowStatus == consts.BaseShowStatusDisabled {
+			continue
+		}
+		if *menu.ParentID == *parentId {
+			newMenuTree := schema.MenuTree{
+				Menu:        *menu,
+				RestfulApis: make(schema.RestfulApis, 0),
+				Buttons:     make(schema.ButtonPres, 0),
+				SonMenus:    make(schema.MenuTrees, 0),
+			}
+			// 获取该菜单的按钮树
+			parentId := uint64(0)
+			if err := a.GetButtonTreesInfo(&newMenuTree.Buttons, newMenuTree.ID, &parentId, buttons); err != nil {
+				return err
+			}
+			// 获取每个顶层菜单的子菜单树以及菜单包含的按钮树
+			if err := a.GetMenuTreesInfo(&newMenuTree.SonMenus, &newMenuTree.ID, menus, buttons); err != nil {
+				return err
+			}
+			*MenuTrees = append(*MenuTrees, &newMenuTree)
+		}
+	}
+	return nil
+}
+
+func (a *User) GetButtonTreesInfo(buttonTrees *schema.ButtonPres, menuId uint64, parentId *uint64, buttons schema.Buttons) error {
+	for _, button := range buttons {
+		if button.ShowStatus == consts.BaseShowStatusDisabled {
+			continue
+		}
+		if *button.ParentID == *parentId && button.MenuID == menuId {
+			newButtonTree := schema.ButtonPre{
+				Button:      *button,
+				RestfulApis: make(schema.RestfulApis, 0),
+				SonButtons:  make(schema.ButtonPres, 0),
+			}
+			if err := a.GetButtonTreesInfo(&newButtonTree.SonButtons, menuId, &newButtonTree.ID, buttons); err != nil {
+				return err
+			}
+			*buttonTrees = append(*buttonTrees, &newButtonTree)
+		}
+	}
+	return nil
+}
+
+// GetMenuTree 获取用户菜单树
+func (a *User) GetMenuTree(c *gin.Context) (*schema.MenuTrees, error) {
+	var menus schema.Menus
+	var buttons schema.Buttons
+	menuTrees := make(schema.MenuTrees, 0)
+	if ginx.GetUserName(c) == consts.AdminName {
+		// 如果是超管用户,获取用户所有的菜单和按钮
+		if menuQueryResult, err := a.MenuModel.Query(schema.MenuQueryParam{
+			Status:     consts.BaseStatusEnable,
+			ShowStatus: consts.BaseShowStatusEnable,
+		}); err != nil {
+			return &menuTrees, err
+		} else {
+			menus = menuQueryResult.Data
+		}
+		if buttonQueryResult, err := a.ButtonModel.Query(schema.ButtonQueryParam{
+			ShowStatus: consts.BaseShowStatusEnable,
+			Status:     consts.BaseStatusEnable,
+		}); err != nil {
+			return &menuTrees, err
+		} else {
+			buttons = buttonQueryResult.Data
+		}
+	} else {
+		// 如果是普通用户，获取用户所有的角色ID
+		roleIds, err := a.GetUserAllRoleIds(c, ginx.GetUserID(c))
+		if err != nil {
+			return &menuTrees, err
+		} else if len(*roleIds) == 0 {
+			return &menuTrees, err
+		}
+		// 根据角色获取菜单列表、按钮列表
+		if RoleQueryResult, err := a.RoleModel.Query(schema.RoleQueryParam{
+			IDs:         common.UintSliceToString(*roleIds, ","),
+			ShowDetails: true,
+		}); err != nil {
+			return &menuTrees, err
+		} else {
+			for _, roleInfo := range RoleQueryResult.Data {
+				// 获取用户菜单列表
+				for _, newMenuInfo := range roleInfo.Menus {
+					if len(menus) == 0 {
+						menus = append(menus, newMenuInfo)
+					} else {
+						for index, menuInfo := range menus {
+							if menuInfo.ID == newMenuInfo.ID {
+								break
+							}
+							if index == (len(menus) - 1) {
+								menus = append(menus, newMenuInfo)
+							}
+						}
+					}
+				}
+				// 获取用户按钮列表
+				for _, newButtonInfo := range roleInfo.Buttons {
+					if len(buttons) == 0 {
+						buttons = append(buttons, newButtonInfo)
+					} else {
+						for index, buttonInfo := range buttons {
+							if buttonInfo.ID == newButtonInfo.ID {
+								break
+							}
+							if index == (len(buttons) - 1) {
+								buttons = append(buttons, newButtonInfo)
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+	// 解析菜单列表和按钮列表，组成菜单树
+	parentId := uint64(0)
+	if err := a.GetMenuTreesInfo(&menuTrees, &parentId, menus, buttons); err != nil {
+		return &menuTrees, err
+	}
+	return menuTrees.Init().SortMenuTrees(), nil
+}
+
+func (a *User) GetUserAllRoleIds(c *gin.Context, userID uint64) (*[]uint64, error) {
+	// 获取用户信息，包含组织、职位、角色、用户组
+	item, err := a.Get(c, userID)
+	if err != nil {
+		return nil, err
+	}
+
+	// 获取用户的角色集合
+	var roleIds []uint64
+	if len(item.Organizations) != 0 {
+		// 获取组织结构的角色ID，如果用户有该组织结构的权限，那么就自动会拥有子组织的权限
+		if OrgQueryResult, err := a.OrganizationModel.Query(schema.OrganizationQueryParam{
+			IDs:         common.UintSliceToString(item.Organizations.GetIDs(), ","),
+			Status:      consts.BaseStatusEnable,
+			ShowDetails: true,
+		}); err != nil {
+			return nil, err
+		} else {
+			OrgQueryResult.Data.GetRoleIds(&roleIds)
+		}
+	}
+	item.Positions.GetRoleIds(&roleIds)
+	// TODO: 等待用户组表完成
+	//item.UserGroups.GetRoleIds(&roleIds)
+	roleIds = append(roleIds, item.Roles.GetIDs()...)
+
+	// 角色ID去重
+	newRoleIds := common.RemoveRepeatedElement(roleIds)
+	return &newRoleIds, nil
+}
+
+// UpdateUserOrganizations 更新用户关联的组织信息
+func (a *User) UpdateUserOrganizations(c *gin.Context, id uint64, items schema.Organizations) error {
+	return a.UserModel.ReplaceUserOrganizations(id, items)
+}
+
+// UpdateUserPositions 更新用户关联的职位信息
+func (a *User) UpdateUserPositions(c *gin.Context, id uint64, items schema.Positions) error {
+	return a.UserModel.ReplaceUserPositions(id, items)
+}
+
+// UpdateUserRoles 更新用户关联的角色信息
+func (a *User) UpdateUserRoles(c *gin.Context, id uint64, items schema.Roles) error {
+	return a.UserModel.ReplaceUserRoles(id, items)
+}
+
+// UpdateUserUserGroup 更新用户关联的用户组信息
+// TODO: 等待用户组表完成
+//func (a *User) UpdateUserUserGroup(c *gin.Context, id uint64, items schema.UserGroups) error {
+//	return a.UserModel.ReplaceUserUserGroup(id, items)
+//}
+
+// ---------------------------------------- User Permission --------------------------------------
+
+// UpdateUserPermission 更新用户权限
+func (a *User) UpdateUserPermission(c *gin.Context, id uint64, item schema.User) error {
+	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
+		// 检查用户是否存在
+		oldItem, err := a.Get(c, id)
+		if err != nil {
+			return err
+		} else {
+			item.ID = oldItem.ID
+			item.Password = oldItem.Password
+		}
+
+		// 检查组织、职位、角色、用户组是否被禁用
+		if err = a.UserParamsCheck(c, &item); err != nil {
+			return err
+		}
+
+		// 更新用户权重
+		if err = a.Update(c, id, item); err != nil {
+			return err
+		}
+
+		// 更新用户和组织的关联关系
+		if err = a.UpdateUserOrganizations(c, id, item.Organizations); err != nil {
+			return err
+		}
+
+		// 更新用户和职位的关联关系
+		if err = a.UpdateUserPositions(c, id, item.Positions); err != nil {
+			return err
+		}
+
+		// 更新用户和角色的关联关系
+		if err = a.UpdateUserRoles(c, id, item.Roles); err != nil {
+			return err
+		}
+
+		// 更新用户和用户组的关联关系
+		// TODO: 等待用户组表完成
+		//if err = a.UpdateUserUserGroup(c, id, item.UserGroups); err != nil {
+		//	return err
+		//}
+		return nil
+	})
+	if err != nil {
+		return err
+	}
+
+	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
+	return nil
+}
+
+// BatchUpdateUserPermission 批量更新用户权限
+func (a *User) BatchUpdateUserPermission(c *gin.Context, items schema.Users) error {
+	return mysql.DB.Transaction(func(tx *gorm.DB) error {
+		for _, item := range items {
+			if err := a.UpdateUserPermission(c, item.ID, *item); err != nil {
+				return err
+			}
+		}
+		return nil
+	})
 }
 
 // ---------------------------------------- Params Validate --------------------------------------

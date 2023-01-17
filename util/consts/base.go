@@ -2,8 +2,10 @@ package consts
 
 // Base模块状态控制
 const (
-	BaseStatusEnable   = 1 // 启动状态
-	BaseStatusDisabled = 2 // 禁用状态
+	BaseStatusEnable       = 1 // 启动状态
+	BaseStatusDisabled     = 2 // 禁用状态
+	BaseShowStatusEnable   = 1 // 显示状态(显示)
+	BaseShowStatusDisabled = 2 // 显示状态(隐藏)
 )
 
 var BaseStatusSlice = []int{BaseStatusEnable, BaseStatusDisabled}
