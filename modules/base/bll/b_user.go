@@ -25,6 +25,7 @@ var UserBll = &User{
 	OrganizationModel:   model.OrganizationModel,
 	PositionModel:       model.PositionModel,
 	UserModel:           model.UserModel,
+	UserGroupModel:      model.UserGroupModel,
 	UserExtendInfoModel: model.UserExtendInfoModel,
 }
 
@@ -35,6 +36,7 @@ type User struct {
 	OrganizationModel   *model.Organization
 	PositionModel       *model.Position
 	UserModel           *model.User
+	UserGroupModel      *model.UserGroup
 	UserExtendInfoModel *model.UserExtendInfo
 }
 
@@ -433,8 +435,7 @@ func (a *User) GetUserAllRoleIds(c *gin.Context, userID uint64) (*[]uint64, erro
 		}
 	}
 	item.Positions.GetRoleIds(&roleIds)
-	// TODO: 等待用户组表完成
-	//item.UserGroups.GetRoleIds(&roleIds)
+	item.UserGroups.GetRoleIds(&roleIds)
 	roleIds = append(roleIds, item.Roles.GetIDs()...)
 
 	// 角色ID去重
@@ -458,10 +459,9 @@ func (a *User) UpdateUserRoles(c *gin.Context, id uint64, items schema.Roles) er
 }
 
 // UpdateUserUserGroup 更新用户关联的用户组信息
-// TODO: 等待用户组表完成
-//func (a *User) UpdateUserUserGroup(c *gin.Context, id uint64, items schema.UserGroups) error {
-//	return a.UserModel.ReplaceUserUserGroup(id, items)
-//}
+func (a *User) UpdateUserUserGroup(c *gin.Context, id uint64, items schema.UserGroups) error {
+	return a.UserModel.ReplaceUserUserGroup(id, items)
+}
 
 // ---------------------------------------- User Permission --------------------------------------
 
@@ -503,10 +503,9 @@ func (a *User) UpdateUserPermission(c *gin.Context, id uint64, item schema.User)
 		}
 
 		// 更新用户和用户组的关联关系
-		// TODO: 等待用户组表完成
-		//if err = a.UpdateUserUserGroup(c, id, item.UserGroups); err != nil {
-		//	return err
-		//}
+		if err = a.UpdateUserUserGroup(c, id, item.UserGroups); err != nil {
+			return err
+		}
 		return nil
 	})
 	if err != nil {
@@ -612,21 +611,20 @@ func (a *User) UserParamsCheck(c *gin.Context, item *schema.User) error {
 	}
 
 	// 检查用户组是否被禁用
-	// TODO: 等待用户组表完成
-	//if len(item.UserGroups) != 0 {
-	//	if UserGroupQueryResult, err := a.UserGroupModel.Query(schema.UserGroupQueryParam{
-	//		IDs:             common.UintSliceToString(item.UserGroups.GetIDs(), ","),
-	//		Status:          consts.BaseStatusDisabled,
-	//	}); err != nil {
-	//		return err
-	//	} else if len(UserGroupQueryResult.Data) != 0 {
-	//		var userGroupNames []string
-	//		for index, userGroup := range UserGroupQueryResult.Data {
-	//			userGroupNames = append(userGroupNames, userGroup.Name)
-	//		}
-	//		return errors.New(fmt.Sprintf("角色组: %s 已被禁用", common.StringSliceToString(userGroupNames, ",")))
-	//	}
-	//}
+	if len(item.UserGroups) != 0 {
+		if UserGroupQueryResult, err := a.UserGroupModel.Query(schema.UserGroupQueryParam{
+			IDs:    common.UintSliceToString(item.UserGroups.GetIDs(), ","),
+			Status: consts.BaseStatusDisabled,
+		}); err != nil {
+			return errors.WithMessage(err, "检查用户组是否被禁用失败")
+		} else if len(UserGroupQueryResult.Data) != 0 {
+			var userGroupNames []string
+			for _, userGroup := range UserGroupQueryResult.Data {
+				userGroupNames = append(userGroupNames, userGroup.Name)
+			}
+			return errors.New(fmt.Sprintf("角色组: %s 已被禁用", common.StringSliceToString(userGroupNames, ",")))
+		}
+	}
 	return nil
 }
 

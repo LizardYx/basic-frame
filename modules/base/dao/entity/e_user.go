@@ -23,22 +23,21 @@ func (a SchemaUsers) ToUsers() *Users {
 	return items
 }
 
-// TODO: 等待用户组和用户扩展信息完成
 type User struct {
-	ID        uint64         `gorm:"primaryKey,autoIncrement;"`
-	UserName  string         `gorm:"index;default:'';not null;unique;"` // 用户名称
-	Password  string         `gorm:"index;default:'';not null;"`        // 用户密码
-	Status    int            `gorm:"index;default:2;not null"`          // 状态(1:启用 2:禁用)
-	Sequence  int            `gorm:"index"`                             // 排序值
-	Creator   uint64         `gorm:"index"`
-	CreatedAt time.Time      `gorm:"index"`
-	UpdatedAt time.Time      `gorm:"index"`
-	DeletedAt gorm.DeletedAt `gorm:"index"`
-	//ExtendInfo    UserExtendInfo `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Organizations Organizations `gorm:"many2many:user_organization;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Positions     Positions     `gorm:"many2many:user_position;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	Roles         Roles         `gorm:"many2many:user_role;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
-	//UserGroups    UserGroups     `gorm:"many2many:user_user_group;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	ID            uint64         `gorm:"primaryKey,autoIncrement;"`
+	UserName      string         `gorm:"index;default:'';not null;unique;"` // 用户名称
+	Password      string         `gorm:"index;default:'';not null;"`        // 用户密码
+	Status        int            `gorm:"index;default:2;not null"`          // 状态(1:启用 2:禁用)
+	Sequence      int            `gorm:"index"`                             // 排序值
+	Creator       uint64         `gorm:"index"`
+	CreatedAt     time.Time      `gorm:"index"`
+	UpdatedAt     time.Time      `gorm:"index"`
+	DeletedAt     gorm.DeletedAt `gorm:"index"`
+	ExtendInfo    UserExtendInfo `gorm:"constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Organizations Organizations  `gorm:"many2many:user_organization;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Positions     Positions      `gorm:"many2many:user_position;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	Roles         Roles          `gorm:"many2many:user_role;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
+	UserGroups    UserGroups     `gorm:"many2many:user_user_group;constraint:OnUpdate:CASCADE,OnDelete:CASCADE;"`
 }
 
 func (a User) TableName() string {

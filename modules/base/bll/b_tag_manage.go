@@ -84,32 +84,6 @@ func (a *TagManage) Delete(c *gin.Context, id uint64) error {
 		return errors.New("未找到该标签")
 	}
 
-	// 检查 联系人活动类型标签 是否被使用
-	// TODO: 等待联系人活动表完成
-	//if oldItem.Type == "customer_tracking_tag" {
-	//	if SaleContactActivityQueryResult, err := a.SaleContactActivityModel.Query(SaleSchema.SaleContactActivityQueryParam{
-	//		TypeName: oldItem.Value,
-	//		FindAll:  true,
-	//	}); err != nil {
-	//		return errors.WithMessage(err, "检查 联系人活动类型标签 是否被使用失败")
-	//	} else if len(SaleContactActivityQueryResult.Data) != 0 {
-	//		return errors.New("该标签正在被使用，请勿删除")
-	//	}
-	//}
-
-	// 检查 联系人活动结果标签 是否被使用
-	// TODO: 等待联系人活动表完成
-	//if oldItem.Type == "customer_active_result_tag" {
-	//	if SaleContactActivityQueryResult, err := a.SaleContactActivityModel.Query(SaleSchema.SaleContactActivityQueryParam{
-	//		ActivityResult: oldItem.Value,
-	//		FindAll:        true,
-	//	}); err != nil {
-	//		return errors.WithMessage(err, "检查 联系人活动结果标签 是否被使用失败")
-	//	} else if len(SaleContactActivityQueryResult.Data) != 0 {
-	//		return errors.New("该标签正在被使用，请勿删除")
-	//	}
-	//}
-
 	// 删除标签
 	return a.TagManageModel.Delete(id)
 }

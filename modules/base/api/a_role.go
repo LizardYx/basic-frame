@@ -9,10 +9,12 @@ import (
 
 var RoleApi = &Role{
 	RoleBll: bll.RoleBll,
+	UserBll: bll.UserBll,
 }
 
 type Role struct {
 	RoleBll *bll.Role
+	UserBll *bll.User
 }
 
 func (a *Role) Query(c *gin.Context) {
@@ -122,19 +124,18 @@ func (a *Role) UserRemoveRole(c *gin.Context) {
 
 func (a *Role) GetRolePermissionTree(c *gin.Context) {
 	// 获取角色信息
-	// TODO: 等待用户表完成
-	//item, err := a.RoleBll.Get(c, ginx.ParseParamID(c, "id"))
-	//if err != nil {
-	//	ginx.ResError(c, "", err)
-	//	return
-	//}
+	item, err := a.RoleBll.Get(c, ginx.ParseParamID(c, "id"))
+	if err != nil {
+		ginx.ResError(c, "", err)
+		return
+	}
 
 	// 将菜单和按钮列表，组装成树
 	menuTrees := make(schema.MenuTrees, 0)
-	//parentId := uint64(0)
-	//if err = a.UserBll.GetMenuTreesInfo(&menuTrees, &parentId, item.Menus, item.Buttons); err != nil {
-	//	ginx.ResError(c, "", err)
-	//	return
-	//}
+	parentId := uint64(0)
+	if err = a.UserBll.GetMenuTreesInfo(&menuTrees, &parentId, item.Menus, item.Buttons); err != nil {
+		ginx.ResError(c, "", err)
+		return
+	}
 	ginx.ResSuccess(c, "", menuTrees.Init().SortMenuTrees())
 }

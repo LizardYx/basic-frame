@@ -16,6 +16,7 @@ import (
 
 var RoleBll = &Role{
 	UserModel:          model.UserModel,
+	UserGroupModel:     model.UserGroupModel,
 	PositionModel:      model.PositionModel,
 	OrganizationModel:  model.OrganizationModel,
 	RoleModel:          model.RoleModel,
@@ -26,6 +27,7 @@ var RoleBll = &Role{
 
 type Role struct {
 	UserModel          *model.User
+	UserGroupModel     *model.UserGroup
 	PositionModel      *model.Position
 	OrganizationModel  *model.Organization
 	RoleModel          *model.Role
@@ -251,19 +253,18 @@ func (a *Role) UpdateAuditorType(c *gin.Context, id uint64, item schema.UpdateAu
 func (a *Role) UserAddRole(c *gin.Context, roleID uint64, userIDs []uint64) error {
 	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
 		// 获取角色详情
-		//item, err := a.Get(c, roleID)
-		//if err != nil {
-		//	return err
-		//}
+		item, err := a.Get(c, roleID)
+		if err != nil {
+			return err
+		}
 
 		// 给用户添加角色
-		// TODO: 等待用户表完成
-		//for _, userID := range userIDs {
-		//	// 用户添加角色
-		//	if err = a.UserModel.AppendUserRoles(userID, schema.Roles{item}); err != nil {
-		//		return errors.WithMessage(err, "用户添加角色失败")
-		//	}
-		//}
+		for _, userID := range userIDs {
+			// 用户添加角色
+			if err = a.UserModel.AppendUserRoles(userID, schema.Roles{item}); err != nil {
+				return errors.WithMessage(err, "用户添加角色失败")
+			}
+		}
 		return nil
 	})
 	if err != nil {
@@ -277,18 +278,17 @@ func (a *Role) UserAddRole(c *gin.Context, roleID uint64, userIDs []uint64) erro
 func (a *Role) UserRemoveRole(c *gin.Context, roleID uint64, userIDs []uint64) error {
 	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
 		// 获取角色详情
-		//roleInfo, err := a.Get(c, roleID)
-		//if err != nil {
-		//	return err
-		//}
+		roleInfo, err := a.Get(c, roleID)
+		if err != nil {
+			return err
+		}
 
 		// 移除用户的指定角色
-		// TODO: 等待用户表完成
-		//for _, userID := range userIDs {
-		//	if err = a.UserModel.UserRemoveRole(userID, *roleInfo); err != nil {
-		//		return errors.WithMessage(err, "用户角色移除失败")
-		//	}
-		//}
+		for _, userID := range userIDs {
+			if err = a.UserModel.UserRemoveRole(userID, *roleInfo); err != nil {
+				return errors.WithMessage(err, "用户角色移除失败")
+			}
+		}
 		return nil
 	})
 	if err != nil {
@@ -335,18 +335,17 @@ func (a *Role) Delete(c *gin.Context, id uint64) error {
 	}
 
 	// 检查是否有用户组绑定了该角色
-	// TODO: 等待用户组表完成
-	//if UserGroupQueryResult, err := a.UserGroupModel.Query(schema.UserGroupQueryParam{
-	//	RoleID: id,
-	//}); err != nil {
-	//	return errors.WithMessage(err, "检查角色是否被用户组使用失败")
-	//} else if len(UserGroupQueryResult.Data) != 0 {
-	//	var userGroupNames []string
-	//	for _, userGroup := range UserGroupQueryResult.Data {
-	//		userGroupNames = append(userGroupNames, userGroup.Name)
-	//	}
-	//	return errors.New(fmt.Sprintf("该角色已被用户组: %s 使用", common.StringSliceToString(userGroupNames, ",")))
-	//}
+	if UserGroupQueryResult, err := a.UserGroupModel.Query(schema.UserGroupQueryParam{
+		RoleID: id,
+	}); err != nil {
+		return errors.WithMessage(err, "检查角色是否被用户组使用失败")
+	} else if len(UserGroupQueryResult.Data) != 0 {
+		var userGroupNames []string
+		for _, userGroup := range UserGroupQueryResult.Data {
+			userGroupNames = append(userGroupNames, userGroup.Name)
+		}
+		return errors.New(fmt.Sprintf("该角色已被用户组: %s 使用", common.StringSliceToString(userGroupNames, ",")))
+	}
 
 	// 检查是否有用户绑定了该角色
 	if UserQueryResult, err := a.UserModel.Query(schema.UserQueryParam{

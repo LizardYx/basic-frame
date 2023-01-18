@@ -6,21 +6,20 @@ import (
 	"time"
 )
 
-// TODO: 等待用户组和用户扩展信息完成
 type User struct {
-	ID        uint64    `json:"id"`                           // 唯一标识
-	UserName  string    `json:"user_name" binding:"required"` // 用户名称
-	Password  string    `json:"password"`                     // 用户密码
-	Status    int       `json:"status"`                       // 状态(1:启用 2:禁用)
-	Sequence  int       `json:"sequence"`                     // 排序值
-	Creator   uint64    `json:"creator"`                      // 创建者
-	CreatedAt time.Time `json:"created_at"`                   // 创建时间
-	UpdatedAt time.Time `json:"updated_at"`                   // 更新时间
-	//ExtendInfo    UserExtendInfo `json:"extend_info"`                  // 用户扩展信息
-	Organizations Organizations `json:"organizations"` // 用户所属的组织结构
-	Positions     Positions     `json:"positions"`     // 用户所属的职位
-	Roles         Roles         `json:"roles"`         // 用户所属的角色(直接绑定给用户的角色)
-	//UserGroups    UserGroups     `json:"user_groups"`                  // 用户所属的的用户组
+	ID            uint64         `json:"id"`                           // 唯一标识
+	UserName      string         `json:"user_name" binding:"required"` // 用户名称
+	Password      string         `json:"password"`                     // 用户密码
+	Status        int            `json:"status"`                       // 状态(1:启用 2:禁用)
+	Sequence      int            `json:"sequence"`                     // 排序值
+	Creator       uint64         `json:"creator"`                      // 创建者
+	CreatedAt     time.Time      `json:"created_at"`                   // 创建时间
+	UpdatedAt     time.Time      `json:"updated_at"`                   // 更新时间
+	ExtendInfo    UserExtendInfo `json:"extend_info"`                  // 用户扩展信息
+	Organizations Organizations  `json:"organizations"`                // 用户所属的组织结构
+	Positions     Positions      `json:"positions"`                    // 用户所属的职位
+	Roles         Roles          `json:"roles"`                        // 用户所属的角色(直接绑定给用户的角色)
+	UserGroups    UserGroups     `json:"user_groups"`                  // 用户所属的的用户组
 }
 
 type UserQueryParam struct {
@@ -84,11 +83,9 @@ func (a User) Init() *User {
 	a.Organizations = *a.Organizations.Init()
 	a.Positions = *a.Positions.Init()
 	a.Roles = *a.Roles.Init()
-
-	// TODO: 等待用户组完成
-	//if len(a.UserGroups) == 0 {
-	//	a.UserGroups = make(UserGroups, 0)
-	//}
+	if len(a.UserGroups) == 0 {
+		a.UserGroups = make(UserGroups, 0)
+	}
 	return &a
 }
 
@@ -130,10 +127,9 @@ func (a Users) GetUserNames() []string {
 func (a Users) GetUserRealNames() []string {
 	var realNames []string
 
-	// TODO: 等待扩展信息完成
-	//for _, user := range a {
-	//	realNames = append(realNames, user.ExtendInfo.RealName)
-	//}
+	for _, user := range a {
+		realNames = append(realNames, user.ExtendInfo.RealName)
+	}
 	return realNames
 }
 

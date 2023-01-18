@@ -16,12 +16,14 @@ var PositionBll = &Position{
 	OrganizationModel: model.OrganizationModel,
 	PositionModel:     model.PositionModel,
 	RoleModel:         model.RoleModel,
+	UserModel:         model.UserModel,
 }
 
 type Position struct {
 	OrganizationModel *model.Organization
 	PositionModel     *model.Position
 	RoleModel         *model.Role
+	UserModel         *model.User
 }
 
 func (a *Position) Query(c *gin.Context, params schema.PositionQueryParam) (*schema.PositionQueryResult, error) {
@@ -87,18 +89,17 @@ func (a *Position) Update(c *gin.Context, id uint64, item schema.Position) error
 func (a *Position) PositionAddUser(c *gin.Context, positionID uint64, userIDs []uint64) error {
 	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
 		// 获取职位信息
-		//positionInfo, err := a.Get(c, positionID)
-		//if err != nil {
-		//	return err
-		//}
+		positionInfo, err := a.Get(c, positionID)
+		if err != nil {
+			return err
+		}
 
 		// 更新用户和职位的关联关系
-		// TODO: 等待用户表完成
-		//for _, userID := range userIDs {
-		//	if err = a.UserModel.AppendUserPositions(userID, schema.Positions{positionInfo}); err != nil {
-		//		return err
-		//	}
-		//}
+		for _, userID := range userIDs {
+			if err = a.UserModel.AppendUserPositions(userID, schema.Positions{positionInfo}); err != nil {
+				return err
+			}
+		}
 		return nil
 	})
 	if err != nil {
@@ -111,18 +112,17 @@ func (a *Position) PositionAddUser(c *gin.Context, positionID uint64, userIDs []
 func (a *Position) PositionRemoveUser(c *gin.Context, positionID uint64, userIDs []uint64) error {
 	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
 		// 获取职位信息
-		//positionInfo, err := a.Get(c, positionID)
-		//if err != nil {
-		//	return err
-		//}
+		positionInfo, err := a.Get(c, positionID)
+		if err != nil {
+			return err
+		}
 
 		// 更新用户和职位的关联关系
-		// TODO: 等待用户表完成
-		//for _, userID := range userIDs {
-		//	if err = a.UserModel.UserRemovePosition(userID, *positionInfo); err != nil {
-		//		return err
-		//	}
-		//}
+		for _, userID := range userIDs {
+			if err = a.UserModel.UserRemovePosition(userID, *positionInfo); err != nil {
+				return err
+			}
+		}
 		return nil
 	})
 	if err != nil {

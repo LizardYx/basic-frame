@@ -178,6 +178,17 @@ func (a *User) ReplaceUserRoles(id uint64, items schema.Roles) error {
 	return nil
 }
 
+// ReplaceUserUserGroup 更新用户关联的用户组信息
+func (a *User) ReplaceUserUserGroup(id uint64, items schema.UserGroups) error {
+	eitem := entity.SchemaUserGroups(items).ToUserGroup()
+	if err := mysql.DB.Model(&entity.User{ID: id}).
+		Association("UserGroups").
+		Replace(eitem); err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
+
 // AppendUserOrganizations 用户新增组织关联信息
 func (a *User) AppendUserOrganizations(id uint64, items schema.Organizations) error {
 	eitem := entity.SchemaOrganizations(items).ToOrganization()
@@ -211,17 +222,16 @@ func (a *User) AppendUserRoles(id uint64, items schema.Roles) error {
 	return nil
 }
 
-// TODO: 等待用户组表完成
 // AppendUserUserGroup 用户新增用户组关联
-//func (a *User) AppendUserUserGroup(id uint64, items schema.UserGroups) error {
-//	eitem := entity.SchemaUserGroups(items).ToUserGroup()
-//	if err := mysql.DB.Model(&entity.User{ID: id}).
-//		Association("UserGroups").
-//		Append(eitem); err != nil {
-//		return errors.WithStack(err)
-//	}
-//	return nil
-//}
+func (a *User) AppendUserUserGroup(id uint64, items schema.UserGroups) error {
+	eitem := entity.SchemaUserGroups(items).ToUserGroup()
+	if err := mysql.DB.Model(&entity.User{ID: id}).
+		Association("UserGroups").
+		Append(eitem); err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}
 
 // UserRemoveOrganization 移除用户的组织关联信息
 func (a *User) UserRemoveOrganization(userID uint64, organization schema.Organization) error {
@@ -256,14 +266,13 @@ func (a *User) UserRemoveRole(userID uint64, role schema.Role) error {
 	return nil
 }
 
-// TODO: 等待用户组表完成
 // UserRemoveUserGroup 移除用户的用户组关联信息
-//func (a *User) UserRemoveUserGroup(userID uint64, userGroup schema.UserGroup) error {
-//	eitem := entity.SchemaUserGroup(userGroup).ToUserGroup()
-//	if err := mysql.DB.Model(entity.User{ID: userID}).
-//		Association("UserGroups").
-//		Delete(eitem); err != nil {
-//		return errors.WithStack(err)
-//	}
-//	return nil
-//}
+func (a *User) UserRemoveUserGroup(userID uint64, userGroup schema.UserGroup) error {
+	eitem := entity.SchemaUserGroup(userGroup).ToUserGroup()
+	if err := mysql.DB.Model(entity.User{ID: userID}).
+		Association("UserGroups").
+		Delete(eitem); err != nil {
+		return errors.WithStack(err)
+	}
+	return nil
+}

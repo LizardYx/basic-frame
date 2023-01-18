@@ -18,6 +18,8 @@ var RouterBase = &Router{
 	PositionApi:       api.PositionApi,
 	OrganizationApi:   api.OrganizationApi,
 	UserExtendInfoApi: api.UserExtendInfoApi,
+	UserGroupApi:      api.UserGroupApi,
+	UserApi:           api.UserApi,
 }
 
 // Router 模块路由管理结构体,需要将该结构体注册到全局路由结构体
@@ -33,10 +35,37 @@ type Router struct {
 	PositionApi       *api.Position
 	OrganizationApi   *api.Organization
 	UserExtendInfoApi *api.UserExtendInfo
+	UserGroupApi      *api.UserGroup
+	UserApi           *api.User
 }
 
 // Register 模块路由注册
 func (a *Router) Register(api *gin.RouterGroup) {
+
+	UserGroup := api.Group("base/users")
+	{
+		UserGroup.GET("", a.UserApi.Query)
+		UserGroup.GET(":id", a.UserApi.Get)
+		UserGroup.POST("", a.UserApi.Create)
+		UserGroup.PUT(":id", a.UserApi.Update)
+		UserGroup.PUT(":id/enable", a.UserApi.EnableUser)
+		UserGroup.PUT(":id/disabled", a.UserApi.DisabledUser)
+		UserGroup.PUT("", a.UserApi.BatchUpdateUserPermission)
+		UserGroup.PUT(":id/permission", a.UserApi.UpdateUserPermission)
+		UserGroup.DELETE(":id", a.UserApi.Delete)
+	}
+
+	UserGroupsGroup := api.Group("base/user-groups")
+	{
+		UserGroupsGroup.GET("", a.UserGroupApi.Query)
+		UserGroupsGroup.GET(":id", a.UserGroupApi.Get)
+		UserGroupsGroup.GET(":id/users", a.UserGroupApi.GetUserGroupUsers)
+		UserGroupsGroup.POST("", a.UserGroupApi.Create)
+		UserGroupsGroup.PUT(":id", a.UserGroupApi.Update)
+		UserGroupsGroup.PUT(":id/user-join", a.UserGroupApi.UserJoinUserGroup)
+		UserGroupsGroup.PUT(":id/user-remove", a.UserGroupApi.UserGroupRemoveUser)
+		UserGroupsGroup.DELETE(":id", a.UserGroupApi.Delete)
+	}
 
 	UserExtendInfoGroup := api.Group("base/user-extend-infos")
 	{

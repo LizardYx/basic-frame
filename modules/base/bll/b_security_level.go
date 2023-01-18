@@ -16,11 +16,13 @@ import (
 var SecurityLevelBll = &SecurityLevel{
 	SecurityLevelModel: model.SecurityLevelModel,
 	RoleModel:          model.RoleModel,
+	UserModel:          model.UserModel,
 }
 
 type SecurityLevel struct {
 	SecurityLevelModel *model.SecurityLevel
 	RoleModel          *model.Role
+	UserModel          *model.User
 }
 
 func (a *SecurityLevel) Query(c *gin.Context, params schema.SecurityLevelQueryParam) (*schema.SecurityLevelQueryResult, error) {
@@ -42,17 +44,16 @@ func (a *SecurityLevel) Get(c *gin.Context, id uint64) (*schema.SecurityLevel, e
 // GetUserSecurityLevels 获取指定用户的所有安全等级
 func (a *SecurityLevel) GetUserSecurityLevels(c *gin.Context, userID uint64) (schema.SecurityLevels, error) {
 	// 获取用户的角色ID集合
-	// TODO: 等待用户表完成
-	//userInfo, err := a.UserModel.Get(userID)
-	//if err != nil {
-	//	return nil, errors.WithMessage(err, "获取用户信息失败")
-	//}
+	userInfo, err := a.UserModel.Get(userID)
+	if err != nil {
+		return nil, errors.WithMessage(err, "获取用户信息失败")
+	}
 
 	var roleIDs []uint64
-	//userInfo.Organizations.GetRoleIds(&roleIDs)
-	//userInfo.Positions.GetRoleIds(&roleIDs)
-	//userInfo.UserGroups.GetRoleIds(&roleIDs)
-	//roleIDs = append(roleIDs, userInfo.Roles.GetIDs()...)
+	userInfo.Organizations.GetRoleIds(&roleIDs)
+	userInfo.Positions.GetRoleIds(&roleIDs)
+	userInfo.UserGroups.GetRoleIds(&roleIDs)
+	roleIDs = append(roleIDs, userInfo.Roles.GetIDs()...)
 
 	// 获取安全级别集合
 	securityLevels := make(schema.SecurityLevels, 0)

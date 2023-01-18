@@ -17,12 +17,14 @@ var OrganizationBll = &Organization{
 	OrganizationModel: model.OrganizationModel,
 	RoleModel:         model.RoleModel,
 	PositionModel:     model.PositionModel,
+	UserModel:         model.UserModel,
 }
 
 type Organization struct {
 	OrganizationModel *model.Organization
 	RoleModel         *model.Role
 	PositionModel     *model.Position
+	UserModel         *model.User
 }
 
 func (a *Organization) Query(c *gin.Context, params schema.OrganizationQueryParam) (*schema.OrganizationQueryResult, error) {
@@ -119,13 +121,12 @@ func (a *Organization) UserJoinOrganization(c *gin.Context, OrgID uint64, userID
 		}
 
 		// 更新用户和组织的关联关系
-		// TODO: 等待用户表完成
-		//for _, userID := range userIDs {
-		//	// 用户加入组织
-		//	if err = a.UserModel.AppendUserOrganizations(userID, schema.Organizations{OrgInfo}); err != nil {
-		//		return errors.WithMessage(err, "用户加入组织失败")
-		//	}
-		//}
+		for _, userID := range userIDs {
+			// 用户加入组织
+			if err = a.UserModel.AppendUserOrganizations(userID, schema.Organizations{OrgInfo}); err != nil {
+				return errors.WithMessage(err, "用户加入组织失败")
+			}
+		}
 		return nil
 	})
 	if err != nil {
@@ -146,12 +147,11 @@ func (a *Organization) UserRemoveOrganization(c *gin.Context, OrgID uint64, user
 		}
 
 		// 将用户从组织中移除
-		// TODO: 等待用户表完成
-		//for _, userID := range userIDs {
-		//	if err = a.UserModel.UserRemoveOrganization(userID, *OrgInfo); err != nil {
-		//		return errors.WithMessage(err, "将用户从组织中移除失败")
-		//	}
-		//}
+		for _, userID := range userIDs {
+			if err = a.UserModel.UserRemoveOrganization(userID, *OrgInfo); err != nil {
+				return errors.WithMessage(err, "将用户从组织中移除失败")
+			}
+		}
 		return nil
 	})
 	if err != nil {
@@ -223,22 +223,20 @@ func (a *Organization) GetOrganizationTreeWithUser(c *gin.Context) (*schema.Orga
 	if err != nil {
 		return nil, errors.WithMessage(err, "获取组织结构失败")
 	}
+
 	// 获取所有用户
-	// TODO: 等待用户表完成
-	//UserQueryResult, err := a.UserModel.Query(schema.UserQueryParam{
-	//	PaginationParam: common.PaginationParam{
-	//		Pagination: false,
-	//	},
-	//	Status:       consts.BaseStatusEnable,
-	//	ShowDetails:  true,
-	//	SequenceSort: 2,
-	//	FindAll:      true,
-	//}, true)
-	//if err != nil {
-	//	return nil, errors.WithMessage(err, "获取所有用户失败")
-	//}
+	UserQueryResult, err := a.UserModel.Query(schema.UserQueryParam{
+		Status:       consts.BaseStatusEnable,
+		SequenceSort: consts.BaseDescSort,
+		ShowDetails:  true,
+		OmitPassword: true,
+		FindAll:      true,
+	})
+	if err != nil {
+		return nil, errors.WithMessage(err, "获取所有用户失败")
+	}
 	OrgTrees := Organizations.SortOrganizations().ToSchemaOrgTrees()
-	//OrgTrees.AddUserToTree(UserQueryResult.Data)
+	OrgTrees.AddUserToTree(UserQueryResult.Data)
 	return OrgTrees, nil
 }
 
