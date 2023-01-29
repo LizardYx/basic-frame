@@ -3,6 +3,7 @@ package main
 import (
 	"basic-frame/middleware"
 	"basic-frame/modules/base"
+	"basic-frame/util/common"
 	"github.com/gin-gonic/gin"
 )
 
@@ -25,12 +26,11 @@ func (a *Router) Register(app *gin.Engine) error {
 // RegisterAPI 注册各个模块的API
 func (a *Router) RegisterAPI(app *gin.Engine) {
 	g := app.Group("/api")
+	// jwtauth 登陆认证
 	g.Use(middleware.UserJWTAuth(middleware.AllowMethodAndPathPrefixSkipper("PUT", "/api/v1/system-config")))
-	// jwtauth
-	// TODO:
 
-	// Casbin
-	// TODO:
+	// Casbin 权限认证
+	g.Use(middleware.CasbinMiddleware(common.SysConfig.CasbinSyncEnforcer, nil))
 
 	// 增加请求频率限制中间件
 	// TODO:

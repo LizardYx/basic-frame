@@ -78,37 +78,6 @@ type MenuTree struct {
 	SonMenus    MenuTrees   `json:"son_menus"`    // 子菜单
 }
 
-type MenuTrees []*MenuTree
-
-// MenuTreeJson 前端菜单Json文件解析struct
-type MenuTreeJson struct {
-	MenuVersion    float64        `json:"menu_version"`    // 菜单版本号
-	MenuTrees      MenuTrees      `json:"menu_trees"`      // 菜单树
-	DisabledFields DisabledFields `json:"disabled_fields"` // 可禁用的字段
-}
-
-// PermissionTree 创建角色的权限树
-type PermissionTree struct {
-	MenuTrees      MenuTrees      `json:"menu_trees"`      // 菜单树
-	DisabledFields DisabledFields `json:"disabled_fields"` // 可禁用的字段
-}
-
-// SortMenuTrees 菜单树排序
-func (a MenuTrees) SortMenuTrees() *MenuTrees {
-	if len(a) != 0 {
-		for _, menuTreeInfo := range a {
-			menuTreeInfo.Buttons.SortButtonTrees()
-			if len(menuTreeInfo.SonMenus) != 0 {
-				menuTreeInfo.SonMenus.SortMenuTrees()
-			}
-		}
-		sort.SliceStable(a, func(i, j int) bool {
-			return a[i].Sequence > a[j].Sequence
-		})
-	}
-	return &a
-}
-
 // Init 菜单树数据初始化
 func (a MenuTree) Init() *MenuTree {
 	if a.ParentID == nil {
@@ -119,14 +88,6 @@ func (a MenuTree) Init() *MenuTree {
 	a.Buttons = *a.Buttons.Init()
 	a.SonMenus = *a.SonMenus.Init()
 	return &a
-}
-
-func (a MenuTrees) Init() *MenuTrees {
-	items := make(MenuTrees, 0)
-	for _, item := range a {
-		items = append(items, item.Init())
-	}
-	return &items
 }
 
 // SetCreator 设置菜单、按钮的创建者
@@ -145,6 +106,73 @@ func (a MenuTree) SetCreator(creator uint64) *MenuTree {
 	return &a
 }
 
+func (a MenuTree) ToSchemaMenu() *Menu {
+	item := new(Menu)
+	_ = common.Copy(a, item)
+	return item
+}
+
+func (a MenuTree) GetButtonIDs(buttonIDs *[]uint64) {
+	if len(a.Buttons) != 0 {
+		a.Buttons.GetIDs(buttonIDs)
+	}
+	if len(a.SonMenus) != 0 {
+		for _, sonMenu := range a.SonMenus {
+			sonMenu.GetButtonIDs(buttonIDs)
+		}
+	}
+}
+
+// GetMenuIDs 获取菜单树的ID集合
+func (a MenuTree) GetMenuIDs(menuIDs *[]uint64) {
+	*menuIDs = append(*menuIDs, a.ID)
+	if len(a.SonMenus) != 0 {
+		for _, menuTreeInfo := range a.SonMenus {
+			menuTreeInfo.GetMenuIDs(menuIDs)
+		}
+	}
+}
+
+// GetRestfulApis 获取菜单关联的restfulApi集合(去重)
+func (a MenuTree) GetRestfulApis(items *RestfulApis) {
+	for _, restfulApi := range a.RestfulApis {
+		for index, item := range *items {
+			if item.UUID == restfulApi.UUID {
+				break
+			}
+			if index == (len(*items) - 1) {
+				*items = append(*items, restfulApi)
+			}
+		}
+	}
+}
+
+type MenuTrees []*MenuTree
+
+// SortMenuTrees 菜单树排序
+func (a MenuTrees) SortMenuTrees() *MenuTrees {
+	if len(a) != 0 {
+		for _, menuTreeInfo := range a {
+			menuTreeInfo.Buttons.SortButtonTrees()
+			if len(menuTreeInfo.SonMenus) != 0 {
+				menuTreeInfo.SonMenus.SortMenuTrees()
+			}
+		}
+		sort.SliceStable(a, func(i, j int) bool {
+			return a[i].Sequence > a[j].Sequence
+		})
+	}
+	return &a
+}
+
+func (a MenuTrees) Init() *MenuTrees {
+	items := make(MenuTrees, 0)
+	for _, item := range a {
+		items = append(items, item.Init())
+	}
+	return &items
+}
+
 // SetCreator 设置菜单、按钮的创建者
 func (a MenuTrees) SetCreator(creator uint64) *MenuTrees {
 	if creator != 0 {
@@ -153,12 +181,6 @@ func (a MenuTrees) SetCreator(creator uint64) *MenuTrees {
 		}
 	}
 	return &a
-}
-
-func (a MenuTree) ToSchemaMenu() *Menu {
-	item := new(Menu)
-	_ = common.Copy(a, item)
-	return item
 }
 
 // GetMenuIDsByMenuID 获取指定菜单的菜单ID集合
@@ -174,16 +196,6 @@ func (a MenuTrees) GetMenuIDsByMenuID(menuID uint64, menuIDs *[]uint64) {
 	return
 }
 
-// GetMenuIDs 获取菜单树的ID集合
-func (a MenuTree) GetMenuIDs(menuIDs *[]uint64) {
-	*menuIDs = append(*menuIDs, a.ID)
-	if len(a.SonMenus) != 0 {
-		for _, menuTreeInfo := range a.SonMenus {
-			menuTreeInfo.GetMenuIDs(menuIDs)
-		}
-	}
-}
-
 // GetButtonIDsByMenuID 获取指定菜单的按钮ID集合
 func (a MenuTrees) GetButtonIDsByMenuID(menuID uint64, buttonIDs *[]uint64) {
 	for _, menuInfo := range a {
@@ -195,17 +207,6 @@ func (a MenuTrees) GetButtonIDsByMenuID(menuID uint64, buttonIDs *[]uint64) {
 		}
 	}
 	return
-}
-
-func (a MenuTree) GetButtonIDs(buttonIDs *[]uint64) {
-	if len(a.Buttons) != 0 {
-		a.Buttons.GetIDs(buttonIDs)
-	}
-	if len(a.SonMenus) != 0 {
-		for _, sonMenu := range a.SonMenus {
-			sonMenu.GetButtonIDs(buttonIDs)
-		}
-	}
 }
 
 // GetSonButtonIDs 获取按钮的子按钮ID集合
@@ -220,4 +221,27 @@ func (a MenuTrees) GetSonButtonIDs(menuID, buttonID uint64) []uint64 {
 		}
 	}
 	return sonButtonIDs
+}
+
+// GetRestfulApis 获取菜单关联的restfulApi集合(去重)
+func (a MenuTrees) GetRestfulApis() RestfulApis {
+	items := make(RestfulApis, 0)
+
+	for _, menuTreeInfo := range a {
+		menuTreeInfo.GetRestfulApis(&items)
+	}
+	return items
+}
+
+// MenuTreeJson 前端菜单Json文件解析struct
+type MenuTreeJson struct {
+	MenuVersion    float64        `json:"menu_version"`    // 菜单版本号
+	MenuTrees      MenuTrees      `json:"menu_trees"`      // 菜单树
+	DisabledFields DisabledFields `json:"disabled_fields"` // 可禁用的字段
+}
+
+// PermissionTree 创建角色的权限树
+type PermissionTree struct {
+	MenuTrees      MenuTrees      `json:"menu_trees"`      // 菜单树
+	DisabledFields DisabledFields `json:"disabled_fields"` // 可禁用的字段
 }

@@ -111,6 +111,20 @@ func (a ButtonPre) ToSchemaButton() *Button {
 	return item
 }
 
+// GetRestfulApis 获取按钮关联的restfulApi集合(去重)
+func (a ButtonPre) GetRestfulApis(items *RestfulApis) {
+	for _, restfulApi := range a.RestfulApis {
+		for index, item := range *items {
+			if item.UUID == restfulApi.UUID {
+				break
+			}
+			if index == (len(*items) - 1) {
+				*items = append(*items, restfulApi)
+			}
+		}
+	}
+}
+
 type ButtonPres []*ButtonPre
 
 func (a ButtonPres) Init() *ButtonPres {
@@ -165,4 +179,14 @@ func (a ButtonPres) SortButtonTrees() {
 			return a[i].Sequence > a[j].Sequence
 		})
 	}
+}
+
+// GetRestfulApis 获取按钮关联的restfulApi集合(去重)
+func (a ButtonPres) GetRestfulApis() RestfulApis {
+	items := make(RestfulApis, 0)
+
+	for _, ButtonPreInfo := range a {
+		ButtonPreInfo.GetRestfulApis(&items)
+	}
+	return items
 }

@@ -4,7 +4,6 @@ import (
 	"basic-frame/util/logger"
 	"github.com/gin-gonic/gin"
 	"github.com/sirupsen/logrus"
-	"net/http"
 	"time"
 )
 
@@ -34,10 +33,6 @@ func GinLoggerMiddleware() gin.HandlerFunc {
 
 		// 请求IP
 		clientIP := c.ClientIP()
-
-		if reqMethod == http.MethodPost || reqMethod == http.MethodPut {
-			// TODO: 还需要记录这2种请求的参数
-		}
 
 		// 日志格式
 		logger.Log.WithFields(logrus.Fields{
