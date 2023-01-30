@@ -42,6 +42,10 @@ type Router struct {
 // Register 模块路由注册
 func (a *Router) Register(api *gin.RouterGroup) {
 
+	api.POST("login", a.UserApi.Login)
+	api.POST("logout", a.UserApi.Logout)
+	api.GET("refresh-token", a.UserApi.RefreshToken)
+
 	UserGroup := api.Group("base/users")
 	{
 		UserGroup.GET("", a.UserApi.Query)

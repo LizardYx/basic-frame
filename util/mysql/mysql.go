@@ -33,7 +33,7 @@ func InitMysql() {
 		return
 	}
 
-	if err := autoMigrate(DB); err != nil {
+	if err = autoMigrate(DB); err != nil {
 		logger.Log.Warn("database autoMigrate error: ", err)
 		log.Fatal("database autoMigrate error: ", err)
 		return

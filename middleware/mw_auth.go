@@ -54,6 +54,20 @@ func ParseToken(token string) (*MyClaims, error) {
 	return nil, errors.New("couldn't handle this token")
 }
 
+// RefreshToken 刷新JWT token字符串
+func RefreshToken(token string) (string, error) {
+	myClaims, err := ParseToken(token)
+	if err != nil {
+		return "", errors.WithMessage(err, "销毁Token失败")
+	}
+
+	// 更新Claims过期时间
+	NewExpiresTime := time.Now().Add(time.Second * time.Duration(common.SysConfig.JWTAuth.Expired))
+	myClaims.RegisteredClaims.ExpiresAt = jwt.NewNumericDate(NewExpiresTime)
+	tokenInfo := jwt.NewWithClaims(jwt.SigningMethodHS256, myClaims)
+	return tokenInfo.SignedString([]byte(common.SysConfig.JWTAuth.SecretKey))
+}
+
 // UserJWTAuth 用户登陆验证
 func UserJWTAuth(skippers ...SkipperFunc) gin.HandlerFunc {
 	return func(c *gin.Context) {

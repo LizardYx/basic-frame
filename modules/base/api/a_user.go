@@ -35,15 +35,10 @@ func (a *User) Login(c *gin.Context) {
 	})
 }
 
-// Logout 用户登出
+// Logout 用户登出(前端需要自己删除Jwt Token字符串)
 func (a *User) Logout(c *gin.Context) {
 	userID := ginx.GetUserID(c)
 	if userID != 0 {
-		// TODO: 等待销毁Token方法完成
-		//if err := a.UserBll.DestroyToken(c, ginx.GetToken(c)); err != nil {
-		//	ginx.ResError(c, "", err)
-		//	return
-		//}
 		// 注销ws连接
 		for client := range middleware.Manager.Clients {
 			if client.ID == userID {
@@ -53,6 +48,18 @@ func (a *User) Logout(c *gin.Context) {
 		}
 	}
 	ginx.ResOperateSuccess(c, "")
+}
+
+// RefreshToken 刷新Jwt Token字符串
+func (a *User) RefreshToken(c *gin.Context) {
+	token, err := middleware.RefreshToken(ginx.GetToken(c))
+	if err != nil {
+		ginx.ResError(c, "", err)
+		return
+	}
+	ginx.ResSuccess(c, "", map[string]interface{}{
+		"token_info": token,
+	})
 }
 
 func (a *User) Query(c *gin.Context) {

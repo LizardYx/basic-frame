@@ -30,7 +30,7 @@ const (
 // WebServer默认配置信息
 const (
 	WebServerHost = "0.0.0.0" // Web服务IP地址
-	WebServerPort = "8080"    // Web服务端口
+	WebServerPort = "2333"    // Web服务端口
 	UseHttpsMode  = "false"   // Web服务是否启用HTTPS
 	HttpsCrtFile  = ""        // HTTPS Crt证书
 	HttpsKeyFile  = ""        // HTTPS私钥
