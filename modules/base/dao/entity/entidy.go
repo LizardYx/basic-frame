@@ -4,6 +4,7 @@ package entity
 func GetTables() []interface{} {
 	return []interface{}{
 		new(User),
+		new(UserExtendInfo),
 		new(Organization),
 		new(Position),
 		new(Role),

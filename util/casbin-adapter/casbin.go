@@ -52,7 +52,7 @@ func InitCasbin() error {
 		return err
 	}
 	// 自动更新所有权限
-	e.StartAutoLoadPolicy(time.Duration(60) * time.Second)
+	e.StartAutoLoadPolicy(time.Duration(consts.CasbinPolicyReloadTime) * time.Second)
 	common.SysConfig.CasbinSyncEnforcer = e
 	return nil
 }

@@ -642,7 +642,7 @@ func (a *User) Verify(c *gin.Context, userName, password string) (*schema.User, 
 	item := UserQueryResult.Data[0]
 	if item.Password != secret.SHA1String(password) {
 		return nil, errors.New("用户密码不正确，请使用正确的密码")
-	} else if item.Status != consts.BaseStatusDisabled {
+	} else if item.Status == consts.BaseStatusDisabled {
 		return nil, errors.New("用户已被禁用")
 	}
 	return item, nil

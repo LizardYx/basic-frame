@@ -4,14 +4,12 @@ import (
 	BaseEntity "basic-frame/modules/base/dao/entity"
 	"basic-frame/util/common"
 	"basic-frame/util/logger"
-	"fmt"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 	GormLogger "gorm.io/gorm/logger"
 	"gorm.io/gorm/schema"
 	"log"
 	"os"
-	"strings"
 	"time"
 )
 
@@ -24,8 +22,8 @@ func InitMysql() {
 	if DB, err = gorm.Open(mysql.Open(common.SysConfig.Mysql.GetDBConnString()), &gorm.Config{
 		Logger: gormLogger(),
 		NamingStrategy: schema.NamingStrategy{
-			TablePrefix:   fmt.Sprintf("%s_", strings.ToLower(common.SysConfig.AppName)), // 表名前缀，`User` 的表名应该是 `t_users`
-			SingularTable: false,                                                         // 使用单数表名，启用该选项，此时，`User` 的表名应该是 `t_user`
+			//TablePrefix:   fmt.Sprintf("%s_", strings.ToLower(common.SysConfig.AppName)), // 表名前缀，`User` 的表名应该是 `t_users`
+			SingularTable: false, // 使用单数表名，启用该选项，此时，`User` 的表名应该是 `t_user`
 		},
 	}); err != nil {
 		logger.Log.Warn("mysql connect error: ", err)

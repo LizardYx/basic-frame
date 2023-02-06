@@ -8,6 +8,7 @@ import (
 	"basic-frame/util/mysql"
 	"context"
 	"fmt"
+	"github.com/gin-gonic/gin"
 	"github.com/robfig/cron/v3"
 	"log"
 )
@@ -26,6 +27,12 @@ func main() {
 
 	// 初始化系统基础配置
 	if err := baseBll.SystemConfigBll.Init(); err != nil {
+		logger.Log.Warningf("%v", err)
+		fmt.Printf("%v\n", err)
+	}
+
+	// 初始化超管用户
+	if err := baseBll.UserBll.Init(&gin.Context{}); err != nil {
 		logger.Log.Warningf("%v", err)
 		fmt.Printf("%v\n", err)
 	}

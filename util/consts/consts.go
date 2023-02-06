@@ -43,6 +43,11 @@ const (
 	JWTAuthType         = "Bearer" // JWTAuth认证类型
 )
 
+// Casbin默认配置信息
+const (
+	CasbinPolicyReloadTime = 60 // Casbin权限策略刷新间隔时间(单位:秒)
+)
+
 // Logger默认配置信息
 const (
 	LoggerRotationTime = "24"  // 设置日志分割的时间(单位:小时)
