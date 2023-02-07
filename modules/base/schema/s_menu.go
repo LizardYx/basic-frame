@@ -100,7 +100,7 @@ func (a MenuTree) SetCreator(creator uint64) *MenuTree {
 			}
 		}
 		if len(a.Buttons) != 0 {
-			a.Buttons.SetCreator(creator)
+			a.Buttons = *a.Buttons.SetCreator(creator)
 		}
 	}
 	return &a

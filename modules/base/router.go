@@ -103,6 +103,15 @@ func (a *Router) Register(api *gin.RouterGroup) {
 		PositionGroup.DELETE(":id", a.PositionApi.Delete)
 	}
 
+	SecurityLevelGroup := api.Group("base/security-levels")
+	{
+		SecurityLevelGroup.GET("", a.SecurityLevelApi.Query)
+		SecurityLevelGroup.GET(":id", a.SecurityLevelApi.Get)
+		SecurityLevelGroup.POST("", a.SecurityLevelApi.Create)
+		SecurityLevelGroup.PUT(":id", a.SecurityLevelApi.Update)
+		SecurityLevelGroup.DELETE(":id", a.SecurityLevelApi.Delete)
+	}
+
 	RoleGroup := api.Group("base/roles")
 	{
 		RoleGroup.GET("", a.RoleApi.Query)
@@ -137,15 +146,6 @@ func (a *Router) Register(api *gin.RouterGroup) {
 	DisabledFieldGroup := api.Group("base/disabled_field")
 	{
 		DisabledFieldGroup.DELETE(":id", a.DisabledFieldApi.Delete)
-	}
-
-	SecurityLevelGroup := api.Group("base/security-levels")
-	{
-		SecurityLevelGroup.GET("", a.SecurityLevelApi.Query)
-		SecurityLevelGroup.GET(":id", a.SecurityLevelApi.Get)
-		SecurityLevelGroup.POST("", a.SecurityLevelApi.Create)
-		SecurityLevelGroup.PUT(":id", a.SecurityLevelApi.Update)
-		SecurityLevelGroup.DELETE(":id", a.SecurityLevelApi.Delete)
 	}
 
 	TagManageGroup := api.Group("base/tag-manages")

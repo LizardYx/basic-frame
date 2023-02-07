@@ -15,7 +15,7 @@ type TagManage struct {
 }
 
 func (a *TagManage) Query(params schema.TagManageQueryParam) (*schema.TagManageQueryResult, error) {
-	db := mysql.DB.Model(entity.TagManage{})
+	db := mysql.DB.Model(&entity.TagManage{})
 	if v := params.Type; v != "" {
 		db = db.Where("type=?", v)
 	}
@@ -44,7 +44,7 @@ func (a *TagManage) Query(params schema.TagManageQueryParam) (*schema.TagManageQ
 }
 
 func (a *TagManage) Get(id uint64) (*schema.TagManage, error) {
-	db := mysql.DB.Model(entity.TagManage{ID: id})
+	db := mysql.DB.Model(&entity.TagManage{}).Where("id = ?", id)
 
 	var item entity.TagManage
 	if ok, err := mysql.FindOne(db, &item); err != nil {
@@ -62,11 +62,11 @@ func (a *TagManage) Create(item schema.TagManage) (*common.IDResult, error) {
 }
 
 func (a *TagManage) UpdateByID(id uint64, item map[string]interface{}) error {
-	result := mysql.DB.Model(entity.TagManage{ID: id}).Updates(item)
+	result := mysql.DB.Model(&entity.TagManage{}).Where("id = ?", id).Updates(item)
 	return errors.WithStack(result.Error)
 }
 
 func (a *TagManage) Delete(id uint64) error {
-	result := mysql.DB.Model(entity.TagManage{ID: id}).Delete(&entity.TagManage{})
+	result := mysql.DB.Model(&entity.TagManage{}).Unscoped().Delete(&entity.TagManage{}, id)
 	return errors.WithStack(result.Error)
 }

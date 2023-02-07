@@ -631,7 +631,8 @@ func (a *User) UserParamsCheck(c *gin.Context, item *schema.User) error {
 // Verify 检查用户是否存在
 func (a *User) Verify(c *gin.Context, userName, password string) (*schema.User, error) {
 	UserQueryResult, err := a.Query(c, schema.UserQueryParam{
-		UserName: userName,
+		UserName:       userName,
+		ShowExtendInfo: true,
 	})
 	if err != nil {
 		return nil, errors.WithMessage(err, "检查用户是否存在失败")

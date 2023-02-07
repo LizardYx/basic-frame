@@ -27,12 +27,16 @@ func (a *Router) Register(app *gin.Engine) error {
 func (a *Router) RegisterAPI(app *gin.Engine) {
 	g := app.Group("/api")
 	// jwtauth 登陆认证
-	g.Use(middleware.UserJWTAuth(middleware.AllowMethodAndPathPrefixSkipper("POST", "/api/v1/login")))
+	g.Use(middleware.UserJWTAuth(
+		middleware.AllowPathPrefixSkipper("/api/v1/login"),
+		middleware.AllowPathPrefixSkipper("/api/v1/base/permission-tree/download"),
+	))
 
 	// Casbin 权限认证
 	g.Use(middleware.CasbinMiddleware(
 		common.SysConfig.CasbinSyncEnforcer,
-		middleware.AllowMethodAndPathPrefixSkipper("POST", "/api/v1/login"),
+		middleware.AllowPathPrefixSkipper("/api/v1/login"),
+		middleware.AllowPathPrefixSkipper("/api/v1/base/permission-tree/download"),
 	))
 
 	// 增加请求频率限制中间件

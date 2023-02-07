@@ -14,7 +14,7 @@ type RestfulApi struct {
 }
 
 func (a *RestfulApi) Query(params schema.RestfulApiQueryParam) (*schema.RestfulApiQueryResult, error) {
-	db := mysql.DB.Model(entity.RestfulApi{})
+	db := mysql.DB.Model(&entity.RestfulApi{})
 	if v := params.UUID; v != "" {
 		db.Where("uuid=?", v)
 	}
@@ -33,7 +33,7 @@ func (a *RestfulApi) Query(params schema.RestfulApiQueryParam) (*schema.RestfulA
 }
 
 func (a *RestfulApi) GetByUUID(uuid string) (*schema.RestfulApi, error) {
-	db := mysql.DB.Model(entity.RestfulApi{UUID: uuid})
+	db := mysql.DB.Model(&entity.RestfulApi{}).Where("UUID = ?", uuid)
 
 	var item entity.RestfulApi
 	ok, err := mysql.FindOne(db, &item)
@@ -52,16 +52,16 @@ func (a *RestfulApi) Create(item schema.RestfulApi) (*common.IDResult, error) {
 }
 
 func (a *RestfulApi) UpdateByID(id uint64, item map[string]interface{}) error {
-	result := mysql.DB.Model(entity.RestfulApi{ID: id}).Updates(item)
+	result := mysql.DB.Model(&entity.RestfulApi{}).Where("id = ?", id).Updates(item)
 	return errors.WithStack(result.Error)
 }
 
 func (a *RestfulApi) UpdateByUUID(uuid string, item map[string]interface{}) error {
-	result := mysql.DB.Model(entity.RestfulApi{UUID: uuid}).Updates(item)
+	result := mysql.DB.Model(&entity.RestfulApi{}).Where("uuid = ?", uuid).Updates(item)
 	return errors.WithStack(result.Error)
 }
 
 func (a *RestfulApi) Delete(id uint64) error {
-	result := mysql.DB.Model(entity.RestfulApi{ID: id}).Delete(&entity.RestfulApi{})
+	result := mysql.DB.Model(&entity.RestfulApi{}).Delete(&entity.RestfulApi{}, id)
 	return errors.WithStack(result.Error)
 }

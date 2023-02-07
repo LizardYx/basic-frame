@@ -14,7 +14,7 @@ type SystemConfig struct {
 }
 
 func (a *SystemConfig) Query(params schema.SystemConfigQueryParam) (*schema.SystemConfigQueryResult, error) {
-	db := mysql.DB.Model(entity.SystemConfig{})
+	db := mysql.DB.Model(&entity.SystemConfig{})
 	db.Order("id DESC")
 
 	var list entity.SystemConfigs
@@ -44,9 +44,7 @@ func (a *SystemConfig) Create(item schema.SystemConfig) (*common.IDResult, error
 }
 
 func (a *SystemConfig) Get(id uint64) (*schema.SystemConfigPre, error) {
-	db := mysql.DB.Model(entity.SystemConfig{})
-
-	db.Where("id = ?", id)
+	db := mysql.DB.Model(&entity.SystemConfig{}).Where("id = ?", id)
 	var item entity.SystemConfig
 	ok, err := mysql.FindOne(db, &item)
 	if err != nil {
@@ -58,6 +56,6 @@ func (a *SystemConfig) Get(id uint64) (*schema.SystemConfigPre, error) {
 }
 
 func (a *SystemConfig) UpdateByID(id uint64, item map[string]interface{}) error {
-	result := mysql.DB.Model(entity.SystemConfig{ID: id}).Updates(item)
+	result := mysql.DB.Model(&entity.SystemConfig{}).Where("id = ?", id).Updates(item)
 	return errors.WithStack(result.Error)
 }

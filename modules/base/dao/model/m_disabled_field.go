@@ -14,7 +14,7 @@ type DisabledField struct {
 }
 
 func (a *DisabledField) Query(params schema.DisabledFieldQueryParam) (*schema.DisabledFieldQueryResult, error) {
-	db := mysql.DB.Model(entity.DisabledField{})
+	db := mysql.DB.Model(&entity.DisabledField{})
 	if v := params.UUID; v != "" {
 		db.Where("uuid = ?", v)
 	}
@@ -33,7 +33,7 @@ func (a *DisabledField) Query(params schema.DisabledFieldQueryParam) (*schema.Di
 }
 
 func (a *DisabledField) Get(id uint64) (*schema.DisabledField, error) {
-	db := mysql.DB.Model(entity.DisabledField{ID: id})
+	db := mysql.DB.Model(&entity.DisabledField{}).Where("id = ?", id)
 
 	var item entity.DisabledField
 	if ok, err := mysql.FindOne(db, &item); err != nil {
@@ -51,11 +51,11 @@ func (a *DisabledField) Create(item schema.DisabledField) (*common.IDResult, err
 }
 
 func (a *DisabledField) UpdateByID(id uint64, item map[string]interface{}) error {
-	result := mysql.DB.Model(entity.DisabledField{ID: id}).Updates(item)
+	result := mysql.DB.Model(&entity.DisabledField{}).Where("id = ?", id).Updates(item)
 	return errors.WithStack(result.Error)
 }
 
 func (a *DisabledField) Delete(id uint64) error {
-	result := mysql.DB.Model(entity.DisabledField{ID: id}).Delete(&entity.DisabledField{})
+	result := mysql.DB.Model(&entity.DisabledField{}).Unscoped().Delete(&entity.DisabledField{}, id)
 	return errors.WithStack(result.Error)
 }

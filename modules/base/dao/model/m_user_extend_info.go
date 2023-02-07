@@ -14,7 +14,7 @@ type UserExtendInfo struct {
 }
 
 func (a *UserExtendInfo) Get(id uint64) (*schema.UserExtendInfo, error) {
-	db := mysql.DB.Model(entity.UserExtendInfo{ID: id})
+	db := mysql.DB.Model(&entity.UserExtendInfo{}).Where("id = ?", id)
 
 	var item entity.UserExtendInfo
 	if ok, err := mysql.FindOne(db, &item); err != nil {
@@ -26,7 +26,7 @@ func (a *UserExtendInfo) Get(id uint64) (*schema.UserExtendInfo, error) {
 }
 
 func (a *UserExtendInfo) GetByRealName(realName string) (*schema.UserExtendInfo, error) {
-	db := mysql.DB.Model(entity.UserExtendInfo{RealName: realName})
+	db := mysql.DB.Model(&entity.UserExtendInfo{}).Where("real_name = ?", realName)
 
 	var item entity.UserExtendInfo
 	if ok, err := mysql.FindOne(db, &item); err != nil {
@@ -44,11 +44,11 @@ func (a *UserExtendInfo) Create(item schema.UserExtendInfo) (*common.IDResult, e
 }
 
 func (a *UserExtendInfo) UpdateByID(id uint64, item map[string]interface{}) error {
-	result := mysql.DB.Model(entity.UserExtendInfo{ID: id}).Updates(item)
+	result := mysql.DB.Model(&entity.UserExtendInfo{}).Where("id = ?", id).Updates(item)
 	return errors.WithStack(result.Error)
 }
 
 func (a *UserExtendInfo) Delete(id uint64) error {
-	result := mysql.DB.Model(entity.UserExtendInfo{ID: id}).Delete(&entity.UserExtendInfo{})
+	result := mysql.DB.Model(&entity.UserExtendInfo{}).Delete(&entity.UserExtendInfo{}, id)
 	return errors.WithStack(result.Error)
 }

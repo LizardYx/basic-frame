@@ -94,11 +94,11 @@ type ListResult struct {
 
 // ErrorResult 响应错误
 type ErrorResult struct {
-	Error ErrorItem `json:"error"` // 错误项
+	Error OperateResult `json:"error"` // 错误项
 }
 
-// ErrorItem 响应错误项
-type ErrorItem struct {
+// OperateResult 操作响应
+type OperateResult struct {
 	Code    int    `json:"code"`    // 错误码
 	Message string `json:"message"` // 错误信息
 }
@@ -118,12 +118,12 @@ func ResList(c *gin.Context, params, v interface{}) {
 }
 
 func ResOperateSuccess(c *gin.Context, params interface{}) {
-	ResSuccess(c, params, Localizer.I18n.Translate(consts.ApiOperateSuccess))
+	ResSuccessString(c, params, Localizer.I18n.Translate(consts.ApiOperateSuccess))
 }
 
 // ResSuccessString 响应操作成功
 func ResSuccessString(c *gin.Context, params interface{}, msg string, args ...interface{}) {
-	ResSuccess(c, params, Localizer.I18n.Translate(msg, args...))
+	ResSuccess(c, params, OperateResult{Message: Localizer.I18n.Translate(msg, args...)})
 }
 
 // ResSuccess 响应成功
@@ -166,7 +166,7 @@ func ResError(c *gin.Context, params interface{}, err error) {
 	}
 
 	// 创建Response
-	eitem := ErrorItem{
+	eitem := OperateResult{
 		Code:    res.Code,
 		Message: res.Message,
 	}

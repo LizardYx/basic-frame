@@ -17,7 +17,7 @@ type User struct {
 }
 
 func (a *User) Query(params schema.UserQueryParam) (*schema.UserQueryResult, error) {
-	db := mysql.DB.Model(entity.User{})
+	db := mysql.DB.Model(&entity.User{})
 	if v := params.ID; v != 0 {
 		db = db.Where("id=?", v)
 	}
@@ -115,7 +115,7 @@ func (a *User) Query(params schema.UserQueryParam) (*schema.UserQueryResult, err
 
 // Get 获取用户和用户与组织、职位、角色的关联信息
 func (a *User) Get(id uint64) (*schema.User, error) {
-	db := mysql.DB.Model(entity.User{ID: id}).Preload(clause.Associations)
+	db := mysql.DB.Model(&entity.User{}).Where("id = ?", id).Preload(clause.Associations)
 
 	var item entity.User
 	if ok, err := mysql.FindOne(db, &item); err != nil {
@@ -133,13 +133,13 @@ func (a *User) Create(item schema.User) (*common.IDResult, error) {
 }
 
 func (a *User) UpdateByID(id uint64, item map[string]interface{}) error {
-	result := mysql.DB.Model(entity.User{ID: id}).Updates(item)
+	result := mysql.DB.Model(&entity.User{}).Where("id = ?", id).Updates(item)
 	return errors.WithStack(result.Error)
 }
 
 // Delete 删除用户和用户与组织、职位、角色的关联信息
 func (a *User) Delete(id uint64) error {
-	result := mysql.DB.Model(entity.User{ID: id}).Select(clause.Associations).Delete(&entity.User{})
+	result := mysql.DB.Model(&entity.User{}).Select(clause.Associations).Delete(&entity.User{}, id)
 	return errors.WithStack(result.Error)
 }
 
@@ -236,7 +236,7 @@ func (a *User) AppendUserUserGroup(id uint64, items schema.UserGroups) error {
 // UserRemoveOrganization 移除用户的组织关联信息
 func (a *User) UserRemoveOrganization(userID uint64, organization schema.Organization) error {
 	eitem := entity.SchemaOrganization(organization).ToOrganization()
-	if err := mysql.DB.Model(entity.User{ID: userID}).
+	if err := mysql.DB.Model(&entity.User{ID: userID}).
 		Association("Organizations").
 		Delete(eitem); err != nil {
 		return errors.WithStack(err)
@@ -247,7 +247,7 @@ func (a *User) UserRemoveOrganization(userID uint64, organization schema.Organiz
 // UserRemovePosition 移除用户的职位关联信息
 func (a *User) UserRemovePosition(userID uint64, position schema.Position) error {
 	eitem := entity.SchemaPosition(position).ToPosition()
-	if err := mysql.DB.Model(entity.User{ID: userID}).
+	if err := mysql.DB.Model(&entity.User{ID: userID}).
 		Association("Positions").
 		Delete(eitem); err != nil {
 		return errors.WithStack(err)
@@ -258,7 +258,7 @@ func (a *User) UserRemovePosition(userID uint64, position schema.Position) error
 // UserRemoveRole 移除用户的角色关联信息
 func (a *User) UserRemoveRole(userID uint64, role schema.Role) error {
 	eitem := entity.SchemaRole(role).ToRole()
-	if err := mysql.DB.Model(entity.User{ID: userID}).
+	if err := mysql.DB.Model(&entity.User{ID: userID}).
 		Association("Roles").
 		Delete(eitem); err != nil {
 		return errors.WithStack(err)
@@ -269,7 +269,7 @@ func (a *User) UserRemoveRole(userID uint64, role schema.Role) error {
 // UserRemoveUserGroup 移除用户的用户组关联信息
 func (a *User) UserRemoveUserGroup(userID uint64, userGroup schema.UserGroup) error {
 	eitem := entity.SchemaUserGroup(userGroup).ToUserGroup()
-	if err := mysql.DB.Model(entity.User{ID: userID}).
+	if err := mysql.DB.Model(&entity.User{ID: userID}).
 		Association("UserGroups").
 		Delete(eitem); err != nil {
 		return errors.WithStack(err)

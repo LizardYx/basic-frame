@@ -31,5 +31,23 @@ type RestfulApiQueryResult struct {
 func (a RestfulApis) Init() *RestfulApis {
 	items := make(RestfulApis, 0)
 	items = append(items, a...)
+	return &items
+}
+
+// SetCreator 设置Restful请求的创建人
+func (a RestfulApis) SetCreator(creator uint64) *RestfulApis {
+	if creator != 0 {
+		for _, restfulApi := range a {
+			restfulApi.Creator = creator
+		}
+	}
 	return &a
+}
+
+// InitUUID 初始化Restful请求的UUID
+func (a RestfulApis) InitUUID() RestfulApis {
+	for _, restfulApi := range a {
+		restfulApi.UUID = common.GetUUID()
+	}
+	return a
 }

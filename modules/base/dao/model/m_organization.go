@@ -17,7 +17,7 @@ type Organization struct {
 }
 
 func (a *Organization) Query(params schema.OrganizationQueryParam) (*schema.OrganizationQueryResult, error) {
-	db := mysql.DB.Model(entity.Organization{})
+	db := mysql.DB.Model(&entity.Organization{})
 	if v := params.ID; v != 0 {
 		db.Where("id=?", v)
 	}
@@ -58,7 +58,7 @@ func (a *Organization) Query(params schema.OrganizationQueryParam) (*schema.Orga
 }
 
 func (a *Organization) Get(id uint64) (*schema.Organization, error) {
-	db := mysql.DB.Model(entity.Organization{ID: id})
+	db := mysql.DB.Model(&entity.Organization{}).Where("id = ?", id)
 
 	var item entity.Organization
 	if ok, err := mysql.FindOne(db, &item); err != nil {
@@ -82,12 +82,12 @@ func (a *Organization) CreateOrganizations(item schema.Organizations) error {
 }
 
 func (a *Organization) UpdateByID(id uint64, item map[string]interface{}) error {
-	result := mysql.DB.Model(entity.Organization{ID: id}).Updates(item)
+	result := mysql.DB.Model(&entity.Organization{}).Where("id = ?", id).Updates(item)
 	return errors.WithStack(result.Error)
 }
 
 func (a *Organization) Delete(id uint64) error {
-	result := mysql.DB.Model(entity.Organization{ID: id}).Delete(&entity.Organization{})
+	result := mysql.DB.Model(&entity.Organization{}).Delete(&entity.Organization{}, id)
 	return errors.WithStack(result.Error)
 }
 
@@ -95,7 +95,7 @@ func (a *Organization) Delete(id uint64) error {
 
 // GetOrganizationTree 获取组织树(包含禁用的组织)
 func (a *Organization) GetOrganizationTree() (*schema.Organizations, error) {
-	db := mysql.DB.Model(entity.Organization{}).Order("id DESC")
+	db := mysql.DB.Model(&entity.Organization{}).Order("id DESC")
 	db = db.
 		Where("parent_id IS NULL").
 		Preload(clause.Associations).
@@ -111,7 +111,7 @@ func (a *Organization) GetOrganizationTree() (*schema.Organizations, error) {
 
 // GetOrganizationTreeForCreateUser 获取组织树(不包含禁用的组织)
 func (a *Organization) GetOrganizationTreeForCreateUser() (*schema.Organizations, error) {
-	db := mysql.DB.Model(entity.Organization{}).Order("id DESC")
+	db := mysql.DB.Model(&entity.Organization{}).Order("id DESC")
 	db = db.
 		Where("parent_id IS NULL AND status = 1").
 		Preload(clause.Associations).
@@ -127,7 +127,7 @@ func (a *Organization) GetOrganizationTreeForCreateUser() (*schema.Organizations
 
 // GetOrgTreeForCreateNotifications 获取组织树(不包含职位和禁用的组织)
 func (a *Organization) GetOrgTreeForCreateNotifications() (*schema.Organizations, error) {
-	db := mysql.DB.Model(entity.Organization{}).Order("id DESC")
+	db := mysql.DB.Model(&entity.Organization{}).Order("id DESC")
 
 	db = db.
 		Where("parent_id IS NULL AND status = 1").

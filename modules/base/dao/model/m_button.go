@@ -16,7 +16,7 @@ type Button struct {
 }
 
 func (a *Button) Query(params schema.ButtonQueryParam) (*schema.ButtonQueryResult, error) {
-	db := mysql.DB.Model(entity.Button{})
+	db := mysql.DB.Model(&entity.Button{})
 	if v := params.IDs; v != "" {
 		db.Where("id IN (?)", strings.Split(v, ","))
 	}
@@ -47,7 +47,7 @@ func (a *Button) Query(params schema.ButtonQueryParam) (*schema.ButtonQueryResul
 }
 
 func (a *Button) Get(id uint64) (*schema.Button, error) {
-	db := mysql.DB.Model(entity.Button{ID: id})
+	db := mysql.DB.Model(&entity.Button{}).Where("id = ?", id)
 
 	var item entity.Button
 	if ok, err := mysql.FindOne(db, &item); err != nil {
@@ -60,7 +60,7 @@ func (a *Button) Get(id uint64) (*schema.Button, error) {
 
 // GetButtonRestfulApis 获取按钮的所有RestfulApis
 func (a *Button) GetButtonRestfulApis(ids []uint64) (*schema.ButtonPres, error) {
-	db := mysql.DB.Where("id IN (?)", ids).Preload("RestfulApis")
+	db := mysql.DB.Model(&entity.Button{}).Where("id IN (?)", ids).Preload("RestfulApis")
 
 	var items entity.Buttons
 	if err := db.Find(&items).Error; err != nil {
@@ -112,7 +112,6 @@ func (a *Button) UpdateButtonPre(item schema.ButtonPre) error {
 		// 更新Button
 		if err := a.UpdateByID(item.ID, map[string]interface{}{
 			"btn_id":    item.BtnID,
-			"select":    item.Select,
 			"name":      item.Name,
 			"icon":      item.Icon,
 			"class":     item.Class,
@@ -134,12 +133,12 @@ func (a *Button) UpdateButtonPre(item schema.ButtonPre) error {
 }
 
 func (a *Button) UpdateByID(id uint64, item map[string]interface{}) error {
-	result := mysql.DB.Model(entity.Button{ID: id}).Updates(item)
+	result := mysql.DB.Model(&entity.Button{}).Where("id = ?", id).Updates(item)
 	return errors.WithStack(result.Error)
 }
 
 // Delete 删除按钮和按钮调用的Api关联
 func (a *Button) Delete(id uint64) error {
-	result := mysql.DB.Model(entity.Button{ID: id}).Unscoped().Delete(&entity.Button{})
+	result := mysql.DB.Model(&entity.Button{}).Unscoped().Delete(&entity.Button{}, id)
 	return errors.WithStack(result.Error)
 }

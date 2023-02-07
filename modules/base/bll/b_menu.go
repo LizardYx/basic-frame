@@ -149,7 +149,6 @@ func (a *Menu) Update(c *gin.Context, id uint64, item schema.Menu) error {
 
 	// 更新菜单基本信息
 	return a.MenuModel.UpdateByID(id, map[string]interface{}{
-		"select":      item.Select,
 		"name":        item.Name,
 		"icon":        item.Icon,
 		"class":       item.Class,

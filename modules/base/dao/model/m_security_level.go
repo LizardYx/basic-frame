@@ -15,7 +15,7 @@ type SecurityLevel struct {
 }
 
 func (a *SecurityLevel) Query(params schema.SecurityLevelQueryParam) (*schema.SecurityLevelQueryResult, error) {
-	db := mysql.DB.Model(entity.SecurityLevel{})
+	db := mysql.DB.Model(&entity.SecurityLevel{})
 	if v := params.ID; v != 0 {
 		db = db.Where("id=?", v)
 	}
@@ -52,7 +52,7 @@ func (a *SecurityLevel) Query(params schema.SecurityLevelQueryParam) (*schema.Se
 }
 
 func (a *SecurityLevel) Get(id uint64) (*schema.SecurityLevel, error) {
-	db := mysql.DB.Model(entity.SecurityLevel{ID: id})
+	db := mysql.DB.Model(&entity.SecurityLevel{}).Where("id = ?", id)
 
 	var item entity.SecurityLevel
 	if ok, err := mysql.FindOne(db, &item); err != nil {
@@ -70,14 +70,14 @@ func (a *SecurityLevel) Create(item schema.SecurityLevel) (*common.IDResult, err
 }
 
 func (a *SecurityLevel) UpdateByID(id uint64, item map[string]interface{}) error {
-	result := mysql.DB.Model(entity.SecurityLevel{ID: id}).Updates(item)
+	result := mysql.DB.Model(&entity.SecurityLevel{}).Where("id = ?", id).Updates(item)
 	return errors.WithStack(result.Error)
 }
 
 // ReplaceSecurityLevelRoles 更新安全等级关联的角色
 func (a *SecurityLevel) ReplaceSecurityLevelRoles(id uint64, items schema.Roles) error {
 	eitem := entity.SchemaRoles(items).ToRole()
-	if err := mysql.DB.Model(entity.SecurityLevel{ID: id}).
+	if err := mysql.DB.Model(&entity.SecurityLevel{ID: id}).
 		Association("Roles").
 		Replace(eitem); err != nil {
 		return errors.WithStack(err)
@@ -86,7 +86,7 @@ func (a *SecurityLevel) ReplaceSecurityLevelRoles(id uint64, items schema.Roles)
 }
 
 func (a *SecurityLevel) Delete(id uint64) error {
-	result := mysql.DB.Model(entity.SecurityLevel{ID: id}).Delete(&entity.SecurityLevel{})
+	result := mysql.DB.Model(&entity.SecurityLevel{}).Delete(&entity.SecurityLevel{}, id)
 	return errors.WithStack(result.Error)
 }
 

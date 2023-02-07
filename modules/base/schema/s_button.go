@@ -90,11 +90,18 @@ func (a ButtonPre) Init() *ButtonPre {
 func (a ButtonPre) SetCreator(creator uint64) *ButtonPre {
 	if creator != 0 {
 		a.Creator = creator
-		for _, sonButton := range a.SonButtons {
-			sonButton.SetCreator(creator)
-		}
+		a.RestfulApis = *a.RestfulApis.SetCreator(creator)
+		a.SonButtons = *a.SonButtons.SetCreator(creator)
 	}
 	return &a
+}
+
+// InitUUID 初始化按钮树的UUID信息
+func (a ButtonPre) InitUUID() ButtonPre {
+	a.UUID = common.GetUUID()
+	a.RestfulApis = a.RestfulApis.InitUUID()
+	a.SonButtons = a.SonButtons.InitUUID()
+	return a
 }
 
 // GetIDs 获取按钮、子按钮的按钮ID集合
@@ -153,6 +160,14 @@ func (a ButtonPres) SetCreator(creator uint64) *ButtonPres {
 		}
 	}
 	return &a
+}
+
+// InitUUID 初始化按钮树的UUID信息
+func (a ButtonPres) InitUUID() ButtonPres {
+	for _, buttonPre := range a {
+		buttonPre.Init()
+	}
+	return a
 }
 
 // GetButtonIDsByButtonID 获取指定按钮的子按钮ID集合

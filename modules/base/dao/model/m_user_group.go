@@ -15,7 +15,7 @@ type UserGroup struct {
 }
 
 func (a *UserGroup) Query(params schema.UserGroupQueryParam) (*schema.UserGroupQueryResult, error) {
-	db := mysql.DB.Model(entity.Role{})
+	db := mysql.DB.Model(&entity.Role{})
 	if v := params.IDs; v != "" {
 		db = db.Where("id IN (?)", strings.Split(v, ","))
 	}
@@ -54,7 +54,7 @@ func (a *UserGroup) Query(params schema.UserGroupQueryParam) (*schema.UserGroupQ
 }
 
 func (a *UserGroup) Get(id uint64) (*schema.UserGroup, error) {
-	db := mysql.DB.Model(entity.UserGroup{ID: id})
+	db := mysql.DB.Model(&entity.UserGroup{}).Where("id = ?", id)
 
 	var item entity.UserGroup
 	if ok, err := mysql.FindOne(db, &item); err != nil {
@@ -72,11 +72,11 @@ func (a *UserGroup) Create(item schema.UserGroup) (*common.IDResult, error) {
 }
 
 func (a *UserGroup) UpdateByID(id uint64, item map[string]interface{}) error {
-	result := mysql.DB.Model(entity.UserGroup{ID: id}).Updates(item)
+	result := mysql.DB.Model(&entity.UserGroup{}).Where("id = ?", id).Updates(item)
 	return errors.WithStack(result.Error)
 }
 
 func (a *UserGroup) Delete(id uint64) error {
-	result := mysql.DB.Model(entity.UserGroup{ID: id}).Unscoped().Delete(&entity.UserGroup{})
+	result := mysql.DB.Model(&entity.UserGroup{}).Unscoped().Delete(&entity.UserGroup{}, id)
 	return errors.WithStack(result.Error)
 }

@@ -16,7 +16,7 @@ type Role struct {
 }
 
 func (a *Role) Query(params schema.RoleQueryParam) (*schema.RoleQueryResult, error) {
-	db := mysql.DB.Model(entity.Role{})
+	db := mysql.DB.Model(&entity.Role{})
 	if v := params.ID; v != 0 {
 		db = db.Where("id=?", v)
 	}
@@ -69,7 +69,7 @@ func (a *Role) Query(params schema.RoleQueryParam) (*schema.RoleQueryResult, err
 }
 
 func (a *Role) Get(id uint64) (*schema.Role, error) {
-	db := mysql.DB.Model(entity.Role{ID: id}).Preload(clause.Associations)
+	db := mysql.DB.Model(&entity.Role{}).Where("id = ?", id).Preload(clause.Associations)
 
 	var item entity.Role
 	if ok, err := mysql.FindOne(db, &item); err != nil {
@@ -87,14 +87,14 @@ func (a *Role) Create(item schema.Role) (*common.IDResult, error) {
 }
 
 func (a *Role) UpdateByID(id uint64, item map[string]interface{}) error {
-	result := mysql.DB.Model(entity.Role{ID: id}).Updates(item)
+	result := mysql.DB.Model(&entity.Role{}).Where("id = ?", id).Updates(item)
 	return errors.WithStack(result.Error)
 }
 
 // UpdateRoleMenu 更新角色关联的菜单
 func (a *Role) UpdateRoleMenu(id uint64, items schema.Menus) error {
 	eitem := entity.SchemaMenus(items).ToMenu()
-	if err := mysql.DB.Model(entity.Role{ID: id}).
+	if err := mysql.DB.Model(&entity.Role{ID: id}).
 		Association("Menus").
 		Replace(eitem); err != nil {
 		return errors.WithStack(err)
@@ -105,7 +105,7 @@ func (a *Role) UpdateRoleMenu(id uint64, items schema.Menus) error {
 // UpdateRoleButton 更新角色关联的按钮
 func (a *Role) UpdateRoleButton(id uint64, items schema.Buttons) error {
 	eitem := entity.SchemaButtons(items).ToButton()
-	if err := mysql.DB.Model(entity.Role{ID: id}).
+	if err := mysql.DB.Model(&entity.Role{ID: id}).
 		Association("Buttons").
 		Replace(eitem); err != nil {
 		return errors.WithStack(err)
@@ -116,7 +116,7 @@ func (a *Role) UpdateRoleButton(id uint64, items schema.Buttons) error {
 // UpdateRoleDisabledFields 更新角色关联的禁用字段
 func (a *Role) UpdateRoleDisabledFields(id uint64, items schema.DisabledFields) error {
 	eitem := entity.SchemaDisabledFields(items).ToDisabledField()
-	if err := mysql.DB.Model(entity.Role{ID: id}).
+	if err := mysql.DB.Model(&entity.Role{ID: id}).
 		Association("DisabledFields").
 		Replace(eitem); err != nil {
 		return errors.WithStack(err)
@@ -125,6 +125,6 @@ func (a *Role) UpdateRoleDisabledFields(id uint64, items schema.DisabledFields) 
 }
 
 func (a *Role) Delete(id uint64) error {
-	result := mysql.DB.Model(entity.Role{ID: id}).Unscoped().Delete(&entity.Role{})
+	result := mysql.DB.Model(&entity.Role{}).Unscoped().Delete(&entity.Role{}, id)
 	return errors.WithStack(result.Error)
 }

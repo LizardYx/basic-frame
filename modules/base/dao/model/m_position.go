@@ -16,7 +16,7 @@ type Position struct {
 }
 
 func (a *Position) Query(params schema.PositionQueryParam) (*schema.PositionQueryResult, error) {
-	db := mysql.DB.Model(entity.Position{})
+	db := mysql.DB.Model(&entity.Position{})
 	if v := params.IDs; v != "" {
 		db = db.Where("id IN (?)", strings.Split(v, ","))
 	}
@@ -63,7 +63,7 @@ func (a *Position) Query(params schema.PositionQueryParam) (*schema.PositionQuer
 }
 
 func (a *Position) Get(id uint64) (*schema.Position, error) {
-	db := mysql.DB.Model(entity.Position{ID: id})
+	db := mysql.DB.Model(&entity.Position{}).Where("id = ?", id)
 
 	var item entity.Position
 	if ok, err := mysql.FindOne(db, &item); err != nil {
@@ -81,11 +81,11 @@ func (a *Position) Create(item schema.Position) (*common.IDResult, error) {
 }
 
 func (a *Position) UpdateByID(id uint64, item map[string]interface{}) error {
-	result := mysql.DB.Model(entity.Position{ID: id}).Updates(item)
+	result := mysql.DB.Model(&entity.Position{}).Where("id = ?", id).Updates(item)
 	return errors.WithStack(result.Error)
 }
 
 func (a *Position) Delete(id uint64) error {
-	result := mysql.DB.Model(entity.Position{ID: id}).Delete(&entity.Position{})
+	result := mysql.DB.Model(&entity.Position{}).Delete(&entity.Position{}, id)
 	return errors.WithStack(result.Error)
 }

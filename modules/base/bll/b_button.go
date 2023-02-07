@@ -28,7 +28,7 @@ func (a *Button) Query(c *gin.Context, params schema.ButtonQueryParam) (*schema.
 
 func (a *Button) Create(c *gin.Context, item schema.ButtonPre) (*common.IDResult, error) {
 	// 初始化按钮UUID
-	item.UUID = common.GetUUID()
+	item = item.InitUUID()
 
 	// 按钮参数验证
 	if err := a.BtnPreParamsCheck(&item); err != nil {
@@ -66,7 +66,6 @@ func (a *Button) Update(c *gin.Context, id uint64, item schema.Button) error {
 	// 更新按钮信息
 	return a.ButtonModel.UpdateByID(id, map[string]interface{}{
 		"btn_id":      item.BtnID,
-		"select":      item.Select,
 		"name":        item.Name,
 		"icon":        item.Icon,
 		"class":       item.Class,

@@ -18,7 +18,7 @@ type Menu struct {
 }
 
 func (a *Menu) Query(params schema.MenuQueryParam) (*schema.MenuQueryResult, error) {
-	db := mysql.DB.Model(entity.Menu{})
+	db := mysql.DB.Model(&entity.Menu{})
 	if v := params.ID; v != 0 {
 		db.Where("id=?", v)
 	}
@@ -52,7 +52,7 @@ func (a *Menu) Query(params schema.MenuQueryParam) (*schema.MenuQueryResult, err
 }
 
 func (a *Menu) Get(id uint64) (*schema.Menu, error) {
-	db := mysql.DB.Model(entity.Menu{ID: id})
+	db := mysql.DB.Model(&entity.Menu{}).Where("id = ?", id)
 
 	var item entity.Menu
 	if ok, err := mysql.FindOne(db, &item); err != nil {
@@ -65,7 +65,7 @@ func (a *Menu) Get(id uint64) (*schema.Menu, error) {
 
 // GetRoleRestfulApis 获取角色的RestfulApis信息
 func (a *Menu) GetRoleRestfulApis(ids []uint64) (*schema.MenuTrees, error) {
-	db := mysql.DB.Model(entity.Menu{}).Where("id IN (?)", ids).Preload("RestfulApis")
+	db := mysql.DB.Model(&entity.Menu{}).Where("id IN (?)", ids).Preload("RestfulApis")
 
 	var items entity.Menus
 	if err := db.Find(&items).Error; err != nil {
@@ -82,13 +82,13 @@ func (a *Menu) Create(item schema.Menu) (*common.IDResult, error) {
 }
 
 func (a *Menu) UpdateByID(id uint64, item map[string]interface{}) error {
-	result := mysql.DB.Model(entity.Menu{ID: id}).Updates(item)
+	result := mysql.DB.Model(&entity.Menu{}).Where("id = ?", id).Updates(item)
 	return errors.WithStack(result.Error)
 }
 
 // Delete 删除菜单、菜单调用的Api关联以及菜单的按钮
 func (a *Menu) Delete(id uint64) error {
-	result := mysql.DB.Model(entity.Menu{ID: id}).Unscoped().Delete(&entity.Menu{})
+	result := mysql.DB.Model(&entity.Menu{}).Unscoped().Delete(&entity.Menu{}, id)
 	return errors.WithStack(result.Error)
 }
 
@@ -96,7 +96,7 @@ func (a *Menu) Delete(id uint64) error {
 
 // QueryMenuTree 获取所有的菜单树(包含禁用)
 func (a *Menu) QueryMenuTree() (*schema.MenuTrees, error) {
-	db := mysql.DB.Model(entity.Menu{}).Order("sequence DESC")
+	db := mysql.DB.Model(&entity.Menu{}).Order("sequence DESC")
 	db.Where("parent_id IS NULL").
 		Preload(clause.Associations).
 		Preload("SonMenus", PreloadMenuAll).
@@ -112,7 +112,7 @@ func (a *Menu) QueryMenuTree() (*schema.MenuTrees, error) {
 
 // QueryMenuTreeForCreateRole 获取创建用户的菜单树(不包含禁用)
 func (a *Menu) QueryMenuTreeForCreateRole() (*schema.MenuTrees, error) {
-	db := mysql.DB.Model(entity.Menu{}).Order("sequence DESC")
+	db := mysql.DB.Model(&entity.Menu{}).Order("sequence DESC")
 	db.Where("parent_id IS NULL AND status = ?", consts.BaseStatusEnable).
 		Preload(clause.Associations).
 		Preload("SonMenus", PreloadMenuAllForCreateRole).
@@ -128,7 +128,7 @@ func (a *Menu) QueryMenuTreeForCreateRole() (*schema.MenuTrees, error) {
 
 func (a *Menu) CreateMenuTrees(items schema.MenuTrees) error {
 	return mysql.DB.Transaction(func(tx *gorm.DB) error {
-		db := mysql.DB.Model(entity.Menu{})
+		db := mysql.DB.Model(&entity.Menu{})
 		for _, item := range items {
 			eitem := entity.SchemaMenuTree(*item).ToMenu()
 			if err := db.Create(eitem).Error; err != nil {

@@ -31,14 +31,14 @@ func main() {
 		fmt.Printf("%v\n", err)
 	}
 
-	// 初始化超管用户
-	if err := baseBll.UserBll.Init(&gin.Context{}); err != nil {
+	// 初始化Casbin
+	if err := casbin_adapter.InitCasbin(); err != nil {
 		logger.Log.Warningf("%v", err)
 		fmt.Printf("%v\n", err)
 	}
 
-	// 初始化Casbin
-	if err := casbin_adapter.InitCasbin(); err != nil {
+	// 初始化超管用户
+	if err := baseBll.UserBll.Init(&gin.Context{}); err != nil {
 		logger.Log.Warningf("%v", err)
 		fmt.Printf("%v\n", err)
 	}

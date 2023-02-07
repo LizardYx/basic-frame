@@ -15,6 +15,7 @@ type Button struct {
 	ButtonBll *bll.Button
 }
 
+// Create 不支持包含子按钮的创建方式
 func (a *Button) Create(c *gin.Context) {
 	var item schema.ButtonPre
 
@@ -22,7 +23,7 @@ func (a *Button) Create(c *gin.Context) {
 		ginx.ResError(c, item, err)
 		return
 	}
-	item.Creator = ginx.GetUserID(c)
+	item.SetCreator(ginx.GetUserID(c))
 	result, err := a.ButtonBll.Create(c, item)
 	if err != nil {
 		ginx.ResError(c, item, err)
@@ -38,6 +39,7 @@ func (a *Button) Update(c *gin.Context) {
 		return
 	}
 
+	item.ID = ginx.ParseParamID(c, "id")
 	if err := a.ButtonBll.UpdateButtonPre(c, item); err != nil {
 		ginx.ResError(c, item, err)
 		return

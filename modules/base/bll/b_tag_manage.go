@@ -64,8 +64,6 @@ func (a *TagManage) Update(c *gin.Context, id uint64, item schema.TagManage) err
 		return errors.WithMessage(err, "检查标签是否存在失败")
 	} else if oldItem == nil {
 		return errors.New("未找到该标签")
-	} else {
-		item.Type = oldItem.Type
 	}
 
 	// 更新标签
