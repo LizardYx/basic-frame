@@ -92,11 +92,6 @@ type ListResult struct {
 	Pagination *common.PaginationResult `json:"pagination,omitempty"`
 }
 
-// ErrorResult 响应错误
-type ErrorResult struct {
-	Error OperateResult `json:"error"` // 错误项
-}
-
 // OperateResult 操作响应
 type OperateResult struct {
 	Code    int    `json:"code"`    // 错误码
@@ -164,13 +159,7 @@ func ResError(c *gin.Context, params interface{}, err error) {
 			fmt.Printf("%v\n", res.Message)        // 基本错误日志
 		}
 	}
-
-	// 创建Response
-	eitem := OperateResult{
-		Code:    res.Code,
-		Message: res.Message,
-	}
-	ResJSON(c, res.StatusCode, params, ErrorResult{Error: eitem})
+	ResJSON(c, res.StatusCode, params, OperateResult{Code: res.Code, Message: res.Message})
 }
 
 // ResJSON 响应JSON数据

@@ -139,6 +139,6 @@ func (a *Button) UpdateByID(id uint64, item map[string]interface{}) error {
 
 // Delete 删除按钮和按钮调用的Api关联
 func (a *Button) Delete(id uint64) error {
-	result := mysql.DB.Model(&entity.Button{}).Unscoped().Delete(&entity.Button{}, id)
+	result := mysql.DB.Model(&entity.Button{}).Select("RestfulApis").Delete(&entity.Button{}, id)
 	return errors.WithStack(result.Error)
 }

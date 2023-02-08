@@ -139,7 +139,7 @@ func (a *Router) Register(api *gin.RouterGroup) {
 	{
 		ButtonGroup.POST("", a.ButtonApi.Create)
 		ButtonGroup.PUT(":id", a.ButtonApi.Update)
-		ButtonGroup.PUT(":id/batch-update", a.ButtonApi.BatchUpdate)
+		ButtonGroup.PUT("", a.ButtonApi.BatchUpdate)
 		ButtonGroup.DELETE(":id", a.ButtonApi.Delete)
 	}
 

@@ -26,7 +26,7 @@ func (a *TagManage) Get(c *gin.Context, id uint64) (*schema.TagManage, error) {
 	if err != nil {
 		return nil, errors.WithMessage(err, "检查标签是否存在失败")
 	} else if item == nil {
-		return nil, errors.New("未找到该标签")
+		return nil, errors.New("标签不存在")
 	}
 
 	return item, nil
@@ -63,7 +63,7 @@ func (a *TagManage) Update(c *gin.Context, id uint64, item schema.TagManage) err
 	if err != nil {
 		return errors.WithMessage(err, "检查标签是否存在失败")
 	} else if oldItem == nil {
-		return errors.New("未找到该标签")
+		return errors.New("标签不存在")
 	}
 
 	// 更新标签
@@ -79,7 +79,7 @@ func (a *TagManage) Delete(c *gin.Context, id uint64) error {
 	if err != nil {
 		return errors.WithMessage(err, "检查标签是否存在失败")
 	} else if oldItem == nil {
-		return errors.New("未找到该标签")
+		return errors.New("标签不存在")
 	}
 
 	// 删除标签

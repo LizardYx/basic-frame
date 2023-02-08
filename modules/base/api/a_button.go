@@ -32,6 +32,7 @@ func (a *Button) Create(c *gin.Context) {
 	ginx.ResSuccess(c, item, result)
 }
 
+// Update 更新按钮基础信息、按钮关联的Restful接口信息、指定Restful接口基础信息
 func (a *Button) Update(c *gin.Context) {
 	var item schema.ButtonPre
 	if err := ginx.ParseJSON(c, &item); err != nil {
@@ -47,6 +48,7 @@ func (a *Button) Update(c *gin.Context) {
 	ginx.ResOperateSuccess(c, item)
 }
 
+// BatchUpdate 批量更新按钮基础信息
 func (a *Button) BatchUpdate(c *gin.Context) {
 	var items schema.Buttons
 	if err := ginx.ParseJSON(c, &items); err != nil {

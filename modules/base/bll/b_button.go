@@ -91,7 +91,7 @@ func (a *Button) BatchUpdate(c *gin.Context, items schema.Buttons) error {
 	if err != nil {
 		return err
 	}
-	LoadCasbinPolicy(c, a.Enforcer)
+	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
 	return err
 }
 
@@ -138,7 +138,7 @@ func (a *Button) UpdateButtonPre(c *gin.Context, item schema.ButtonPre) error {
 	if err != nil {
 		return err
 	}
-	LoadCasbinPolicy(c, a.Enforcer)
+	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
 	return err
 }
 
@@ -156,7 +156,7 @@ func (a *Button) Delete(c *gin.Context, id uint64) error {
 		},
 		ParentID: id,
 	}); err != nil {
-		return errors.WithMessage(err, "删除菜单失败")
+		return errors.WithMessage(err, "检查按钮是否有子项失败")
 	} else if ButtonQueryResult.PageResult.Total != 0 {
 		return errors.New("有子按钮，请勿删除")
 	}
@@ -165,7 +165,7 @@ func (a *Button) Delete(c *gin.Context, id uint64) error {
 	if err := a.ButtonModel.Delete(id); err != nil {
 		return errors.WithMessage(err, "删除按钮失败")
 	}
-	LoadCasbinPolicy(c, a.Enforcer)
+	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
 	return nil
 }
 
