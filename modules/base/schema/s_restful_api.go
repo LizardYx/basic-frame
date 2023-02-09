@@ -34,6 +34,14 @@ func (a RestfulApis) Init() *RestfulApis {
 	return &items
 }
 
+func (a RestfulApis) GetIDs() []uint64 {
+	var ids []uint64
+	for _, restfulApi := range a {
+		ids = append(ids, restfulApi.ID)
+	}
+	return ids
+}
+
 // SetCreator 设置Restful请求的创建人
 func (a RestfulApis) SetCreator(creator uint64) *RestfulApis {
 	if creator != 0 {
@@ -44,10 +52,12 @@ func (a RestfulApis) SetCreator(creator uint64) *RestfulApis {
 	return &a
 }
 
-// InitUUID 初始化Restful请求的UUID
-func (a RestfulApis) InitUUID() RestfulApis {
+func (a RestfulApis) GetUUID() []string {
+	var uuids []string
 	for _, restfulApi := range a {
-		restfulApi.UUID = common.GetUUID()
+		if restfulApi.UUID != "" {
+			uuids = append(uuids, restfulApi.UUID)
+		}
 	}
-	return a
+	return uuids
 }

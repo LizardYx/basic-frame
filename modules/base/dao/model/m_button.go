@@ -7,6 +7,7 @@ import (
 	"basic-frame/util/mysql"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
+	"gorm.io/gorm/clause"
 	"strings"
 )
 
@@ -58,8 +59,20 @@ func (a *Button) Get(id uint64) (*schema.Button, error) {
 	return item.ToSchemaButton(), nil
 }
 
-// GetButtonRestfulApis 获取按钮的所有RestfulApis
-func (a *Button) GetButtonRestfulApis(ids []uint64) (*schema.ButtonPres, error) {
+func (a *Button) GetButtonRestfulApis(id uint64) (*schema.ButtonPre, error) {
+	db := mysql.DB.Model(&entity.Button{}).Where("id = ?", id).Preload("RestfulApis")
+
+	var item entity.Button
+	if ok, err := mysql.FindOne(db, &item); err != nil {
+		return nil, errors.WithStack(err)
+	} else if !ok {
+		return nil, nil
+	}
+	return item.ToSchemaButtonPre(), nil
+}
+
+// GetButtonsRestfulApis 获取多个按钮的所有RestfulApis
+func (a *Button) GetButtonsRestfulApis(ids []uint64) (*schema.ButtonPres, error) {
 	db := mysql.DB.Model(&entity.Button{}).Where("id IN (?)", ids).Preload("RestfulApis")
 
 	var items entity.Buttons
@@ -139,6 +152,18 @@ func (a *Button) UpdateByID(id uint64, item map[string]interface{}) error {
 
 // Delete 删除按钮和按钮调用的Api关联
 func (a *Button) Delete(id uint64) error {
-	result := mysql.DB.Model(&entity.Button{}).Select("RestfulApis").Delete(&entity.Button{}, id)
+	result := mysql.DB.Model(&entity.Button{}).
+		Unscoped().
+		Select(clause.Associations).
+		Delete(&entity.Button{}, id)
+	return errors.WithStack(result.Error)
+}
+
+// BatchDelete 批量删除按钮和按钮调用的Api关联
+func (a *Button) BatchDelete(ids []uint64) error {
+	result := mysql.DB.Model(&entity.Button{}).
+		Unscoped().
+		Select(clause.Associations).
+		Delete(&entity.Button{}, "id IN (?)", ids)
 	return errors.WithStack(result.Error)
 }

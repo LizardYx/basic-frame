@@ -23,7 +23,7 @@ func (a *Button) Create(c *gin.Context) {
 		ginx.ResError(c, item, err)
 		return
 	}
-	item.SetCreator(ginx.GetUserID(c))
+	item.SetCreator(ginx.GetUserID(c), &item)
 	result, err := a.ButtonBll.Create(c, item)
 	if err != nil {
 		ginx.ResError(c, item, err)
@@ -41,6 +41,7 @@ func (a *Button) Update(c *gin.Context) {
 	}
 
 	item.ID = ginx.ParseParamID(c, "id")
+	item.SetCreator(ginx.GetUserID(c), &item)
 	if err := a.ButtonBll.UpdateButtonPre(c, item); err != nil {
 		ginx.ResError(c, item, err)
 		return

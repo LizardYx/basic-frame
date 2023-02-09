@@ -62,6 +62,11 @@ func (a *RestfulApi) UpdateByUUID(uuid string, item map[string]interface{}) erro
 }
 
 func (a *RestfulApi) Delete(id uint64) error {
-	result := mysql.DB.Model(&entity.RestfulApi{}).Delete(&entity.RestfulApi{}, id)
+	result := mysql.DB.Model(&entity.RestfulApi{}).Unscoped().Delete(&entity.RestfulApi{}, id)
+	return errors.WithStack(result.Error)
+}
+
+func (a *RestfulApi) BatchDelete(ids []uint64) error {
+	result := mysql.DB.Model(&entity.RestfulApi{}).Unscoped().Delete(&entity.RestfulApi{}, "id IN (?)", ids)
 	return errors.WithStack(result.Error)
 }

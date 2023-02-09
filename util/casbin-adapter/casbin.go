@@ -100,7 +100,7 @@ func (a *CasbinAdapter) LoadRolePolicy(model casbinModel.Model) error {
 
 			// 获取角色关联页面的Api集合
 			if len(roleInfo.Menus) != 0 {
-				if menuTrees, err := a.MenuModel.GetRoleRestfulApis(roleInfo.Menus.GetIDs()); err != nil {
+				if menuTrees, err := a.MenuModel.GetMenusRestfulApis(roleInfo.Menus.GetIDs()); err != nil {
 					return errors.WithStack(err)
 				} else if len(*menuTrees) != 0 {
 					// 获取菜单页面关联的所有Api(去重)
@@ -110,7 +110,7 @@ func (a *CasbinAdapter) LoadRolePolicy(model casbinModel.Model) error {
 
 			// 获取角色关联按钮的Api集合
 			if len(roleInfo.Buttons) != 0 {
-				if buttonPres, err := a.ButtonModel.GetButtonRestfulApis(roleInfo.Buttons.GetIDs()); err != nil {
+				if buttonPres, err := a.ButtonModel.GetButtonsRestfulApis(roleInfo.Buttons.GetIDs()); err != nil {
 					return errors.WithStack(err)
 				} else if len(*buttonPres) != 0 {
 					// 获取按钮关联的所有Api(去重)

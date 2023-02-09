@@ -63,8 +63,21 @@ func (a *Menu) Get(id uint64) (*schema.Menu, error) {
 	return item.ToSchemaMenu(), nil
 }
 
-// GetRoleRestfulApis 获取角色的RestfulApis信息
-func (a *Menu) GetRoleRestfulApis(ids []uint64) (*schema.MenuTrees, error) {
+// GetMenuRestfulApis 获取菜单的RestfulApis信息
+func (a *Menu) GetMenuRestfulApis(id uint64) (*schema.MenuTree, error) {
+	db := mysql.DB.Model(&entity.Menu{}).Where("id = ?", id).Preload("RestfulApis")
+
+	var item entity.Menu
+	if ok, err := mysql.FindOne(db, &item); err != nil {
+		return nil, errors.WithStack(err)
+	} else if !ok {
+		return nil, nil
+	}
+	return item.ToSchemaMenuTree(), nil
+}
+
+// GetMenusRestfulApis 获取多个菜单的RestfulApis信息
+func (a *Menu) GetMenusRestfulApis(ids []uint64) (*schema.MenuTrees, error) {
 	db := mysql.DB.Model(&entity.Menu{}).Where("id IN (?)", ids).Preload("RestfulApis")
 
 	var items entity.Menus
@@ -73,6 +86,18 @@ func (a *Menu) GetRoleRestfulApis(ids []uint64) (*schema.MenuTrees, error) {
 	}
 	menuTrees := items.ToSchemaMenuTrees()
 	return &menuTrees, nil
+}
+
+func (a *Menu) GetMenuBtnRestfulApis(id uint64) (*schema.MenuTree, error) {
+	db := mysql.DB.Model(&entity.Menu{}).Where("id = ?", id).Preload("RestfulApis").Preload("Buttons")
+
+	var item entity.Menu
+	if ok, err := mysql.FindOne(db, &item); err != nil {
+		return nil, errors.WithStack(err)
+	} else if !ok {
+		return nil, nil
+	}
+	return item.ToSchemaMenuTree(), nil
 }
 
 func (a *Menu) Create(item schema.Menu) (*common.IDResult, error) {

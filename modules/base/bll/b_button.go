@@ -28,7 +28,7 @@ func (a *Button) Query(c *gin.Context, params schema.ButtonQueryParam) (*schema.
 
 func (a *Button) Create(c *gin.Context, item schema.ButtonPre) (*common.IDResult, error) {
 	// 初始化按钮UUID
-	item = item.InitUUID()
+	a.InitUUID(&item, true)
 
 	// 按钮参数验证
 	if err := a.BtnPreParamsCheck(&item); err != nil {
@@ -42,6 +42,19 @@ func (a *Button) Create(c *gin.Context, item schema.ButtonPre) (*common.IDResult
 func (a *Button) Get(c *gin.Context, id uint64) (*schema.Button, error) {
 	// 获取指定按钮信息
 	item, err := a.ButtonModel.Get(id)
+	if err != nil {
+		return nil, errors.WithMessage(err, "获取按钮信息失败")
+	} else if item == nil {
+		return nil, errors.New("未找到该按钮")
+	}
+
+	return item, nil
+}
+
+// GetButtonAndRestfulApis 获取按钮和按钮的RestfulApi信息
+func (a *Button) GetButtonAndRestfulApis(c *gin.Context, id uint64) (*schema.ButtonPre, error) {
+	// 获取指定按钮信息
+	item, err := a.ButtonModel.GetButtonRestfulApis(id)
 	if err != nil {
 		return nil, errors.WithMessage(err, "获取按钮信息失败")
 	} else if item == nil {
@@ -96,18 +109,56 @@ func (a *Button) BatchUpdate(c *gin.Context, items schema.Buttons) error {
 }
 
 // UpdateButtonRestfulApis 更新按钮关联的Restful接口信息
-func (a *Button) UpdateButtonRestfulApis(c *gin.Context, id uint64, item schema.RestfulApis) error {
+func (a *Button) UpdateButtonRestfulApis(c *gin.Context, id uint64, items schema.RestfulApis) error {
 	// 检查按钮是否存在
-	if _, err := a.Get(c, id); err != nil {
+	buttonPre, err := a.GetButtonAndRestfulApis(c, id)
+	if err != nil {
 		return err
 	}
 
-	// 更新按钮关联的Restful接口信息
-	return a.ButtonModel.UpdateButtonRestfulApis(id, item)
+	return mysql.DB.Transaction(func(tx *gorm.DB) error {
+		// 新增Restful接口信息,并更新按钮和Restful接口的关联
+		if err = a.ButtonModel.UpdateButtonRestfulApis(id, items); err != nil {
+			return errors.WithMessage(err, "新增Restful接口信息失败")
+		}
+
+		// 更新Restful接口信息
+		for _, item := range items {
+			if item.ID != 0 {
+				if err = a.RestfulApiModel.UpdateByID(item.ID, map[string]interface{}{
+					"method": item.Method,
+					"path":   item.Path,
+					"memo":   item.Memo,
+				}); err != nil {
+					return errors.WithMessage(err, "更新Restful接口信息失败")
+				}
+			}
+		}
+
+		// 删除Restful接口信息
+		var currentApiUUIDs = items.GetUUID()
+		for _, restfulApi := range buttonPre.RestfulApis {
+			if !common.ContainsString(currentApiUUIDs, restfulApi.UUID) {
+				// 如果该Restful接口UUID不存在了，则删除
+				if err = a.RestfulApiModel.Delete(restfulApi.ID); err != nil {
+					return errors.WithMessage(err, "删除Restful接口信息失败")
+				}
+			}
+		}
+		return nil
+	})
 }
 
 // UpdateButtonPre 更新按钮基础信息、按钮关联的Restful接口信息、指定Restful接口基础信息
 func (a *Button) UpdateButtonPre(c *gin.Context, item schema.ButtonPre) error {
+	// 初始化按钮信息
+	a.InitUUID(&item, false)
+
+	// 按钮参数验证
+	if err := a.BtnPreParamsCheck(&item); err != nil {
+		return err
+	}
+
 	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
 		// 更新按钮基础信息
 		if err := a.Update(c, item.ID, *item.ToSchemaButton()); err != nil {
@@ -117,21 +168,6 @@ func (a *Button) UpdateButtonPre(c *gin.Context, item schema.ButtonPre) error {
 		// 更新按钮关联的Restful接口信息
 		if err := a.UpdateButtonRestfulApis(c, item.ID, item.RestfulApis); err != nil {
 			return err
-		}
-
-		// 更新指定Restful接口基础信息
-		if len(item.RestfulApis) != 0 {
-			for _, restfulApiInfo := range item.RestfulApis {
-				if restfulApiInfo.ID != 0 {
-					if err := a.RestfulApiModel.UpdateByID(restfulApiInfo.ID, map[string]interface{}{
-						"method": restfulApiInfo.Method,
-						"path":   restfulApiInfo.Path,
-						"memo":   restfulApiInfo.Memo,
-					}); err != nil {
-						return err
-					}
-				}
-			}
 		}
 		return nil
 	})
@@ -144,11 +180,6 @@ func (a *Button) UpdateButtonPre(c *gin.Context, item schema.ButtonPre) error {
 
 // Delete 删除按钮和按钮调用的Api
 func (a *Button) Delete(c *gin.Context, id uint64) error {
-	// 检查按钮是否存在
-	if _, err := a.Get(c, id); err != nil {
-		return err
-	}
-
 	// 检查按钮是否有子项
 	if ButtonQueryResult, err := a.ButtonModel.Query(schema.ButtonQueryParam{
 		PaginationParam: common.PaginationParam{
@@ -161,9 +192,29 @@ func (a *Button) Delete(c *gin.Context, id uint64) error {
 		return errors.New("有子按钮，请勿删除")
 	}
 
-	// 删除按钮和按钮关联的Api
-	if err := a.ButtonModel.Delete(id); err != nil {
-		return errors.WithMessage(err, "删除按钮失败")
+	// 获取按钮信息和按钮的RestfulApi信息
+	buttonPre, err := a.GetButtonAndRestfulApis(c, id)
+	if err != nil {
+		return err
+	}
+
+	// 删除按钮和按钮关联的Api信息
+	err = mysql.DB.Transaction(func(tx *gorm.DB) error {
+		// 删除按钮的RestfulApi信息
+		for _, restfulApi := range buttonPre.RestfulApis {
+			if err = a.RestfulApiModel.Delete(restfulApi.ID); err != nil {
+				return err
+			}
+		}
+
+		// 删除按钮信息
+		if err = a.ButtonModel.Delete(id); err != nil {
+			return errors.WithMessage(err, "删除按钮失败")
+		}
+		return nil
+	})
+	if err != nil {
+		return err
 	}
 	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
 	return nil
@@ -203,4 +254,25 @@ func (a *Button) BtnPreParamsCheck(item *schema.ButtonPre) error {
 		}
 	}
 	return nil
+}
+
+// InitUUID 初始化按钮、restfulApi 的UUID数据
+func (a *Button) InitUUID(item *schema.ButtonPre, isCreate bool) {
+	if item.UUID == "" {
+		item.ID = 0
+		item.UUID = common.GetUUID()
+	} else if isCreate {
+		item.ID = 0
+	}
+	for _, restfulApi := range item.RestfulApis {
+		if restfulApi.UUID == "" {
+			restfulApi.ID = 0
+			restfulApi.UUID = common.GetUUID()
+		} else if isCreate {
+			restfulApi.ID = 0
+		}
+	}
+	for _, sonButton := range item.SonButtons {
+		a.InitUUID(sonButton, isCreate)
+	}
 }

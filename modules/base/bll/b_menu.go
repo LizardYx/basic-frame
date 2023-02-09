@@ -130,6 +130,28 @@ func (a *Menu) Get(c *gin.Context, id uint64) (*schema.Menu, error) {
 	return item, nil
 }
 
+func (a *Menu) GetMenuRestfulApis(c *gin.Context, id uint64) (*schema.MenuTree, error) {
+	item, err := a.MenuModel.GetMenuRestfulApis(id)
+	if err != nil {
+		return nil, errors.WithMessage(err, "获取菜单信息失败")
+	} else if item == nil {
+		return nil, errors.New("未找到菜单信息")
+	}
+
+	return item, nil
+}
+
+func (a *Menu) GetMenuBtnRestfulApis(c *gin.Context, id uint64) (*schema.MenuTree, error) {
+	item, err := a.MenuModel.GetMenuBtnRestfulApis(id)
+	if err != nil {
+		return nil, errors.WithMessage(err, "获取菜单信息失败")
+	} else if item == nil {
+		return nil, errors.New("未找到菜单信息")
+	}
+
+	return item, nil
+}
+
 func (a *Menu) Create(c *gin.Context, item schema.Menu) (*common.IDResult, error) {
 	item.UUID = common.GetUUID()
 	return a.MenuModel.Create(item)
@@ -180,11 +202,6 @@ func (a *Menu) BatchUpdateMenus(c *gin.Context, items schema.Menus) error {
 
 // Delete 删除菜单、菜单调用的Api关联以及菜单的按钮
 func (a *Menu) Delete(c *gin.Context, id uint64) error {
-	// 查询该菜单是否存在
-	if _, err := a.Get(c, id); err != nil {
-		return err
-	}
-
 	// 查询菜单是否有子项
 	if MenuQueryResult, err := a.MenuModel.Query(schema.MenuQueryParam{
 		PaginationParam: common.PaginationParam{
@@ -197,8 +214,48 @@ func (a *Menu) Delete(c *gin.Context, id uint64) error {
 		return errors.New("该菜单含有子项，请先删除子项")
 	}
 
-	// 删除菜单、菜单调用的Api关联以及菜单的按钮
-	if err := a.MenuModel.Delete(id); err != nil {
+	// 获取菜单、菜单按钮及菜单RestfulApi的信息
+	menuTree, err := a.GetMenuBtnRestfulApis(c, id)
+	if err != nil {
+		return err
+	}
+
+	err = mysql.DB.Transaction(func(tx *gorm.DB) error {
+		// 获取菜单所有的按钮ID
+		var buttonIDs []uint64
+		menuTree.GetButtonIDs(&buttonIDs)
+
+		// 获取菜单的按钮和按钮的RestfulApi信息
+		var buttonPres *schema.ButtonPres
+		if buttonPres, err = a.ButtonModel.GetButtonsRestfulApis(buttonIDs); err != nil {
+			return errors.New("获取按钮信息失败")
+		} else {
+			// 删除按钮的RestfulApi信息
+			btnRestfulApis := buttonPres.GetRestfulApis()
+			if err = a.RestfulApiModel.BatchDelete(btnRestfulApis.GetIDs()); err != nil {
+				return errors.New("删除按钮的RestfulApi信息失败")
+			}
+
+			// 删除菜单的按钮信息
+			if err = a.ButtonModel.BatchDelete(buttonIDs); err != nil {
+				return errors.New("删除按钮信息失败")
+			}
+		}
+
+		// 删除菜单的RestfulApi信息
+		for _, restfulApi := range menuTree.RestfulApis {
+			if err = a.RestfulApiModel.Delete(restfulApi.ID); err != nil {
+				return errors.New("删除菜单的RestfulApi信息失败")
+			}
+		}
+
+		// 删除菜单信息
+		if err = a.MenuModel.Delete(id); err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
 		return err
 	}
 	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
@@ -289,9 +346,7 @@ func (a *Menu) createButtons(c *gin.Context, MenuID uint64, parentID *uint64, li
 				// 创建按钮及按钮关联的Api
 				fmt.Println("创建按钮及按钮关联的Api:", item.Name)
 				item.ID = 0
-				if item.UUID == "" {
-					item.UUID = common.GetUUID()
-				}
+				item.UUID = common.GetUUID()
 				for _, restfulApi := range item.RestfulApis {
 					restfulApi.ID = 0
 					if restfulApi.UUID == "" {
@@ -311,7 +366,7 @@ func (a *Menu) createButtons(c *gin.Context, MenuID uint64, parentID *uint64, li
 				if err != nil {
 					return errors.New("查询按钮是否存在失败")
 				} else if len(ButtonQueryResult.Data) != 0 {
-					// 更新按钮的Api信息
+					// 更新或新增按钮的Api信息
 					if len(item.RestfulApis) != 0 {
 						if err = a.UpdateRestfulApis(c, &item.RestfulApis); err != nil {
 							return errors.New(fmt.Sprintf("更新按钮: %s 关联的Api失败", item.Name))
@@ -327,9 +382,6 @@ func (a *Menu) createButtons(c *gin.Context, MenuID uint64, parentID *uint64, li
 					// 创建按钮及按钮关联的Api
 					fmt.Println("创建按钮及按钮关联的Api:", item.Name)
 					item.ID = 0
-					if item.UUID == "" {
-						item.UUID = common.GetUUID()
-					}
 					for _, restfulApi := range item.RestfulApis {
 						restfulApi.ID = 0
 						if restfulApi.UUID == "" {
@@ -360,16 +412,7 @@ func (a *Menu) QueryMenuTree() (*schema.MenuTrees, error) {
 }
 
 func (a *Menu) CreateMenuTree(c *gin.Context, item schema.MenuTree) (*common.IDResult, error) {
-	item.ID = 0
-	if item.UUID == "" {
-		item.UUID = common.GetUUID()
-	}
-	for _, restfulApi := range item.RestfulApis {
-		restfulApi.ID = 0
-		if restfulApi.UUID == "" {
-			restfulApi.UUID = common.GetUUID()
-		}
-	}
+	a.InitUUID(&item, true)
 	return a.MenuModel.CreateMenuTree(item)
 }
 
@@ -413,6 +456,7 @@ func (a *Menu) UpdateRestfulApis(c *gin.Context, items *schema.RestfulApis) erro
 		if item.UUID == "" {
 			// 创建restfulApi
 			item.ID = 0
+			item.UUID = common.GetUUID()
 			if IDResult, err := a.RestfulApiModel.Create(*item); err != nil {
 				return err
 			} else {
@@ -519,7 +563,7 @@ func (a *Menu) UpdatePermissionTree(c *gin.Context, item schema.PermissionTree) 
 							return errors.New(fmt.Sprintf("更新可禁用字段: %s 失败", disabledField.KeyName))
 						}
 					} else {
-						// 新增可禁用字段
+						// 新增可禁用字段(使用已有的UUID)
 						disabledField.Creator = ginx.GetUserID(c)
 						if _, err = a.DisabledFieldModel.Create(*disabledField); err != nil {
 							return errors.New(fmt.Sprintf("创建可禁用字段: %s 失败", disabledField.KeyName))
@@ -616,4 +660,23 @@ func (a *Menu) MenuParamsCheck(c *gin.Context, item *schema.Menu) error {
 	}
 
 	return nil
+}
+
+func (a *Menu) InitUUID(item *schema.MenuTree, isCreate bool) {
+	if item.UUID == "" {
+		item.ID = 0
+		item.UUID = common.GetUUID()
+	} else if isCreate {
+		item.ID = 0
+	}
+	for _, restfulApi := range item.RestfulApis {
+		if restfulApi.UUID == "" {
+			restfulApi.UUID = common.GetUUID()
+		} else if isCreate {
+			restfulApi.ID = 0
+		}
+	}
+	for _, sonMenu := range item.SonMenus {
+		a.InitUUID(sonMenu, isCreate)
+	}
 }
