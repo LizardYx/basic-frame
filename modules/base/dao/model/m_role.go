@@ -62,14 +62,14 @@ func (a *Role) Query(params schema.RoleQueryParam) (*schema.RoleQueryResult, err
 		return nil, errors.WithStack(err)
 	}
 	qr := &schema.RoleQueryResult{
-		Data:       list.ToSchemaRoles(),
+		Data:       list.ToSchemaRolePres(),
 		PageResult: paginationResult,
 	}
 	return qr, nil
 }
 
 func (a *Role) Get(id uint64) (*schema.Role, error) {
-	db := mysql.DB.Model(&entity.Role{}).Where("id = ?", id).Preload(clause.Associations)
+	db := mysql.DB.Model(&entity.Role{}).Where("id = ?", id)
 
 	var item entity.Role
 	if ok, err := mysql.FindOne(db, &item); err != nil {
@@ -80,8 +80,20 @@ func (a *Role) Get(id uint64) (*schema.Role, error) {
 	return item.ToSchemaRole(), nil
 }
 
-func (a *Role) Create(item schema.Role) (*common.IDResult, error) {
-	eitem := entity.SchemaRole(item).ToRole()
+func (a *Role) GetPre(id uint64) (*schema.RolePre, error) {
+	db := mysql.DB.Model(&entity.Role{}).Where("id = ?", id).Preload(clause.Associations)
+
+	var item entity.Role
+	if ok, err := mysql.FindOne(db, &item); err != nil {
+		return nil, errors.WithStack(err)
+	} else if !ok {
+		return nil, nil
+	}
+	return item.ToSchemaRolePre(), nil
+}
+
+func (a *Role) Create(item schema.RolePre) (*common.IDResult, error) {
+	eitem := entity.SchemaRolePre(item).ToRole()
 	result := mysql.DB.Create(&eitem)
 	return &common.IDResult{ID: eitem.ID}, errors.WithStack(result.Error)
 }

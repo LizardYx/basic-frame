@@ -286,17 +286,17 @@ func (a *User) Delete(c *gin.Context, id uint64) error {
 // ---------------------------------------- User Organization --------------------------------------
 
 // GetMenuTreesInfo 获取菜单树顶层结构
-func (a *User) GetMenuTreesInfo(MenuTrees *schema.MenuTrees, parentId *uint64, menus schema.Menus, buttons schema.Buttons) error {
+func (a *User) GetMenuTreesInfo(MenuTrees *schema.MenuPres, parentId *uint64, menus schema.Menus, buttons schema.Buttons) error {
 	for _, menu := range menus {
 		if menu.ShowStatus == consts.BaseShowStatusDisabled {
 			continue
 		}
 		if *menu.ParentID == *parentId {
-			newMenuTree := schema.MenuTree{
+			newMenuTree := schema.MenuPre{
 				Menu:        *menu,
 				RestfulApis: make(schema.RestfulApis, 0),
 				Buttons:     make(schema.ButtonPres, 0),
-				SonMenus:    make(schema.MenuTrees, 0),
+				SonMenus:    make(schema.MenuPres, 0),
 			}
 			// 获取该菜单的按钮树
 			parentId := uint64(0)
@@ -334,10 +334,10 @@ func (a *User) GetButtonTreesInfo(buttonTrees *schema.ButtonPres, menuId uint64,
 }
 
 // GetMenuTree 获取用户菜单树
-func (a *User) GetMenuTree(c *gin.Context) (*schema.MenuTrees, error) {
+func (a *User) GetMenuTree(c *gin.Context) (*schema.MenuPres, error) {
 	var menus schema.Menus
 	var buttons schema.Buttons
-	menuTrees := make(schema.MenuTrees, 0)
+	menuTrees := make(schema.MenuPres, 0)
 	if ginx.GetUserName(c) == consts.AdminName {
 		// 如果是超管用户,获取用户所有的菜单和按钮
 		if menuQueryResult, err := a.MenuModel.Query(schema.MenuQueryParam{
@@ -410,7 +410,7 @@ func (a *User) GetMenuTree(c *gin.Context) (*schema.MenuTrees, error) {
 	if err := a.GetMenuTreesInfo(&menuTrees, &parentId, menus, buttons); err != nil {
 		return &menuTrees, err
 	}
-	return menuTrees.Init().SortMenuTrees(), nil
+	return menuTrees.Init().SortMenuPres(), nil
 }
 
 func (a *User) GetUserAllRoleIds(c *gin.Context, userID uint64) (*[]uint64, error) {

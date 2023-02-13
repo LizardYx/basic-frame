@@ -21,10 +21,6 @@ type SecurityLevel struct {
 func (a SecurityLevel) Init() *SecurityLevel {
 	if len(a.Roles) == 0 {
 		a.Roles = make(Roles, 0)
-	} else {
-		for index, _ := range a.Roles {
-			a.Roles[index].Init()
-		}
 	}
 	return &a
 }

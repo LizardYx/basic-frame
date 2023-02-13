@@ -53,10 +53,23 @@ func (a *Role) Get(c *gin.Context, id uint64) (*schema.Role, error) {
 	return item, nil
 }
 
-// GetAll 获取角色信息(包含菜单、按钮是否选中)
-func (a *Role) GetAll(c *gin.Context, id uint64) (*schema.Role, error) {
+// GetPre 获取角色所有信息(包含菜单、按钮、禁用字段)
+func (a *Role) GetPre(c *gin.Context, id uint64) (*schema.RolePre, error) {
 	// 获取角色详情
-	item, err := a.Get(c, id)
+	item, err := a.RoleModel.GetPre(id)
+	if err != nil {
+		return nil, errors.WithMessage(err, "获取角色信息失败")
+	} else if item == nil {
+		return nil, errors.New("角色不存在")
+	}
+
+	return item, nil
+}
+
+// GetPreWithSelect 获取角色所有信息(包含菜单、按钮、禁用字段。以及菜单、按钮是否为全选)
+func (a *Role) GetPreWithSelect(c *gin.Context, id uint64) (*schema.RolePre, error) {
+	// 获取角色所有信息
+	item, err := a.GetPre(c, id)
 	if err != nil {
 		return nil, err
 	}
@@ -93,7 +106,7 @@ func (a *Role) GetAll(c *gin.Context, id uint64) (*schema.Role, error) {
 	return item, nil
 }
 
-func (a *Role) Create(c *gin.Context, item schema.Role) (*common.IDResult, error) {
+func (a *Role) Create(c *gin.Context, item schema.RolePre) (*common.IDResult, error) {
 	// 检查前端传入的参数是否允许
 	if err := a.RoleDetailInfoCheck(c, &item); err != nil {
 		return &common.IDResult{}, err
@@ -167,7 +180,7 @@ func (a *Role) UpdateRoleDisabledFields(c *gin.Context, id uint64, items schema.
 }
 
 // UpdateDetails 更新角色基本信息、角色和菜单的关联、角色和按钮的关联、角色和可禁用字段的关联
-func (a *Role) UpdateDetails(c *gin.Context, item schema.Role) error {
+func (a *Role) UpdateDetails(c *gin.Context, item schema.RolePre) error {
 	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
 		// 检查前端传入的参数是否允许
 		if err := a.RoleDetailInfoCheck(c, &item); err != nil {
@@ -175,7 +188,7 @@ func (a *Role) UpdateDetails(c *gin.Context, item schema.Role) error {
 		}
 
 		// 更新角色基本信息
-		if err := a.Update(c, item.ID, item); err != nil {
+		if err := a.Update(c, item.ID, *item.ToRole()); err != nil {
 			return err
 		}
 
@@ -229,7 +242,7 @@ func (a *Role) UpdateAuditorType(c *gin.Context, id uint64, item schema.UpdateAu
 			}
 		}
 
-		// 获取角色信息
+		// 获取角色基本信息
 		roleInfo, err := a.Get(c, id)
 		if err != nil {
 			return err
@@ -252,7 +265,7 @@ func (a *Role) UpdateAuditorType(c *gin.Context, id uint64, item schema.UpdateAu
 // UserAddRole 给用户添加角色
 func (a *Role) UserAddRole(c *gin.Context, roleID uint64, userIDs []uint64) error {
 	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
-		// 获取角色详情
+		// 获取角色基本信息
 		item, err := a.Get(c, roleID)
 		if err != nil {
 			return err
@@ -277,7 +290,7 @@ func (a *Role) UserAddRole(c *gin.Context, roleID uint64, userIDs []uint64) erro
 // UserRemoveRole 移除用户的指定角色
 func (a *Role) UserRemoveRole(c *gin.Context, roleID uint64, userIDs []uint64) error {
 	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
-		// 获取角色详情
+		// 获取角色基本信息
 		roleInfo, err := a.Get(c, roleID)
 		if err != nil {
 			return err
@@ -300,7 +313,7 @@ func (a *Role) UserRemoveRole(c *gin.Context, roleID uint64, userIDs []uint64) e
 
 // Delete 删除角色
 func (a *Role) Delete(c *gin.Context, id uint64) error {
-	// 检查角色是否存在
+	// 获取角色基本信息
 	if oldItem, err := a.Get(c, id); err != nil {
 		return err
 	} else if oldItem.AuditorTypes != "" {
@@ -385,7 +398,7 @@ func (a *Role) Delete(c *gin.Context, id uint64) error {
 
 // ---------------------------------------- Params  Validate --------------------------------------
 
-func (a *Role) RoleDetailInfoCheck(c *gin.Context, item *schema.Role) error {
+func (a *Role) RoleDetailInfoCheck(c *gin.Context, item *schema.RolePre) error {
 	// 检查角色名称是否为空
 	item.Name = strings.TrimSpace(item.Name)
 	if item.Name == "" {

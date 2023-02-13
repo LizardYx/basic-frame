@@ -13,7 +13,8 @@ import (
 )
 
 var ButtonBll = &Button{
-	ButtonModel: model.ButtonModel,
+	ButtonModel:     model.ButtonModel,
+	RestfulApiModel: model.RestfulApiModel,
 }
 
 type Button struct {

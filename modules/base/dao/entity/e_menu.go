@@ -23,9 +23,9 @@ func (a SchemaMenus) ToMenu() *Menus {
 	return item
 }
 
-type SchemaMenuTree schema.MenuTree
+type SchemaMenuPre schema.MenuPre
 
-func (a SchemaMenuTree) ToMenu() *Menu {
+func (a SchemaMenuPre) ToMenu() *Menu {
 	item := new(Menu)
 	_ = common.Copy(a, item)
 	return item
@@ -68,16 +68,16 @@ func (a Menus) ToSchemaMenus() schema.Menus {
 	return list
 }
 
-func (a Menu) ToSchemaMenuTree() *schema.MenuTree {
-	item := new(schema.MenuTree)
+func (a Menu) ToSchemaMenuPre() *schema.MenuPre {
+	item := new(schema.MenuPre)
 	_ = common.Copy(a, item)
 	return item
 }
 
-func (a Menus) ToSchemaMenuTrees() schema.MenuTrees {
-	list := make(schema.MenuTrees, len(a))
+func (a Menus) ToSchemaMenuPres() schema.MenuPres {
+	list := make(schema.MenuPres, len(a))
 	for i, item := range a {
-		list[i] = item.ToSchemaMenuTree().Init()
+		list[i] = item.ToSchemaMenuPre().Init()
 	}
-	return *list.SortMenuTrees()
+	return *list.SortMenuPres()
 }

@@ -23,6 +23,22 @@ func (a SchemaRoles) ToRole() *Roles {
 	return item
 }
 
+type SchemaRolePre schema.RolePre
+
+func (a SchemaRolePre) ToRole() *Role {
+	item := new(Role)
+	_ = common.Copy(a, item)
+	return item
+}
+
+type SchemaRolePres schema.RolePre
+
+func (a SchemaRolePres) ToRole() *Roles {
+	item := new(Roles)
+	_ = common.Copy(a, item)
+	return item
+}
+
 type Role struct {
 	ID             uint64          `gorm:"primaryKey,autoIncrement;"`
 	Name           string          `gorm:"index;default:'';not null;unique;"` // 角色名称
@@ -43,6 +59,12 @@ type Role struct {
 func (a Role) ToSchemaRole() *schema.Role {
 	item := new(schema.Role)
 	_ = common.Copy(a, item)
+	return item
+}
+
+func (a Role) ToSchemaRolePre() *schema.RolePre {
+	item := new(schema.RolePre)
+	_ = common.Copy(a, item)
 	item = item.Init()
 	return item
 }
@@ -53,6 +75,14 @@ func (a Roles) ToSchemaRoles() schema.Roles {
 	list := make(schema.Roles, len(a))
 	for i, item := range a {
 		list[i] = item.ToSchemaRole()
+	}
+	return list
+}
+
+func (a Roles) ToSchemaRolePres() schema.RolePres {
+	list := make(schema.RolePres, len(a))
+	for i, item := range a {
+		list[i] = item.ToSchemaRolePre()
 	}
 	return list
 }

@@ -19,10 +19,16 @@ import (
 )
 
 var MenuBll = &Menu{
-	MenuModel: model.MenuModel,
+	ButtonBll:          ButtonBll,
+	MenuModel:          model.MenuModel,
+	ButtonModel:        model.ButtonModel,
+	RestfulApiModel:    model.RestfulApiModel,
+	DisabledFieldModel: model.DisabledFieldModel,
+	SystemConfigModel:  model.SystemConfigModel,
 }
 
 type Menu struct {
+	ButtonBll          *Button
 	MenuModel          *model.Menu
 	ButtonModel        *model.Button
 	RestfulApiModel    *model.RestfulApi
@@ -130,7 +136,7 @@ func (a *Menu) Get(c *gin.Context, id uint64) (*schema.Menu, error) {
 	return item, nil
 }
 
-func (a *Menu) GetMenuRestfulApis(c *gin.Context, id uint64) (*schema.MenuTree, error) {
+func (a *Menu) GetMenuRestfulApis(c *gin.Context, id uint64) (*schema.MenuPre, error) {
 	item, err := a.MenuModel.GetMenuRestfulApis(id)
 	if err != nil {
 		return nil, errors.WithMessage(err, "获取菜单信息失败")
@@ -141,7 +147,7 @@ func (a *Menu) GetMenuRestfulApis(c *gin.Context, id uint64) (*schema.MenuTree, 
 	return item, nil
 }
 
-func (a *Menu) GetMenuBtnRestfulApis(c *gin.Context, id uint64) (*schema.MenuTree, error) {
+func (a *Menu) GetMenuBtnRestfulApis(c *gin.Context, id uint64) (*schema.MenuPre, error) {
 	item, err := a.MenuModel.GetMenuBtnRestfulApis(id)
 	if err != nil {
 		return nil, errors.WithMessage(err, "获取菜单信息失败")
@@ -265,7 +271,7 @@ func (a *Menu) Delete(c *gin.Context, id uint64) error {
 // ----------------------------------------MenuTrees--------------------------------------
 
 // UpdateMenuTrees 更新前端菜单及按钮(包括菜单和按钮调用的api)
-func (a *Menu) UpdateMenuTrees(c *gin.Context, parentID *uint64, list schema.MenuTrees) error {
+func (a *Menu) UpdateMenuTrees(c *gin.Context, parentID *uint64, list schema.MenuPres) error {
 	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
 		for _, item := range list {
 			item.ParentID = parentID
@@ -345,14 +351,7 @@ func (a *Menu) createButtons(c *gin.Context, MenuID uint64, parentID *uint64, li
 			if item.UUID == "" {
 				// 创建按钮及按钮关联的Api
 				fmt.Println("创建按钮及按钮关联的Api:", item.Name)
-				item.ID = 0
-				item.UUID = common.GetUUID()
-				for _, restfulApi := range item.RestfulApis {
-					restfulApi.ID = 0
-					if restfulApi.UUID == "" {
-						restfulApi.UUID = common.GetUUID()
-					}
-				}
+				a.ButtonBll.InitUUID(item, true)
 				if BtnIDResult, err := a.ButtonModel.CreateButtonPre(*item); err != nil {
 					return errors.New(fmt.Sprintf("创建按钮: %s 及按钮关联的Api失败", item.Name))
 				} else {
@@ -367,27 +366,14 @@ func (a *Menu) createButtons(c *gin.Context, MenuID uint64, parentID *uint64, li
 					return errors.New("查询按钮是否存在失败")
 				} else if len(ButtonQueryResult.Data) != 0 {
 					// 更新或新增按钮的Api信息
-					if len(item.RestfulApis) != 0 {
-						if err = a.UpdateRestfulApis(c, &item.RestfulApis); err != nil {
-							return errors.New(fmt.Sprintf("更新按钮: %s 关联的Api失败", item.Name))
-						}
-					}
-					// 更新按钮及按钮关联的Api
-					fmt.Println("更新按钮及按钮关联的Api:", item.Name)
 					item.ID = ButtonQueryResult.Data[0].ID
-					if err = a.ButtonModel.UpdateButtonPre(*item); err != nil {
-						return errors.New(fmt.Sprintf("更新按钮: %s 及按钮关联的Api失败", item.Name))
+					if err = a.ButtonBll.UpdateButtonPre(c, *item); err != nil {
+						return err
 					}
 				} else {
 					// 创建按钮及按钮关联的Api
 					fmt.Println("创建按钮及按钮关联的Api:", item.Name)
-					item.ID = 0
-					for _, restfulApi := range item.RestfulApis {
-						restfulApi.ID = 0
-						if restfulApi.UUID == "" {
-							restfulApi.UUID = common.GetUUID()
-						}
-					}
+					a.ButtonBll.InitUUID(item, true)
 					if BtnIDResult, err := a.ButtonModel.CreateButtonPre(*item); err != nil {
 						return errors.New(fmt.Sprintf("创建按钮: %s 及按钮关联的Api失败", item.Name))
 					} else {
@@ -407,11 +393,11 @@ func (a *Menu) createButtons(c *gin.Context, MenuID uint64, parentID *uint64, li
 }
 
 // QueryMenuTree 获取当前用户的菜单树
-func (a *Menu) QueryMenuTree() (*schema.MenuTrees, error) {
+func (a *Menu) QueryMenuTree() (*schema.MenuPres, error) {
 	return a.MenuModel.QueryMenuTree()
 }
 
-func (a *Menu) CreateMenuTree(c *gin.Context, item schema.MenuTree) (*common.IDResult, error) {
+func (a *Menu) CreateMenuTree(c *gin.Context, item schema.MenuPre) (*common.IDResult, error) {
 	a.InitUUID(&item, true)
 	return a.MenuModel.CreateMenuTree(item)
 }
@@ -427,12 +413,32 @@ func (a *Menu) UpdateMenuRestfulApis(c *gin.Context, id uint64, item schema.Rest
 	return a.MenuModel.UpdateMenuRestfulApis(id, item)
 }
 
-// UpdateMenuTree 更新菜单及菜单关联的Api
-func (a *Menu) UpdateMenuTree(c *gin.Context, item schema.MenuTree) error {
+// UpdateMenuTree 更新菜单及菜单关联的Api(新增、修改、删除Api信息)
+func (a *Menu) UpdateMenuTree(c *gin.Context, item schema.MenuPre) error {
 	return mysql.DB.Transaction(func(tx *gorm.DB) error {
-		// 更新菜单信息
+		// 更新菜单基本信息
 		if err := a.Update(c, item.ID, *item.ToSchemaMenu()); err != nil {
 			return err
+		}
+
+		// 获取菜单的Api信息,如果在新的菜单Api中不存在，则需要删除
+		if menuPre, err := a.GetMenuRestfulApis(c, item.ID); err != nil {
+			return err
+		} else if len(menuPre.RestfulApis) != 0 {
+			// 检查旧的Api是否依然在菜单中
+			var deletedApiIDs []uint64
+			newRestfulApiUUIDs := item.RestfulApis.GetUUID()
+			for _, restfulApi := range menuPre.RestfulApis {
+				if !common.ContainsString(newRestfulApiUUIDs, restfulApi.UUID) {
+					// 该Api在新的菜单接口中不存在,需要删除
+					deletedApiIDs = append(deletedApiIDs, restfulApi.ID)
+				}
+			}
+			if len(deletedApiIDs) != 0 {
+				if err = a.RestfulApiModel.BatchDelete(deletedApiIDs); err != nil {
+					return errors.WithMessage(err, "删除菜单的RestfulApi失败")
+				}
+			}
 		}
 
 		// 更新RestfulApi信息
@@ -497,13 +503,13 @@ func (a *Menu) UpdateRestfulApis(c *gin.Context, items *schema.RestfulApis) erro
 // GetPermissionTree 编辑权限树时调用的接口
 func (a *Menu) GetPermissionTree(c *gin.Context) (*schema.PermissionTree, error) {
 	permissionTree := &schema.PermissionTree{
-		MenuTrees:      make(schema.MenuTrees, 0),
+		MenuTrees:      make(schema.MenuPres, 0),
 		DisabledFields: make(schema.DisabledFields, 0),
 	}
 	if menuTrees, err := a.MenuModel.QueryMenuTree(); err != nil {
 		return permissionTree, errors.New("获取菜单树失败")
 	} else {
-		permissionTree.MenuTrees = *menuTrees.SortMenuTrees().Init()
+		permissionTree.MenuTrees = *menuTrees.SortMenuPres().Init()
 	}
 
 	if fieldResult, err := a.DisabledFieldModel.Query(schema.DisabledFieldQueryParam{}); err != nil {
@@ -524,7 +530,7 @@ func (a *Menu) UpdatePermissionTree(c *gin.Context, item schema.PermissionTree) 
 					parentId = nil
 				}
 			}
-			if err := a.UpdateMenuTrees(c, parentId, schema.MenuTrees{menuTree}); err != nil {
+			if err := a.UpdateMenuTrees(c, parentId, schema.MenuPres{menuTree}); err != nil {
 				return err
 			}
 		}
@@ -604,13 +610,13 @@ func (a *Menu) UpdatePermissionTreeFile(c *gin.Context) error {
 // GetPermissionTreeForCreateRole 创建角色时调用的接口
 func (a *Menu) GetPermissionTreeForCreateRole(c *gin.Context) (*schema.PermissionTree, error) {
 	permissionTree := &schema.PermissionTree{
-		MenuTrees:      make(schema.MenuTrees, 0),
+		MenuTrees:      make(schema.MenuPres, 0),
 		DisabledFields: make(schema.DisabledFields, 0),
 	}
 	if menuTrees, err := a.MenuModel.QueryMenuTreeForCreateRole(); err != nil {
 		return permissionTree, errors.New("获取菜单树失败")
 	} else {
-		permissionTree.MenuTrees = *menuTrees.SortMenuTrees().Init()
+		permissionTree.MenuTrees = *menuTrees.SortMenuPres().Init()
 	}
 
 	if fieldResult, err := a.DisabledFieldModel.Query(schema.DisabledFieldQueryParam{}); err != nil {
@@ -629,7 +635,7 @@ func (a *Menu) GetMenuJson(c *gin.Context) (*schema.MenuTreeJson, error) {
 	if permissionTree, err := a.GetPermissionTree(c); err != nil {
 		return &menuTreeJson, err
 	} else {
-		menuTreeJson.MenuTrees = *permissionTree.MenuTrees.SortMenuTrees()
+		menuTreeJson.MenuTrees = *permissionTree.MenuTrees.SortMenuPres()
 		menuTreeJson.DisabledFields = permissionTree.DisabledFields
 	}
 
@@ -662,7 +668,7 @@ func (a *Menu) MenuParamsCheck(c *gin.Context, item *schema.Menu) error {
 	return nil
 }
 
-func (a *Menu) InitUUID(item *schema.MenuTree, isCreate bool) {
+func (a *Menu) InitUUID(item *schema.MenuPre, isCreate bool) {
 	if item.UUID == "" {
 		item.ID = 0
 		item.UUID = common.GetUUID()

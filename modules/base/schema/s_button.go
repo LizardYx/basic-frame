@@ -11,7 +11,7 @@ type Button struct {
 	ID         uint64    `json:"id"`                         // 唯一标识
 	UUID       string    `json:"UUID"`                       // 前端组装菜单需要的
 	BtnID      int       `json:"btn_id" binding:"required"`  // 前端识别按钮用
-	Select     bool      `json:"select"`                     // 是否被选中(前端用于判断菜单是否被选中)
+	Select     bool      `json:"select"`                     // 是否全选(前端用于判断按钮的子按钮是否全部被选中)
 	Name       string    `json:"name" binding:"required"`    // 按钮名称
 	Icon       string    `json:"icon"`                       // 按钮图标
 	Class      string    `json:"class"`                      // 按钮样式
@@ -67,7 +67,7 @@ func (a Buttons) Init() *Buttons {
 	return &items
 }
 
-// ---------------------------------------- Response Struct --------------------------------------
+// ---------------------------------------- Pre Struct --------------------------------------
 
 type ButtonPre struct {
 	Button

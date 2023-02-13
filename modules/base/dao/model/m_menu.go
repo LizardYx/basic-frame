@@ -64,7 +64,7 @@ func (a *Menu) Get(id uint64) (*schema.Menu, error) {
 }
 
 // GetMenuRestfulApis 获取菜单的RestfulApis信息
-func (a *Menu) GetMenuRestfulApis(id uint64) (*schema.MenuTree, error) {
+func (a *Menu) GetMenuRestfulApis(id uint64) (*schema.MenuPre, error) {
 	db := mysql.DB.Model(&entity.Menu{}).Where("id = ?", id).Preload("RestfulApis")
 
 	var item entity.Menu
@@ -73,22 +73,22 @@ func (a *Menu) GetMenuRestfulApis(id uint64) (*schema.MenuTree, error) {
 	} else if !ok {
 		return nil, nil
 	}
-	return item.ToSchemaMenuTree(), nil
+	return item.ToSchemaMenuPre(), nil
 }
 
 // GetMenusRestfulApis 获取多个菜单的RestfulApis信息
-func (a *Menu) GetMenusRestfulApis(ids []uint64) (*schema.MenuTrees, error) {
+func (a *Menu) GetMenusRestfulApis(ids []uint64) (*schema.MenuPres, error) {
 	db := mysql.DB.Model(&entity.Menu{}).Where("id IN (?)", ids).Preload("RestfulApis")
 
 	var items entity.Menus
 	if err := db.Find(&items).Error; err != nil {
 		return nil, errors.WithStack(err)
 	}
-	menuTrees := items.ToSchemaMenuTrees()
+	menuTrees := items.ToSchemaMenuPres()
 	return &menuTrees, nil
 }
 
-func (a *Menu) GetMenuBtnRestfulApis(id uint64) (*schema.MenuTree, error) {
+func (a *Menu) GetMenuBtnRestfulApis(id uint64) (*schema.MenuPre, error) {
 	db := mysql.DB.Model(&entity.Menu{}).Where("id = ?", id).Preload("RestfulApis").Preload("Buttons")
 
 	var item entity.Menu
@@ -97,7 +97,7 @@ func (a *Menu) GetMenuBtnRestfulApis(id uint64) (*schema.MenuTree, error) {
 	} else if !ok {
 		return nil, nil
 	}
-	return item.ToSchemaMenuTree(), nil
+	return item.ToSchemaMenuPre(), nil
 }
 
 func (a *Menu) Create(item schema.Menu) (*common.IDResult, error) {
@@ -120,7 +120,7 @@ func (a *Menu) Delete(id uint64) error {
 // ----------------------------------------MenuTrees--------------------------------------
 
 // QueryMenuTree 获取所有的菜单树(包含禁用)
-func (a *Menu) QueryMenuTree() (*schema.MenuTrees, error) {
+func (a *Menu) QueryMenuTree() (*schema.MenuPres, error) {
 	db := mysql.DB.Model(&entity.Menu{}).Order("sequence DESC")
 	db.Where("parent_id IS NULL").
 		Preload(clause.Associations).
@@ -131,12 +131,12 @@ func (a *Menu) QueryMenuTree() (*schema.MenuTrees, error) {
 	if err := db.Find(&list).Error; err != nil {
 		return nil, errors.WithStack(err)
 	}
-	MenuTrees := list.ToSchemaMenuTrees()
+	MenuTrees := list.ToSchemaMenuPres()
 	return &MenuTrees, nil
 }
 
 // QueryMenuTreeForCreateRole 获取创建用户的菜单树(不包含禁用)
-func (a *Menu) QueryMenuTreeForCreateRole() (*schema.MenuTrees, error) {
+func (a *Menu) QueryMenuTreeForCreateRole() (*schema.MenuPres, error) {
 	db := mysql.DB.Model(&entity.Menu{}).Order("sequence DESC")
 	db.Where("parent_id IS NULL AND status = ?", consts.BaseStatusEnable).
 		Preload(clause.Associations).
@@ -147,15 +147,15 @@ func (a *Menu) QueryMenuTreeForCreateRole() (*schema.MenuTrees, error) {
 	if err := db.Find(&list).Error; err != nil {
 		return nil, errors.WithStack(err)
 	}
-	MenuTrees := list.ToSchemaMenuTrees()
+	MenuTrees := list.ToSchemaMenuPres()
 	return &MenuTrees, nil
 }
 
-func (a *Menu) CreateMenuTrees(items schema.MenuTrees) error {
+func (a *Menu) CreateMenuTrees(items schema.MenuPres) error {
 	return mysql.DB.Transaction(func(tx *gorm.DB) error {
 		db := mysql.DB.Model(&entity.Menu{})
 		for _, item := range items {
-			eitem := entity.SchemaMenuTree(*item).ToMenu()
+			eitem := entity.SchemaMenuPre(*item).ToMenu()
 			if err := db.Create(eitem).Error; err != nil {
 				return errors.WithStack(err)
 			}
@@ -164,8 +164,8 @@ func (a *Menu) CreateMenuTrees(items schema.MenuTrees) error {
 	})
 }
 
-func (a *Menu) CreateMenuTree(item schema.MenuTree) (*common.IDResult, error) {
-	eitem := entity.SchemaMenuTree(item).ToMenu()
+func (a *Menu) CreateMenuTree(item schema.MenuPre) (*common.IDResult, error) {
+	eitem := entity.SchemaMenuPre(item).ToMenu()
 	result := mysql.DB.Create(eitem)
 	return &common.IDResult{ID: eitem.ID}, errors.WithStack(result.Error)
 }

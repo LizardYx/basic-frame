@@ -6,26 +6,16 @@ import (
 )
 
 type Role struct {
-	ID             uint64         `json:"id"`                      // 唯一标识
-	Name           string         `json:"name" binding:"required"` // 角色名称
-	Sequence       int            `json:"sequence"`                // 排序值
-	Type           int            `json:"type" binding:"required"` // 角色类型(1.用户角色 2.组织角色 3.职位角色 4.用户组角色)
-	AuditorTypes   string         `json:"auditor_types"`           // 审核类型(逗号分隔)
-	Status         int            `json:"status"`                  // 状态(1:启用 2:禁用)
-	Memo           string         `json:"memo"`                    // 备注
-	Creator        uint64         `json:"creator"`                 // 创建者
-	CreatedAt      time.Time      `json:"created_at"`              // 创建时间
-	UpdatedAt      time.Time      `json:"updated_at"`              // 更新时间
-	Menus          Menus          `json:"menus"`                   // 角色能使用的菜单
-	Buttons        Buttons        `json:"buttons"`                 // 角色能使用的按钮
-	DisabledFields DisabledFields `json:"disabled_fields"`         // 角色禁用的字段
-}
-
-func (a Role) Init() *Role {
-	a.Menus = *a.Menus.Init()
-	a.Buttons = *a.Buttons.Init()
-	a.DisabledFields = *a.DisabledFields.Init()
-	return &a
+	ID           uint64    `json:"id"`                      // 唯一标识
+	Name         string    `json:"name" binding:"required"` // 角色名称
+	Sequence     int       `json:"sequence"`                // 排序值
+	Type         int       `json:"type" binding:"required"` // 角色类型(1.用户角色 2.组织角色 3.职位角色 4.用户组角色)
+	AuditorTypes string    `json:"auditor_types"`           // 审核类型(逗号分隔)
+	Status       int       `json:"status"`                  // 状态(1:启用 2:禁用)
+	Memo         string    `json:"memo"`                    // 备注
+	Creator      uint64    `json:"creator"`                 // 创建者
+	CreatedAt    time.Time `json:"created_at"`              // 创建时间
+	UpdatedAt    time.Time `json:"updated_at"`              // 更新时间
 }
 
 type RoleQueryParam struct {
@@ -47,11 +37,17 @@ type UpdateAuditorTypeParam struct {
 	AuditorType int `json:"auditor_type"` // 审核类型
 }
 
+type RoleQueryResult struct {
+	Data       RolePres
+	PageResult *common.PaginationResult
+}
+
 type Roles []*Role
 
-type RoleQueryResult struct {
-	Data       Roles
-	PageResult *common.PaginationResult
+func (a Roles) Init() *Roles {
+	items := make(Roles, 0)
+	items = append(items, a...)
+	return &items
 }
 
 func (a Roles) GetIDs() []uint64 {
@@ -62,11 +58,51 @@ func (a Roles) GetIDs() []uint64 {
 	return l
 }
 
-func (a Roles) Init() *Roles {
-	items := make(Roles, 0)
+// ---------------------------------------- Pre Struct --------------------------------------
+
+type RolePre struct {
+	Role
+	Menus          Menus          `json:"menus"`           // 角色能使用的菜单
+	Buttons        Buttons        `json:"buttons"`         // 角色能使用的按钮
+	DisabledFields DisabledFields `json:"disabled_fields"` // 角色禁用的字段
+}
+
+func (a RolePre) Init() *RolePre {
+	a.Menus = *a.Menus.Init()
+	a.Buttons = *a.Buttons.Init()
+	a.DisabledFields = *a.DisabledFields.Init()
+	return &a
+}
+
+func (a RolePre) ToRole() *Role {
+	item := new(Role)
+	_ = common.Copy(a, item)
+	return item
+}
+
+type RolePres []*RolePre
+
+func (a RolePres) Init() *RolePres {
+	items := make(RolePres, 0)
 
 	for _, role := range a {
 		items = append(items, role.Init())
 	}
 	return &items
+}
+
+func (a RolePres) GetIDs() []uint64 {
+	l := make([]uint64, len(a))
+	for i, j := range a {
+		l[i] = j.ID
+	}
+	return l
+}
+
+func (a RolePres) ToRole() Roles {
+	list := make(Roles, len(a))
+	for i, item := range a {
+		list[i] = item.ToRole()
+	}
+	return list
 }
