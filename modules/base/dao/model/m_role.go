@@ -23,6 +23,9 @@ func (a *Role) Query(params schema.RoleQueryParam) (*schema.RoleQueryResult, err
 	if v := params.IDs; v != "" {
 		db = db.Where("id IN (?)", strings.Split(v, ","))
 	}
+	if v := params.Name; v != "" {
+		db = db.Where("name = ?", v)
+	}
 	if v := params.Type; v != 0 {
 		db = db.Where("type=?", v)
 	}
@@ -37,9 +40,6 @@ func (a *Role) Query(params schema.RoleQueryParam) (*schema.RoleQueryResult, err
 	}
 	if v := params.Status; v != 0 {
 		db = db.Where("status=?", v)
-	}
-	if v := params.Name; v != "" {
-		db = db.Where("name = ?", v)
 	}
 	if v := params.Memo; v != "" {
 		db = db.Where("lower(memo) LIKE ?", "%"+strings.ToLower(v)+"%")

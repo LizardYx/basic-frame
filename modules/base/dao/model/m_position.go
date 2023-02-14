@@ -20,6 +20,9 @@ func (a *Position) Query(params schema.PositionQueryParam) (*schema.PositionQuer
 	if v := params.IDs; v != "" {
 		db = db.Where("id IN (?)", strings.Split(v, ","))
 	}
+	if v := params.Name; v != "" {
+		db = db.Where("name = ?", v)
+	}
 	if v := params.RoleID; v != 0 {
 		db = db.Where("role_id=?", v)
 	}
@@ -29,16 +32,9 @@ func (a *Position) Query(params schema.PositionQueryParam) (*schema.PositionQuer
 	if v := params.Status; v != 0 {
 		db = db.Where("status=?", v)
 	}
-	if v := params.Name; v != "" {
-		db = db.Where("name = ?", v)
-	}
 	if v := params.Memo; v != "" {
 		v = "%" + strings.ToLower(v) + "%"
 		db = db.Where("lower(memo) LIKE ?", v)
-	}
-	if v := strings.TrimSpace(params.QueryValue); v != "" {
-		v = "%" + strings.ToLower(v) + "%"
-		db = db.Where("lower(name) LIKE ? OR lower(memo) LIKE ?", v, v)
 	}
 	if v := params.SequenceSort; common.ContainsInt(consts.BaseSortSlice, v) {
 		if v == consts.BaseAscSort {
@@ -49,7 +45,13 @@ func (a *Position) Query(params schema.PositionQueryParam) (*schema.PositionQuer
 	} else {
 		db.Order("id DESC")
 	}
-
+	if v := strings.TrimSpace(params.QueryValue); v != "" {
+		v = "%" + strings.ToLower(v) + "%"
+		db = db.Where("lower(name) LIKE ? OR lower(memo) LIKE ?", v, v)
+	}
+	if params.FindAll {
+		params.Pagination = false
+	}
 	var list entity.Positions
 	paginationResult, err := mysql.Paginate(db, params.PaginationParam, &list)
 	if err != nil {

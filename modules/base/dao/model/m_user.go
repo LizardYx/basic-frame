@@ -50,6 +50,10 @@ func (a *User) Query(params schema.UserQueryParam) (*schema.UserQueryResult, err
 			Select("user_id").
 			Where("position_id IN (?)", strings.Split(v, ",")))
 	}
+	if v := params.AuditorTypes; v != "" {
+		// TODO:
+	}
+
 	if v := params.RoleID; v != 0 {
 		db.Where("id IN (?)", mysql.DB.Table("user_role").
 			Select("user_id").
@@ -76,20 +80,8 @@ func (a *User) Query(params schema.UserQueryParam) (*schema.UserQueryResult, err
 	if v := params.ShowDetails; v {
 		db.Preload(clause.Associations)
 	}
-	if v := params.QueryValue; v != "" {
-		v = "%" + strings.ToLower(v) + "%"
-		db.Where("lower(user_name) LIKE ? OR id IN (?)", v, mysql.DB.Table("user_extend_info").
-			Select("user_id").
-			Where("lower(real_name) LIKE ? OR lower(mobile_phone) LIKE ? OR lower(qq_account) LIKE ? OR lower(email) LIKE ?", v, v, v, v))
-	}
 	if v := params.OmitPassword; v {
 		db.Omit("password")
-	}
-	if v := params.FindAll; v {
-		params.PaginationParam.Pagination = false
-	}
-	if v := params.FindDeleted; v {
-		db = db.Unscoped()
 	}
 	if v := params.SequenceSort; common.ContainsInt(consts.BaseSortSlice, v) {
 		if v == consts.BaseAscSort {
@@ -99,6 +91,18 @@ func (a *User) Query(params schema.UserQueryParam) (*schema.UserQueryResult, err
 		}
 	} else {
 		db.Order("id DESC")
+	}
+	if v := params.QueryValue; v != "" {
+		v = "%" + strings.ToLower(v) + "%"
+		db.Where("lower(user_name) LIKE ? OR id IN (?)", v, mysql.DB.Table("user_extend_info").
+			Select("user_id").
+			Where("lower(real_name) LIKE ? OR lower(mobile_phone) LIKE ? OR lower(qq_account) LIKE ? OR lower(email) LIKE ?", v, v, v, v))
+	}
+	if v := params.FindAll; v {
+		params.PaginationParam.Pagination = false
+	}
+	if v := params.FindDeleted; v {
+		db = db.Unscoped()
 	}
 
 	var list entity.Users

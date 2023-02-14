@@ -31,11 +31,17 @@ func (a *Menu) Query(params schema.MenuQueryParam) (*schema.MenuQueryResult, err
 	if v := params.ParentID; v != 0 {
 		db.Where("parent_id=?", v)
 	}
+	if v := params.Router; v != "" {
+		db.Where("router=?", v)
+	}
 	if v := params.Status; v != 0 {
 		db.Where("status=?", v)
 	}
 	if v := params.ShowStatus; v != 0 {
 		db.Where("show_status=?", v)
+	}
+	if params.FindAll {
+		params.Pagination = false
 	}
 	db.Order("id DESC")
 

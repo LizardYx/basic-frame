@@ -22,20 +22,26 @@ func (a *SecurityLevel) Query(params schema.SecurityLevelQueryParam) (*schema.Se
 	if v := params.IDs; v != "" {
 		db = db.Where("id IN (?)", strings.Split(v, ","))
 	}
-	if v := params.Status; v != 0 {
-		db = db.Where("status=?", v)
-	}
-	if v := params.Name; v != "" {
-		db = db.Where("lower(name) LIKE ?", "%"+strings.ToLower(v)+"%")
-	}
 	if v := params.RoleIDs; v != "" {
 		db.Where("id IN (?)", mysql.DB.Table("security_level_role").
 			Select("security_level_id").
 			Where("role_id IN (?)", strings.Split(v, ",")))
 	}
+	if v := params.Name; v != "" {
+		db = db.Where("lower(name) LIKE ?", "%"+strings.ToLower(v)+"%")
+	}
+	if v := params.Status; v != 0 {
+		db = db.Where("status=?", v)
+	}
+	if v := params.ShowDetails; v {
+		db = db.Preload("Roles")
+	}
 	if v := params.QueryValue; v != "" {
 		v = "%" + strings.ToLower(v) + "%"
 		db.Where("lower(name) LIKE ? OR lower(memo) LIKE ?", v, v)
+	}
+	if params.FindAll {
+		params.Pagination = false
 	}
 	db.Order("id DESC")
 
@@ -53,6 +59,18 @@ func (a *SecurityLevel) Query(params schema.SecurityLevelQueryParam) (*schema.Se
 
 func (a *SecurityLevel) Get(id uint64) (*schema.SecurityLevel, error) {
 	db := mysql.DB.Model(&entity.SecurityLevel{}).Where("id = ?", id)
+
+	var item entity.SecurityLevel
+	if ok, err := mysql.FindOne(db, &item); err != nil {
+		return nil, errors.WithStack(err)
+	} else if !ok {
+		return nil, nil
+	}
+	return item.ToSchemaSecurityLevel(), nil
+}
+
+func (a *SecurityLevel) GetPre(id uint64) (*schema.SecurityLevel, error) {
+	db := mysql.DB.Model(&entity.SecurityLevel{}).Where("id = ?", id).Preload("Roles")
 
 	var item entity.SecurityLevel
 	if ok, err := mysql.FindOne(db, &item); err != nil {

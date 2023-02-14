@@ -43,6 +43,9 @@ func (a *Organization) Query(params schema.OrganizationQueryParam) (*schema.Orga
 		v = "%" + strings.ToLower(v) + "%"
 		db.Where("lower(name) LIKE ? OR lower(memo) LIKE ?", v, v)
 	}
+	if params.FindAll {
+		params.Pagination = false
+	}
 	db.Order("id DESC")
 
 	var list entity.Organizations

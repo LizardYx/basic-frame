@@ -15,7 +15,7 @@ type UserGroup struct {
 }
 
 func (a *UserGroup) Query(params schema.UserGroupQueryParam) (*schema.UserGroupQueryResult, error) {
-	db := mysql.DB.Model(&entity.Role{})
+	db := mysql.DB.Model(&entity.UserGroup{})
 	if v := params.IDs; v != "" {
 		db = db.Where("id IN (?)", strings.Split(v, ","))
 	}

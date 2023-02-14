@@ -31,7 +31,7 @@ func (a *SecurityLevel) Query(c *gin.Context, params schema.SecurityLevelQueryPa
 
 func (a *SecurityLevel) Get(c *gin.Context, id uint64) (*schema.SecurityLevel, error) {
 	// 获取安全等级信息
-	item, err := a.SecurityLevelModel.Get(id)
+	item, err := a.SecurityLevelModel.GetPre(id)
 	if err != nil {
 		return nil, errors.WithMessage(err, "获取安全等级信息失败")
 	} else if item == nil {
