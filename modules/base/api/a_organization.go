@@ -43,6 +43,7 @@ func (a *Organization) Get(c *gin.Context) {
 	ginx.ResSuccess(c, "", item)
 }
 
+// Create 创建组织信息(职位没有ID且职位的组织ID为0，则创建职位)
 func (a *Organization) Create(c *gin.Context) {
 	var items schema.Organizations
 	if err := ginx.ParseJSON(c, &items); err != nil {

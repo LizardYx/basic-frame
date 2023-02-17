@@ -74,14 +74,16 @@ func (a Organization) Init() *Organization {
 	return &a
 }
 
-// GetRoleIds 获取组织、子组织的角色ID。isTop为True时，还包含当前组织的职位角色
+// GetRoleIds 获取组织、子组织的角色ID(包含子组织的职位角色ID。isTop为True时，还包含当前组织的职位角色)
 func (a Organization) GetRoleIds(roleIDs *[]uint64, isTop bool) {
-	if a.RoleID != 0 {
+	if a.RoleID != 0 && !common.ContainsUint64(*roleIDs, a.RoleID) {
 		*roleIDs = append(*roleIDs, a.RoleID)
 	}
 	if !isTop && len(a.Positions) != 0 {
 		for _, position := range a.Positions {
-			*roleIDs = append(*roleIDs, position.RoleID)
+			if position.RoleID != 0 && !common.ContainsUint64(*roleIDs, position.RoleID) {
+				*roleIDs = append(*roleIDs, position.RoleID)
+			}
 		}
 	}
 	if len(a.SonOrganizations) != 0 {
@@ -92,9 +94,37 @@ func (a Organization) GetRoleIds(roleIDs *[]uint64, isTop bool) {
 	return
 }
 
+// GetOrgRoleIDs 获取组织、子组织的角色ID
+func (a Organization) GetOrgRoleIDs(roleIDs *[]uint64) {
+	if a.RoleID != 0 && !common.ContainsUint64(*roleIDs, a.RoleID) {
+		*roleIDs = append(*roleIDs, a.RoleID)
+	}
+	if len(a.SonOrganizations) != 0 {
+		for _, sonOrganization := range a.SonOrganizations {
+			sonOrganization.GetOrgRoleIDs(roleIDs)
+		}
+	}
+}
+
+// GetPositionRoleIDs 获取组织所有的职位角色ID
+func (a Organization) GetPositionRoleIDs(roleIDs *[]uint64) {
+	for _, position := range a.Positions {
+		if position.RoleID != 0 && !common.ContainsUint64(*roleIDs, position.RoleID) {
+			*roleIDs = append(*roleIDs, position.RoleID)
+		}
+	}
+	for _, sonOrg := range a.SonOrganizations {
+		sonOrg.GetPositionRoleIDs(roleIDs)
+	}
+}
+
 // GetPositionIds 获取组织、子组织的职位ID集合
 func (a Organization) GetPositionIds(positionIDs *[]uint64) {
-	*positionIDs = append(*positionIDs, a.Positions.GetIDs()...)
+	for _, position := range a.Positions {
+		if position.ID != 0 && !common.ContainsUint64(*positionIDs, position.ID) {
+			*positionIDs = append(*positionIDs, position.ID)
+		}
+	}
 	if len(a.SonOrganizations) != 0 {
 		for _, sonOrganization := range a.SonOrganizations {
 			sonOrganization.GetPositionIds(positionIDs)

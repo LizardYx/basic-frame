@@ -73,12 +73,65 @@ func (a *User) Query(c *gin.Context, params schema.UserQueryParam) (*schema.User
 		}); err != nil {
 			return nil, errors.WithMessage(err, "获取用户列表失败")
 		} else if len(roleQueryResult.Data) != 0 {
-			var roleIDs []uint64
-			if params.RoleIDs != "" {
-				roleIDs = common.SplitStringToUint64(params.RoleIDs, ",")
+			for _, roleInfo := range roleQueryResult.Data {
+				if roleInfo.Type == consts.RoleTypeForUser {
+					// 如果是针对用户的角色
+					var roleIDs []uint64
+					if params.RoleIDs != "" {
+						roleIDs = common.SplitStringToUint64(params.RoleIDs, ",")
+					}
+					roleIDs = append(roleIDs, roleInfo.ID)
+					params.RoleIDs = common.UintSliceToString(roleIDs, ",")
+				} else if roleInfo.Type == consts.RoleTypeForOrg {
+					// 如果是针对组织的角色
+					if organizationQueryResult, err := a.OrganizationModel.Query(schema.OrganizationQueryParam{
+						RoleID:  roleInfo.ID,
+						Status:  consts.BaseStatusEnable,
+						FindAll: true,
+					}); err != nil {
+						return nil, errors.WithMessage(err, "获取组织列表失败")
+					} else if len(organizationQueryResult.Data) != 0 {
+						var orgIDs []uint64
+						if params.OrgIDs != "" {
+							orgIDs = common.SplitStringToUint64(params.OrgIDs, ",")
+						}
+						orgIDs = append(orgIDs, organizationQueryResult.Data.GetIDs()...)
+						params.OrgIDs = common.UintSliceToString(orgIDs, ",")
+					}
+				} else if roleInfo.Type == consts.RoleTypeForPosition {
+					// 如果是针对职位的角色
+					if positionQueryResult, err := a.PositionModel.Query(schema.PositionQueryParam{
+						RoleID:  roleInfo.ID,
+						Status:  consts.BaseStatusEnable,
+						FindAll: true,
+					}); err != nil {
+						return nil, errors.WithMessage(err, "获取职位列表失败")
+					} else if len(positionQueryResult.Data) != 0 {
+						var positionIDs []uint64
+						if params.PositionIDs != "" {
+							positionIDs = common.SplitStringToUint64(params.PositionIDs, ",")
+						}
+						positionIDs = append(positionIDs, positionQueryResult.Data.GetIDs()...)
+						params.PositionIDs = common.UintSliceToString(positionIDs, ",")
+					}
+				} else if roleInfo.Type == consts.RoleTypeForUserGroup {
+					// 如果是针对用户组的角色
+					if userGroupQueryResult, err := a.UserGroupModel.Query(schema.UserGroupQueryParam{
+						RoleID:  roleInfo.ID,
+						Status:  consts.BaseStatusEnable,
+						FindAll: true,
+					}); err != nil {
+						return nil, errors.WithMessage(err, "获取用户组列表失败")
+					} else if len(userGroupQueryResult.Data) != 0 {
+						var userGroupIDs []uint64
+						if params.UserGroupIDs != "" {
+							userGroupIDs = common.SplitStringToUint64(params.UserGroupIDs, ",")
+						}
+						userGroupIDs = append(userGroupIDs, userGroupQueryResult.Data.GetIDs()...)
+						params.UserGroupIDs = common.UintSliceToString(userGroupIDs, ",")
+					}
+				}
 			}
-			roleIDs = append(roleIDs, roleQueryResult.Data.GetIDs()...)
-			params.RoleIDs = common.UintSliceToString(roleIDs, ",")
 		}
 	}
 

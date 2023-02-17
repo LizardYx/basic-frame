@@ -17,6 +17,7 @@ type Menu struct {
 	MenuBll *bll.Menu
 }
 
+// BatchUpdateMenus 批量更新菜单基本信息
 func (a *Menu) BatchUpdateMenus(c *gin.Context) {
 	var items schema.Menus
 	if err := ginx.ParseJSON(c, &items); err != nil {
@@ -31,6 +32,7 @@ func (a *Menu) BatchUpdateMenus(c *gin.Context) {
 	ginx.ResOperateSuccess(c, items)
 }
 
+// Delete 删除菜单、菜单的Api、菜单按钮、菜单按钮的Api
 func (a *Menu) Delete(c *gin.Context) {
 	if err := a.MenuBll.Delete(c, ginx.ParseParamID(c, "id")); err != nil {
 		ginx.ResError(c, "", err)
@@ -41,7 +43,7 @@ func (a *Menu) Delete(c *gin.Context) {
 
 // ----------------------------------------PermissionTree--------------------------------------
 
-// GetPermissionTree 编辑权限树时调用的接口
+// GetPermissionTree 获取所有的菜单树、特殊接口(包含禁用)
 func (a *Menu) GetPermissionTree(c *gin.Context) {
 	permissionTree, err := a.MenuBll.GetPermissionTree(c)
 	if err != nil {
@@ -51,6 +53,7 @@ func (a *Menu) GetPermissionTree(c *gin.Context) {
 	ginx.ResSuccess(c, "", permissionTree)
 }
 
+// UpdatePermissionTree 菜单、按钮及可禁用字段的基础信息(创建、更新)。菜单和按钮调用的api(创建、更新、删除)
 func (a *Menu) UpdatePermissionTree(c *gin.Context) {
 	var item schema.PermissionTree
 	if err := ginx.ParseJSON(c, &item); err != nil {
@@ -80,7 +83,7 @@ func (a *Menu) DownloadPermissionTree(c *gin.Context) {
 	c.File(filePath)
 }
 
-// GetPermissionTreeForCreateRole 创建角色时调用的接口
+// GetPermissionTreeForCreateRole 获取所有的菜单树、按钮树、特殊接口(不包含禁用的菜单和按钮)
 func (a *Menu) GetPermissionTreeForCreateRole(c *gin.Context) {
 	permissionTree, err := a.MenuBll.GetPermissionTreeForCreateRole(c)
 	if err != nil {

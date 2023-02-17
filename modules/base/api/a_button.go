@@ -15,7 +15,7 @@ type Button struct {
 	ButtonBll *bll.Button
 }
 
-// Create 不支持包含子按钮的创建方式
+// Create 创建按钮和按钮关联的RestfulApi(不会创建子按钮)
 func (a *Button) Create(c *gin.Context) {
 	var item schema.ButtonPre
 
@@ -64,6 +64,7 @@ func (a *Button) BatchUpdate(c *gin.Context) {
 	ginx.ResOperateSuccess(c, items)
 }
 
+// Delete 删除按钮和按钮调用的Api
 func (a *Button) Delete(c *gin.Context) {
 	if err := a.ButtonBll.Delete(c, ginx.ParseParamID(c, "id")); err != nil {
 		ginx.ResError(c, "", err)

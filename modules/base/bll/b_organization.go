@@ -31,18 +31,20 @@ func (a *Organization) Query(c *gin.Context, params schema.OrganizationQueryPara
 	return a.OrganizationModel.Query(params)
 }
 
+// Get 获取组织的基本信息
 func (a *Organization) Get(c *gin.Context, id uint64) (*schema.Organization, error) {
-	// 获取组织详情
+	// 获取组织基本信息
 	item, err := a.OrganizationModel.Get(id)
 	if err != nil {
-		return nil, errors.WithMessage(err, "获取组织信息失败")
+		return nil, errors.WithMessage(err, "获取组织基本信息失败")
 	} else if item == nil {
 		return nil, errors.New("组织不存在")
 	}
 
-	return item.SortOrganization(), nil
+	return item, nil
 }
 
+// Create 创建组织信息(职位没有ID且职位的组织ID为0，则创建职位)
 func (a *Organization) Create(c *gin.Context, items schema.Organizations) error {
 	// 参数角色和职位是否被禁用
 	for index, item := range items {
@@ -243,15 +245,33 @@ func (a *Organization) GetOrganizationTreeWithUser(c *gin.Context) (*schema.Orga
 // ---------------------------------------- Params  Validate --------------------------------------
 
 func (a *Organization) OrgParamsCheck(c *gin.Context, item schema.Organization) error {
-	// 检查角色是否被禁用
+	// 检查组织角色是否被禁用、是否为非组织类型角色
 	var roleIds []uint64
-	item.GetRoleIds(&roleIds, true)
+	item.GetOrgRoleIDs(&roleIds)
 	if len(roleIds) != 0 {
 		if RoleQueryResult, err := a.RoleModel.Query(schema.RoleQueryParam{
-			IDs: common.UintSliceToString(roleIds, ","),
+			IDs:     common.UintSliceToString(roleIds, ","),
+			FindAll: true,
 		}); err != nil {
-			return errors.WithMessage(err, "检查角色是否被禁用失败")
+			return errors.WithMessage(err, "获取组织的角色信息失败")
+		} else if len(RoleQueryResult.Data) != len(roleIds) {
+			// 如果有未找到的角色ID
+			var notFoundRoleId []uint64
+			for _, roleId := range roleIds {
+				for index, roleInfo := range RoleQueryResult.Data {
+					if roleInfo.ID == roleId {
+						continue
+					}
+					if index == (len(RoleQueryResult.Data) - 1) {
+						notFoundRoleId = append(notFoundRoleId, roleId)
+					}
+				}
+			}
+			if len(notFoundRoleId) != 0 {
+				return errors.New(fmt.Sprintf("角色ID: %s 的角色未找到", common.UintSliceToString(notFoundRoleId, ",")))
+			}
 		} else if len(RoleQueryResult.Data) != 0 {
+			// 检查角色是否被禁用、是否为非组织类型
 			var disabledRoleName []string
 			var ErrTypeRoleName []string
 			for _, role := range RoleQueryResult.Data {
@@ -266,22 +286,53 @@ func (a *Organization) OrgParamsCheck(c *gin.Context, item schema.Organization) 
 				return errors.New(fmt.Sprintf("角色: %s 已被禁用", common.StringSliceToString(disabledRoleName, ",")))
 			}
 			if len(ErrTypeRoleName) != 0 {
-				return errors.New(fmt.Sprintf("角色: %s 的角色类型错误", common.StringSliceToString(ErrTypeRoleName, ",")))
+				return errors.New(fmt.Sprintf("角色: %s 的角色类型不是组织类型", common.StringSliceToString(ErrTypeRoleName, ",")))
 			}
-		} else if len(RoleQueryResult.Data) != len(roleIds) {
+		}
+	}
+
+	// 检查职位的角色是否被禁用、是否为非职位类型的角色
+	var positionRoleIDs []uint64
+	item.GetPositionRoleIDs(&positionRoleIDs)
+	if len(positionRoleIDs) != 0 {
+		if roleQueryResult, err := a.RoleModel.Query(schema.RoleQueryParam{
+			IDs:     common.UintSliceToString(positionRoleIDs, ","),
+			FindAll: true,
+		}); err != nil {
+			return errors.WithMessage(err, "获取职位的角色信息失败")
+		} else if len(roleQueryResult.Data) != len(positionRoleIDs) {
+			// 如果有未找到的角色ID
 			var notFoundRoleId []uint64
-			for _, roleId := range roleIds {
-				for index, roleInfo := range RoleQueryResult.Data {
-					if roleInfo.ID == roleId {
+			for _, positionRoleID := range positionRoleIDs {
+				for index, roleInfo := range roleQueryResult.Data {
+					if roleInfo.ID == positionRoleID {
 						continue
 					}
-					if index == (len(RoleQueryResult.Data) - 1) {
-						notFoundRoleId = append(notFoundRoleId, roleId)
+					if index == (len(roleQueryResult.Data) - 1) {
+						notFoundRoleId = append(notFoundRoleId, positionRoleID)
 					}
 				}
 			}
 			if len(notFoundRoleId) != 0 {
-				return errors.New(fmt.Sprintf("角色ID: %d 的角色未找到", common.UintSliceToString(notFoundRoleId, ",")))
+				return errors.New(fmt.Sprintf("角色ID: %s 的角色未找到", common.UintSliceToString(notFoundRoleId, ",")))
+			}
+		} else if len(roleQueryResult.Data) != 0 {
+			// 检查角色是否被禁用、是否为非职位类型
+			var disabledRoleName []string
+			var ErrTypeRoleName []string
+			for _, roleInfo := range roleQueryResult.Data {
+				if roleInfo.Status == consts.BaseStatusDisabled {
+					disabledRoleName = append(disabledRoleName, roleInfo.Name)
+				}
+				if roleInfo.Type != consts.RoleTypeForPosition {
+					ErrTypeRoleName = append(ErrTypeRoleName, roleInfo.Name)
+				}
+			}
+			if len(disabledRoleName) != 0 {
+				return errors.New(fmt.Sprintf("角色: %s 已被禁用", common.StringSliceToString(disabledRoleName, ",")))
+			}
+			if len(ErrTypeRoleName) != 0 {
+				return errors.New(fmt.Sprintf("角色: %s 的角色类型不是职位类型", common.StringSliceToString(ErrTypeRoleName, ",")))
 			}
 		}
 	}
@@ -291,8 +342,9 @@ func (a *Organization) OrgParamsCheck(c *gin.Context, item schema.Organization) 
 	item.GetPositionIds(&positionIds)
 	if len(positionIds) != 0 {
 		if PositionQueryResult, err := a.PositionModel.Query(schema.PositionQueryParam{
-			IDs:    common.UintSliceToString(positionIds, ","),
-			Status: consts.BaseStatusDisabled,
+			IDs:     common.UintSliceToString(positionIds, ","),
+			Status:  consts.BaseStatusDisabled,
+			FindAll: true,
 		}); err != nil {
 			return errors.WithMessage(err, "检查职位是否被禁用失败")
 		} else if len(PositionQueryResult.Data) != 0 {

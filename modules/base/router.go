@@ -79,7 +79,7 @@ func (a *Router) Register(api *gin.RouterGroup) {
 	OrganizationGroup := api.Group("base/organizations")
 	{
 		OrganizationGroup.GET("", a.OrganizationApi.Query)
-		OrganizationGroup.GET("/organization-tree/basic-info/:id", a.OrganizationApi.Get)
+		OrganizationGroup.GET(":id", a.OrganizationApi.Get)
 		OrganizationGroup.GET("/organization-tree/create-notifications", a.OrganizationApi.GetOrgTreeForCreateNotifications)
 		OrganizationGroup.GET("/organization-tree/create-user", a.OrganizationApi.GetOrganizationTreeForCreateUser)
 		OrganizationGroup.GET("/organization-tree/all", a.OrganizationApi.GetOrganizationTreeWithUser)

@@ -94,6 +94,7 @@ func (a *Menu) GetMenusRestfulApis(ids []uint64) (*schema.MenuPres, error) {
 	return &menuTrees, nil
 }
 
+// GetMenuBtnRestfulApis 获取菜单、菜单的所有按钮、菜单的RestfulApi信息
 func (a *Menu) GetMenuBtnRestfulApis(id uint64) (*schema.MenuPre, error) {
 	db := mysql.DB.Model(&entity.Menu{}).Where("id = ?", id).Preload("RestfulApis").Preload("Buttons")
 

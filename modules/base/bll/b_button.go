@@ -27,6 +27,7 @@ func (a *Button) Query(c *gin.Context, params schema.ButtonQueryParam) (*schema.
 	return a.ButtonModel.Query(params)
 }
 
+// Create 创建按钮和按钮关联的RestfulApi(不会创建子按钮)
 func (a *Button) Create(c *gin.Context, item schema.ButtonPre) (*common.IDResult, error) {
 	// 初始化按钮UUID
 	a.InitUUID(&item, true)

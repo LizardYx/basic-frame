@@ -106,6 +106,7 @@ func (a *Role) GetPreWithSelect(c *gin.Context, id uint64) (*schema.RolePre, err
 	return item, nil
 }
 
+// Create 创建角色
 func (a *Role) Create(c *gin.Context, item schema.RolePre) (*common.IDResult, error) {
 	// 检查前端传入的参数是否允许
 	if err := a.RoleDetailInfoCheck(c, &item); err != nil {

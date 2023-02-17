@@ -33,6 +33,7 @@ func (a *Role) Query(c *gin.Context) {
 	ginx.ResList(c, params, result.Data)
 }
 
+// Get 获取角色所有信息(包含菜单、按钮、禁用字段。以及菜单、按钮是否为全选)
 func (a *Role) Get(c *gin.Context) {
 	item, err := a.RoleBll.GetPreWithSelect(c, ginx.ParseParamID(c, "id"))
 	if err != nil {
@@ -42,6 +43,7 @@ func (a *Role) Get(c *gin.Context) {
 	ginx.ResSuccess(c, "", item)
 }
 
+// Create 创建角色
 func (a *Role) Create(c *gin.Context) {
 	var item schema.RolePre
 	if err := ginx.ParseJSON(c, &item); err != nil {
@@ -58,6 +60,7 @@ func (a *Role) Create(c *gin.Context) {
 	ginx.ResSuccess(c, item, result)
 }
 
+// Update 更新角色基本信息、角色和菜单的关联、角色和按钮的关联、角色和可禁用字段的关联
 func (a *Role) Update(c *gin.Context) {
 	var item schema.RolePre
 	if err := ginx.ParseJSON(c, &item); err != nil {
@@ -72,6 +75,7 @@ func (a *Role) Update(c *gin.Context) {
 	ginx.ResOperateSuccess(c, item)
 }
 
+// UpdateAuditorType 给角色添加审核类型
 func (a *Role) UpdateAuditorType(c *gin.Context) {
 	var item schema.UpdateAuditorTypeParam
 	if err := ginx.ParseJSON(c, &item); err != nil {
@@ -86,6 +90,7 @@ func (a *Role) UpdateAuditorType(c *gin.Context) {
 	ginx.ResOperateSuccess(c, item)
 }
 
+// Delete 删除角色
 func (a *Role) Delete(c *gin.Context) {
 	if err := a.RoleBll.Delete(c, ginx.ParseParamID(c, "id")); err != nil {
 		ginx.ResError(c, "", err)
@@ -94,6 +99,7 @@ func (a *Role) Delete(c *gin.Context) {
 	ginx.ResOperateSuccess(c, "")
 }
 
+// UserAddRole 给用户添加角色
 func (a *Role) UserAddRole(c *gin.Context) {
 	var userIDs []uint64
 	if err := ginx.ParseJSON(c, &userIDs); err != nil {
@@ -108,6 +114,7 @@ func (a *Role) UserAddRole(c *gin.Context) {
 	ginx.ResOperateSuccess(c, userIDs)
 }
 
+// UserRemoveRole 移除用户的指定角色
 func (a *Role) UserRemoveRole(c *gin.Context) {
 	var userIDs []uint64
 	if err := ginx.ParseJSON(c, &userIDs); err != nil {
@@ -122,8 +129,9 @@ func (a *Role) UserRemoveRole(c *gin.Context) {
 	ginx.ResOperateSuccess(c, userIDs)
 }
 
+// GetRolePermissionTree 获取角色的菜单树
 func (a *Role) GetRolePermissionTree(c *gin.Context) {
-	// 获取角色所有信息
+	// 获取角色所有信息(包含菜单、按钮、禁用字段)
 	item, err := a.RoleBll.GetPre(c, ginx.ParseParamID(c, "id"))
 	if err != nil {
 		ginx.ResError(c, "", err)

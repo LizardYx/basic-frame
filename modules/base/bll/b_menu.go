@@ -147,6 +147,7 @@ func (a *Menu) GetMenuRestfulApis(c *gin.Context, id uint64) (*schema.MenuPre, e
 	return item, nil
 }
 
+// GetMenuBtnRestfulApis 获取菜单、菜单的所有按钮、菜单的RestfulApi信息
 func (a *Menu) GetMenuBtnRestfulApis(c *gin.Context, id uint64) (*schema.MenuPre, error) {
 	item, err := a.MenuModel.GetMenuBtnRestfulApis(id)
 	if err != nil {
@@ -206,7 +207,7 @@ func (a *Menu) BatchUpdateMenus(c *gin.Context, items schema.Menus) error {
 	return nil
 }
 
-// Delete 删除菜单、菜单调用的Api关联以及菜单的按钮
+// Delete 删除菜单、菜单的Api、菜单按钮、菜单按钮的Api
 func (a *Menu) Delete(c *gin.Context, id uint64) error {
 	// 查询菜单是否有子项
 	if MenuQueryResult, err := a.MenuModel.Query(schema.MenuQueryParam{
@@ -270,7 +271,7 @@ func (a *Menu) Delete(c *gin.Context, id uint64) error {
 
 // ----------------------------------------MenuTrees--------------------------------------
 
-// UpdateMenuTrees 更新前端菜单及按钮(包括菜单和按钮调用的api)
+// UpdateMenuTrees 菜单及按钮的基础信息(创建、更新)。菜单和按钮调用的api(创建、更新、删除)
 func (a *Menu) UpdateMenuTrees(c *gin.Context, parentID *uint64, list schema.MenuPres) error {
 	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
 		for _, item := range list {
@@ -500,7 +501,7 @@ func (a *Menu) UpdateRestfulApis(c *gin.Context, items *schema.RestfulApis) erro
 
 // ----------------------------------------PermissionTree--------------------------------------
 
-// GetPermissionTree 编辑权限树时调用的接口
+// GetPermissionTree 获取所有的菜单树、特殊接口(包含禁用)
 func (a *Menu) GetPermissionTree(c *gin.Context) (*schema.PermissionTree, error) {
 	permissionTree := &schema.PermissionTree{
 		MenuTrees:      make(schema.MenuPres, 0),
@@ -520,6 +521,7 @@ func (a *Menu) GetPermissionTree(c *gin.Context) (*schema.PermissionTree, error)
 	return permissionTree, nil
 }
 
+// UpdatePermissionTree 菜单、按钮及可禁用字段的基础信息(创建、更新)。菜单和按钮调用的api(创建、更新、删除)
 func (a *Menu) UpdatePermissionTree(c *gin.Context, item schema.PermissionTree) error {
 	return mysql.DB.Transaction(func(tx *gorm.DB) error {
 		// 菜单树更新
@@ -607,7 +609,7 @@ func (a *Menu) UpdatePermissionTreeFile(c *gin.Context) error {
 	return nil
 }
 
-// GetPermissionTreeForCreateRole 创建角色时调用的接口
+// GetPermissionTreeForCreateRole 获取所有的菜单树、按钮树、特殊接口(不包含禁用的菜单和按钮)
 func (a *Menu) GetPermissionTreeForCreateRole(c *gin.Context) (*schema.PermissionTree, error) {
 	permissionTree := &schema.PermissionTree{
 		MenuTrees:      make(schema.MenuPres, 0),
@@ -629,6 +631,7 @@ func (a *Menu) GetPermissionTreeForCreateRole(c *gin.Context) (*schema.Permissio
 
 // ----------------------------------------MenuTreeJson--------------------------------------
 
+// GetMenuJson 获取菜单Json文件内容: 所有的菜单树、特殊接口(包含禁用)
 func (a *Menu) GetMenuJson(c *gin.Context) (*schema.MenuTreeJson, error) {
 	menuTreeJson := schema.MenuTreeJson{}
 	// 获取权限树

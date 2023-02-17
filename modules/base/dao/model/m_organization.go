@@ -60,6 +60,7 @@ func (a *Organization) Query(params schema.OrganizationQueryParam) (*schema.Orga
 	return qr, nil
 }
 
+// Get 获取组织的基本信息
 func (a *Organization) Get(id uint64) (*schema.Organization, error) {
 	db := mysql.DB.Model(&entity.Organization{}).Where("id = ?", id)
 
@@ -72,12 +73,14 @@ func (a *Organization) Get(id uint64) (*schema.Organization, error) {
 	return item.ToSchemaOrganization(), nil
 }
 
+// Create 创建组织信息(职位没有ID且职位的组织ID为0，则创建职位)
 func (a *Organization) Create(item schema.Organization) (*common.IDResult, error) {
 	eitem := entity.SchemaOrganization(item).ToOrganization()
 	result := mysql.DB.Create(&eitem)
 	return &common.IDResult{ID: eitem.ID}, errors.WithStack(result.Error)
 }
 
+// CreateOrganizations 创建组织信息(职位没有ID且职位的组织ID为0，则创建职位)
 func (a *Organization) CreateOrganizations(item schema.Organizations) error {
 	eitem := entity.SchemaOrganizations(item).ToOrganization()
 	result := mysql.DB.Create(&eitem)

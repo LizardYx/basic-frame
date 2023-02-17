@@ -90,6 +90,7 @@ func (a *Button) Create(item schema.Button) (*common.IDResult, error) {
 	return &common.IDResult{ID: eitem.ID}, errors.WithStack(result.Error)
 }
 
+// CreateButtonPre 创建按钮和按钮关联的RestfulApi(不会创建子按钮)
 func (a *Button) CreateButtonPre(item schema.ButtonPre) (*common.IDResult, error) {
 	eitem := entity.SchemaButtonPre(item).ToButton()
 	result := mysql.DB.Create(&eitem)
