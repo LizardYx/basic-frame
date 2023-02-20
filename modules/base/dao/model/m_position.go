@@ -64,6 +64,7 @@ func (a *Position) Query(params schema.PositionQueryParam) (*schema.PositionQuer
 	return qr, nil
 }
 
+// Get 获取职位基础信息
 func (a *Position) Get(id uint64) (*schema.Position, error) {
 	db := mysql.DB.Model(&entity.Position{}).Where("id = ?", id)
 
@@ -76,18 +77,26 @@ func (a *Position) Get(id uint64) (*schema.Position, error) {
 	return item.ToSchemaPosition(), nil
 }
 
+// Create 创建职位
 func (a *Position) Create(item schema.Position) (*common.IDResult, error) {
 	eitem := entity.SchemaPosition(item).ToPosition()
 	result := mysql.DB.Create(&eitem)
 	return &common.IDResult{ID: eitem.ID}, errors.WithStack(result.Error)
 }
 
+// UpdateByID 更新职位基础信息
 func (a *Position) UpdateByID(id uint64, item map[string]interface{}) error {
 	result := mysql.DB.Model(&entity.Position{}).Where("id = ?", id).Updates(item)
 	return errors.WithStack(result.Error)
 }
 
+// Delete 删除职位
 func (a *Position) Delete(id uint64) error {
 	result := mysql.DB.Model(&entity.Position{}).Delete(&entity.Position{}, id)
+	return errors.WithStack(result.Error)
+}
+
+func (a *Position) BatchDelete(ids []uint64) error {
+	result := mysql.DB.Model(&entity.Position{}).Delete(&entity.Position{}, "id IN (?)", ids)
 	return errors.WithStack(result.Error)
 }

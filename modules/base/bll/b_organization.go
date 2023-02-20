@@ -44,6 +44,19 @@ func (a *Organization) Get(c *gin.Context, id uint64) (*schema.Organization, err
 	return item, nil
 }
 
+// GetPre 获取组织、职位信息
+func (a *Organization) GetPre(c *gin.Context, id uint64, includeSonOrg bool) (*schema.Organization, error) {
+	// 获取组织、职位信息
+	item, err := a.OrganizationModel.GetPre(id, includeSonOrg)
+	if err != nil {
+		return nil, errors.WithMessage(err, "获取组织信息失败")
+	} else if item == nil {
+		return nil, errors.New("组织不存在")
+	}
+
+	return item, nil
+}
+
 // Create 创建组织信息(职位没有ID且职位的组织ID为0，则创建职位)
 func (a *Organization) Create(c *gin.Context, items schema.Organizations) error {
 	// 参数角色和职位是否被禁用
@@ -62,6 +75,7 @@ func (a *Organization) Create(c *gin.Context, items schema.Organizations) error 
 	return nil
 }
 
+// Update 更新组织的基础信息
 func (a *Organization) Update(c *gin.Context, id uint64, item schema.Organization) error {
 	// 检查参数正确性
 	if err := a.OrgParamsValidate(&item); err != nil {
@@ -74,18 +88,15 @@ func (a *Organization) Update(c *gin.Context, id uint64, item schema.Organizatio
 	}
 
 	// 检查组织是否存在
-	oldItem, err := a.OrganizationModel.Get(id)
-	if err != nil {
-		return errors.WithMessage(err, "获取组织信息失败")
-	} else if oldItem == nil {
-		return errors.New("组织不存在")
+	if _, err := a.Get(c, id); err != nil {
+		return err
 	}
 
 	// 更新组织信息
 	if *item.ParentID == 0 {
 		item.ParentID = nil
 	}
-	if err = a.OrganizationModel.UpdateByID(id, map[string]interface{}{
+	if err := a.OrganizationModel.UpdateByID(id, map[string]interface{}{
 		"name":      item.Name,
 		"role_id":   item.RoleID,
 		"sequence":  item.Sequence,
@@ -99,27 +110,13 @@ func (a *Organization) Update(c *gin.Context, id uint64, item schema.Organizatio
 	return nil
 }
 
-func (a *Organization) UpdateOrganizations(c *gin.Context, items schema.Organizations) error {
-	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
-		for _, item := range items {
-			if err := a.Update(c, item.ID, *item); err != nil {
-				return err
-			}
-		}
-		return nil
-	})
-	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
-	return err
-}
-
+// UserJoinOrganization 用户加入指定组织
 func (a *Organization) UserJoinOrganization(c *gin.Context, OrgID uint64, userIDs []uint64) error {
 	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
-		// 获取用户组信息
+		// 获取组织信息
 		OrgInfo, err := a.Get(c, OrgID)
 		if err != nil {
-			return errors.WithMessage(err, "获取组织信息失败")
-		} else if OrgInfo == nil {
-			return errors.New("组织不存在")
+			return err
 		}
 
 		// 更新用户和组织的关联关系
@@ -138,17 +135,16 @@ func (a *Organization) UserJoinOrganization(c *gin.Context, OrgID uint64, userID
 	return nil
 }
 
+// UserRemoveOrganization 用户移出指定组织
 func (a *Organization) UserRemoveOrganization(c *gin.Context, OrgID uint64, userIDs []uint64) error {
 	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
 		// 获取组织信息
 		OrgInfo, err := a.Get(c, OrgID)
 		if err != nil {
-			return errors.WithMessage(err, "获取组织信息失败")
-		} else if OrgInfo == nil {
-			return errors.New("组织不存在")
+			return err
 		}
 
-		// 将用户从组织中移除
+		// 将用户从组织中移出
 		for _, userID := range userIDs {
 			if err = a.UserModel.UserRemoveOrganization(userID, *OrgInfo); err != nil {
 				return errors.WithMessage(err, "将用户从组织中移除失败")
@@ -166,11 +162,9 @@ func (a *Organization) UserRemoveOrganization(c *gin.Context, OrgID uint64, user
 // Delete 删除组织和组织的职位
 func (a *Organization) Delete(c *gin.Context, id uint64) error {
 	// 检查组织是否存在
-	oldItem, err := a.OrganizationModel.Get(id)
+	organizationInfo, err := a.GetPre(c, id, false)
 	if err != nil {
-		return errors.WithMessage(err, "获取组织信息失败")
-	} else if oldItem == nil {
-		return errors.New("组织不存在")
+		return err
 	}
 
 	// 检查组织是否有子项
@@ -185,16 +179,26 @@ func (a *Organization) Delete(c *gin.Context, id uint64) error {
 		return errors.New("该组织有子级，请勿删除")
 	}
 
-	// 删除组织
-	if err = a.OrganizationModel.Delete(id); err != nil {
-		return errors.WithMessage(err, "删除组织失败")
-	}
+	// 删除组织和职位
+	err = mysql.DB.Transaction(func(tx *gorm.DB) error {
+		// 删除组织的职位
+		if err = a.PositionModel.BatchDelete(organizationInfo.Positions.GetIDs()); err != nil {
+			return errors.WithMessage(err, "删除组织的职位失败")
+		}
+
+		// 删除组织
+		if err = a.OrganizationModel.Delete(id); err != nil {
+			return errors.WithMessage(err, "删除组织失败")
+		}
+		return nil
+	})
 	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
 	return nil
 }
 
 // ----------------------------------------OrganizationTree--------------------------------------
 
+// GetOrganizationTree 获取组织树、职位列表(包含禁用的组织、职位)
 func (a *Organization) GetOrganizationTree(c *gin.Context) (*schema.Organizations, error) {
 	Organizations, err := a.OrganizationModel.GetOrganizationTree()
 	if err != nil {
@@ -203,6 +207,7 @@ func (a *Organization) GetOrganizationTree(c *gin.Context) (*schema.Organization
 	return Organizations.SortOrganizations(), nil
 }
 
+// GetOrganizationTreeForCreateUser 获取组织树、职位列表(不包含禁用的组织和职位)
 func (a *Organization) GetOrganizationTreeForCreateUser(c *gin.Context) (*schema.Organizations, error) {
 	Organizations, err := a.OrganizationModel.GetOrganizationTreeForCreateUser()
 	if err != nil {
@@ -211,6 +216,7 @@ func (a *Organization) GetOrganizationTreeForCreateUser(c *gin.Context) (*schema
 	return Organizations.SortOrganizations(), nil
 }
 
+// GetOrgTreeForCreateNotifications 获取组织树(不包含职位和禁用的组织)
 func (a *Organization) GetOrgTreeForCreateNotifications(c *gin.Context) (*schema.Organizations, error) {
 	Organizations, err := a.OrganizationModel.GetOrgTreeForCreateNotifications()
 	if err != nil {
@@ -219,8 +225,9 @@ func (a *Organization) GetOrgTreeForCreateNotifications(c *gin.Context) (*schema
 	return Organizations.SortOrganizations(), nil
 }
 
+// GetOrganizationTreeWithUser 获取包含用户的组织树、职位列表(不包含禁用的组织和职位)
 func (a *Organization) GetOrganizationTreeWithUser(c *gin.Context) (*schema.OrganizationTrees, error) {
-	// 获取组织、职位树
+	// 获取组织树、职位列表(不包含禁用的组织和职位)
 	Organizations, err := a.OrganizationModel.GetOrganizationTreeForCreateUser()
 	if err != nil {
 		return nil, errors.WithMessage(err, "获取组织结构失败")

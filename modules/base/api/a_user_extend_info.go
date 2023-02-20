@@ -15,6 +15,7 @@ type UserExtendInfo struct {
 	UserExtendInfoBll *bll.UserExtendInfo
 }
 
+// Update 更新用户扩展信息
 func (a *UserExtendInfo) Update(c *gin.Context) {
 	var item schema.UserExtendInfo
 	if err := ginx.ParseJSON(c, &item); err != nil {

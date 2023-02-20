@@ -29,7 +29,7 @@ type OrganizationQueryParam struct {
 	ParentID      uint64 `form:"parent_id"`
 	Status        int    `form:"status"`         // 状态(1:启用 2:禁用)
 	ShowPositions bool   `form:"show_positions"` // 是否显示组织的职位列表
-	ShowDetails   bool   `form:"show_details"`   // 是否显示组织树
+	ShowDetails   bool   `form:"show_details"`   // 是否显示组织树(获取组织树、职位列表.不包含禁用的组织和职位)
 	QueryValue    string `form:"queryValue"`     // 模糊搜索(搜索 组织名称/备注)
 	FindAll       bool   `form:"find_all"`       // 是否查询所有数据
 }

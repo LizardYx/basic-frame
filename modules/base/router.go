@@ -79,16 +79,14 @@ func (a *Router) Register(api *gin.RouterGroup) {
 	OrganizationGroup := api.Group("base/organizations")
 	{
 		OrganizationGroup.GET("", a.OrganizationApi.Query)
-		OrganizationGroup.GET(":id", a.OrganizationApi.Get)
-		OrganizationGroup.GET("/organization-tree/create-notifications", a.OrganizationApi.GetOrgTreeForCreateNotifications)
-		OrganizationGroup.GET("/organization-tree/create-user", a.OrganizationApi.GetOrganizationTreeForCreateUser)
-		OrganizationGroup.GET("/organization-tree/all", a.OrganizationApi.GetOrganizationTreeWithUser)
-		OrganizationGroup.GET("/organization-tree/edit", a.OrganizationApi.GetOrganizationTree)
+		OrganizationGroup.GET("/create-notifications", a.OrganizationApi.GetOrgTreeForCreateNotifications)
+		OrganizationGroup.GET("/create-user", a.OrganizationApi.GetOrganizationTreeForCreateUser)
+		OrganizationGroup.GET("/include-user", a.OrganizationApi.GetOrganizationTreeWithUser)
+		OrganizationGroup.GET("/edit", a.OrganizationApi.GetOrganizationTree)
 		OrganizationGroup.POST("", a.OrganizationApi.Create)
-		OrganizationGroup.PUT(":id/user-join", a.OrganizationApi.UserJoinOrganization)
-		OrganizationGroup.PUT(":id/user-remove", a.OrganizationApi.UserRemoveOrganization)
-		OrganizationGroup.PUT(":id", a.OrganizationApi.Update)
-		api.PUT("base/organizations", a.OrganizationApi.UpdateOrganizations)
+		OrganizationGroup.PUT("user-join/:id", a.OrganizationApi.UserJoinOrganization)
+		OrganizationGroup.PUT("user-remove/:id", a.OrganizationApi.UserRemoveOrganization)
+		OrganizationGroup.PUT("update-basic-info/:id", a.OrganizationApi.Update)
 		OrganizationGroup.DELETE(":id", a.OrganizationApi.Delete)
 	}
 
@@ -98,8 +96,8 @@ func (a *Router) Register(api *gin.RouterGroup) {
 		PositionGroup.GET(":id", a.PositionApi.Get)
 		PositionGroup.POST("", a.PositionApi.Create)
 		PositionGroup.PUT(":id", a.PositionApi.Update)
-		PositionGroup.PUT(":id/user-join", a.PositionApi.PositionAddUser)
-		PositionGroup.PUT(":id/user-remove", a.PositionApi.PositionRemoveUser)
+		PositionGroup.PUT("user-join/:id", a.PositionApi.PositionAddUser)
+		PositionGroup.PUT("user-remove/:id", a.PositionApi.PositionRemoveUser)
 		PositionGroup.DELETE(":id", a.PositionApi.Delete)
 	}
 
@@ -125,7 +123,7 @@ func (a *Router) Register(api *gin.RouterGroup) {
 		RoleGroup.DELETE(":id", a.RoleApi.Delete)
 	}
 
-	MenuGroup := api.Group("base/permission-tree")
+	MenuGroup := api.Group("base/menu")
 	{
 		MenuGroup.GET("/create-role", a.MenuApi.GetPermissionTreeForCreateRole)
 		MenuGroup.GET("/edit", a.MenuApi.GetPermissionTree)

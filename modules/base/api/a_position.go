@@ -31,6 +31,7 @@ func (a *Position) Query(c *gin.Context) {
 	ginx.ResList(c, params, result.Data)
 }
 
+// Get 获取职位基础信息
 func (a *Position) Get(c *gin.Context) {
 	item, err := a.PositionBll.Get(c, ginx.ParseParamID(c, "id"))
 	if err != nil {
@@ -40,6 +41,7 @@ func (a *Position) Get(c *gin.Context) {
 	ginx.ResSuccess(c, "", item)
 }
 
+// Create 创建职位
 func (a *Position) Create(c *gin.Context) {
 	var item schema.Position
 	if err := ginx.ParseJSON(c, &item); err != nil {
@@ -56,6 +58,7 @@ func (a *Position) Create(c *gin.Context) {
 	ginx.ResSuccess(c, item, result)
 }
 
+// Update 更新职位基础信息
 func (a *Position) Update(c *gin.Context) {
 	var item schema.Position
 	if err := ginx.ParseJSON(c, &item); err != nil {
@@ -70,6 +73,7 @@ func (a *Position) Update(c *gin.Context) {
 	ginx.ResOperateSuccess(c, item)
 }
 
+// PositionAddUser 新增用户职位信息
 func (a *Position) PositionAddUser(c *gin.Context) {
 	var userIDs []uint64
 	if err := ginx.ParseJSON(c, &userIDs); err != nil {
@@ -83,6 +87,7 @@ func (a *Position) PositionAddUser(c *gin.Context) {
 	ginx.ResOperateSuccess(c, userIDs)
 }
 
+// PositionRemoveUser 移出用户职位信息
 func (a *Position) PositionRemoveUser(c *gin.Context) {
 	var userIDs []uint64
 	if err := ginx.ParseJSON(c, &userIDs); err != nil {
@@ -96,6 +101,7 @@ func (a *Position) PositionRemoveUser(c *gin.Context) {
 	ginx.ResOperateSuccess(c, userIDs)
 }
 
+// Delete 删除职位
 func (a *Position) Delete(c *gin.Context) {
 	if err := a.PositionBll.Delete(c, ginx.ParseParamID(c, "id")); err != nil {
 		ginx.ResError(c, "", err)

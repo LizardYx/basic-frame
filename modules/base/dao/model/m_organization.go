@@ -37,7 +37,8 @@ func (a *Organization) Query(params schema.OrganizationQueryParam) (*schema.Orga
 		db = db.Preload("Positions")
 	}
 	if params.ShowDetails {
-		db = db.Preload(clause.Associations).Preload("SonOrganizations", PreloadOrganizationAllForCreateUser)
+		db = db.Preload("Positions", "status = 1").
+			Preload("SonOrganizations", PreloadOrganizationAllForCreateUser)
 	}
 	if v := params.QueryValue; v != "" {
 		v = "%" + strings.ToLower(v) + "%"
@@ -60,10 +61,26 @@ func (a *Organization) Query(params schema.OrganizationQueryParam) (*schema.Orga
 	return qr, nil
 }
 
-// Get 获取组织的基本信息
+// Get 获取组织基本信息
 func (a *Organization) Get(id uint64) (*schema.Organization, error) {
 	db := mysql.DB.Model(&entity.Organization{}).Where("id = ?", id)
 
+	var item entity.Organization
+	if ok, err := mysql.FindOne(db, &item); err != nil {
+		return nil, errors.WithStack(err)
+	} else if !ok {
+		return nil, nil
+	}
+	return item.ToSchemaOrganization(), nil
+}
+
+// GetPre 获取组织、职位信息
+func (a *Organization) GetPre(id uint64, includeSonOrg bool) (*schema.Organization, error) {
+	db := mysql.DB.Model(&entity.Organization{}).Where("id = ?", id).Preload("Positions")
+
+	if includeSonOrg {
+		db.Preload("SonOrganizations", PreloadOrganizationAll)
+	}
 	var item entity.Organization
 	if ok, err := mysql.FindOne(db, &item); err != nil {
 		return nil, errors.WithStack(err)
@@ -99,7 +116,7 @@ func (a *Organization) Delete(id uint64) error {
 
 // ----------------------------------------OrganizationTree-----------------------
 
-// GetOrganizationTree 获取组织树(包含禁用的组织)
+// GetOrganizationTree 获取组织树、职位列表(包含禁用的组织、职位)
 func (a *Organization) GetOrganizationTree() (*schema.Organizations, error) {
 	db := mysql.DB.Model(&entity.Organization{}).Order("id DESC")
 	db = db.
@@ -115,12 +132,12 @@ func (a *Organization) GetOrganizationTree() (*schema.Organizations, error) {
 	return &organizationTrees, nil
 }
 
-// GetOrganizationTreeForCreateUser 获取组织树(不包含禁用的组织)
+// GetOrganizationTreeForCreateUser 获取组织树、职位列表(不包含禁用的组织和职位)
 func (a *Organization) GetOrganizationTreeForCreateUser() (*schema.Organizations, error) {
 	db := mysql.DB.Model(&entity.Organization{}).Order("id DESC")
 	db = db.
 		Where("parent_id IS NULL AND status = 1").
-		Preload(clause.Associations).
+		Preload("Positions", "status = 1").
 		Preload("SonOrganizations", PreloadOrganizationAllForCreateUser)
 
 	var list entity.Organizations
@@ -154,7 +171,7 @@ func PreloadOrganizationAll(db *gorm.DB) *gorm.DB {
 }
 
 func PreloadOrganizationAllForCreateUser(db *gorm.DB) *gorm.DB {
-	return db.Preload(clause.Associations).
+	return db.Preload("Positions", "status = 1").
 		Preload("SonOrganizations", "status = 1", PreloadOrganizationAllForCreateUser)
 }
 

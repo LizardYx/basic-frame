@@ -30,10 +30,11 @@ func (a *Position) Query(c *gin.Context, params schema.PositionQueryParam) (*sch
 	return a.PositionModel.Query(params)
 }
 
+// Get 获取职位基础信息
 func (a *Position) Get(c *gin.Context, id uint64) (*schema.Position, error) {
 	item, err := a.PositionModel.Get(id)
 	if err != nil {
-		return nil, errors.WithMessage(err, "检查职位是否存在失败")
+		return nil, errors.WithMessage(err, "获取职位基础信息失败")
 	} else if item == nil {
 		return nil, errors.New("未找到该职位")
 	}
@@ -41,6 +42,7 @@ func (a *Position) Get(c *gin.Context, id uint64) (*schema.Position, error) {
 	return item, nil
 }
 
+// Create 创建职位
 func (a *Position) Create(c *gin.Context, item schema.Position) (*common.IDResult, error) {
 	// 检查角色ID和组织ID是否被禁用
 	if err := a.PositionParamsCheck(c, &item); err != nil {
@@ -56,24 +58,22 @@ func (a *Position) Create(c *gin.Context, item schema.Position) (*common.IDResul
 	return IDResult, nil
 }
 
+// Update 更新职位基础信息
 func (a *Position) Update(c *gin.Context, id uint64, item schema.Position) error {
 	// 检查职位是否存在
-	oldItem, err := a.PositionModel.Get(id)
-	if err != nil {
-		return errors.WithMessage(err, "检查职位是否存在失败")
-	} else if oldItem == nil {
-		return errors.New("未找到该职位")
+	if oldItem, err := a.Get(c, id); err != nil {
+		return err
 	} else {
 		item.OrganizationID = oldItem.OrganizationID
 	}
 
 	// 检查角色ID和组织ID是否被禁用
-	if err = a.PositionParamsCheck(c, &item); err != nil {
+	if err := a.PositionParamsCheck(c, &item); err != nil {
 		return err
 	}
 
 	// 更新职位信息
-	if err = a.PositionModel.UpdateByID(id, map[string]interface{}{
+	if err := a.PositionModel.UpdateByID(id, map[string]interface{}{
 		"name":     item.Name,
 		"role_id":  item.RoleID,
 		"sequence": item.Sequence,
@@ -86,6 +86,7 @@ func (a *Position) Update(c *gin.Context, id uint64, item schema.Position) error
 	return nil
 }
 
+// PositionAddUser 新增用户职位信息
 func (a *Position) PositionAddUser(c *gin.Context, positionID uint64, userIDs []uint64) error {
 	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
 		// 获取职位信息
@@ -109,6 +110,7 @@ func (a *Position) PositionAddUser(c *gin.Context, positionID uint64, userIDs []
 	return nil
 }
 
+// PositionRemoveUser 移出用户职位信息
 func (a *Position) PositionRemoveUser(c *gin.Context, positionID uint64, userIDs []uint64) error {
 	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
 		// 获取职位信息
@@ -132,17 +134,15 @@ func (a *Position) PositionRemoveUser(c *gin.Context, positionID uint64, userIDs
 	return nil
 }
 
+// Delete 删除职位
 func (a *Position) Delete(c *gin.Context, id uint64) error {
 	// 检查职位是否存在
-	oldItem, err := a.PositionModel.Get(id)
-	if err != nil {
-		return errors.WithMessage(err, "检查职位是否存在失败")
-	} else if oldItem == nil {
-		return errors.New("未找到该职位")
+	if _, err := a.Get(c, id); err != nil {
+		return err
 	}
 
-	// 删除角色
-	if err = a.PositionModel.Delete(id); err != nil {
+	// 删除职位
+	if err := a.PositionModel.Delete(id); err != nil {
 		return err
 	}
 	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)

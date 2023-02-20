@@ -58,6 +58,7 @@ func (a *Organization) Create(c *gin.Context) {
 	ginx.ResOperateSuccess(c, items)
 }
 
+// Update 更新组织的基础信息
 func (a *Organization) Update(c *gin.Context) {
 	var item schema.Organization
 	if err := ginx.ParseJSON(c, &item); err != nil {
@@ -72,20 +73,7 @@ func (a *Organization) Update(c *gin.Context) {
 	ginx.ResOperateSuccess(c, item)
 }
 
-func (a *Organization) UpdateOrganizations(c *gin.Context) {
-	var items schema.Organizations
-	if err := ginx.ParseJSON(c, &items); err != nil {
-		ginx.ResError(c, items, err)
-		return
-	}
-
-	if err := a.OrganizationBll.UpdateOrganizations(c, items); err != nil {
-		ginx.ResError(c, items, err)
-		return
-	}
-	ginx.ResOperateSuccess(c, items)
-}
-
+// Delete 删除组织和组织的职位
 func (a *Organization) Delete(c *gin.Context) {
 	if err := a.OrganizationBll.Delete(c, ginx.ParseParamID(c, "id")); err != nil {
 		ginx.ResError(c, "", err)
@@ -94,6 +82,7 @@ func (a *Organization) Delete(c *gin.Context) {
 	ginx.ResOperateSuccess(c, "")
 }
 
+// UserJoinOrganization 用户加入指定组织
 func (a *Organization) UserJoinOrganization(c *gin.Context) {
 	var items []uint64
 	if err := ginx.ParseJSON(c, &items); err != nil {
@@ -107,6 +96,7 @@ func (a *Organization) UserJoinOrganization(c *gin.Context) {
 	ginx.ResOperateSuccess(c, items)
 }
 
+// UserRemoveOrganization 用户移出指定组织
 func (a *Organization) UserRemoveOrganization(c *gin.Context) {
 	var items []uint64
 	if err := ginx.ParseJSON(c, &items); err != nil {
@@ -122,6 +112,7 @@ func (a *Organization) UserRemoveOrganization(c *gin.Context) {
 
 // ----------------------------------------OrganizationTree--------------------------------------
 
+// GetOrganizationTree 获取组织树、职位列表(包含禁用的组织、职位)
 func (a *Organization) GetOrganizationTree(c *gin.Context) {
 	Organizations, err := a.OrganizationBll.GetOrganizationTree(c)
 	if err != nil {
@@ -131,6 +122,7 @@ func (a *Organization) GetOrganizationTree(c *gin.Context) {
 	ginx.ResSuccess(c, "", Organizations)
 }
 
+// GetOrganizationTreeForCreateUser 获取组织树、职位列表(不包含禁用的组织和职位)
 func (a *Organization) GetOrganizationTreeForCreateUser(c *gin.Context) {
 	Organizations, err := a.OrganizationBll.GetOrganizationTreeForCreateUser(c)
 	if err != nil {
@@ -140,6 +132,7 @@ func (a *Organization) GetOrganizationTreeForCreateUser(c *gin.Context) {
 	ginx.ResSuccess(c, "", Organizations)
 }
 
+// GetOrgTreeForCreateNotifications 获取组织树(不包含职位和禁用的组织)
 func (a *Organization) GetOrgTreeForCreateNotifications(c *gin.Context) {
 	Organizations, err := a.OrganizationBll.GetOrgTreeForCreateNotifications(c)
 	if err != nil {
@@ -149,6 +142,7 @@ func (a *Organization) GetOrgTreeForCreateNotifications(c *gin.Context) {
 	ginx.ResSuccess(c, "", Organizations)
 }
 
+// GetOrganizationTreeWithUser 获取包含用户的组织树、职位列表(不包含禁用的组织和职位)
 func (a *Organization) GetOrganizationTreeWithUser(c *gin.Context) {
 	OrganizationTrees, err := a.OrganizationBll.GetOrganizationTreeWithUser(c)
 	if err != nil {
