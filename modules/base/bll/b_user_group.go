@@ -6,6 +6,7 @@ import (
 	"basic-frame/util/common"
 	"basic-frame/util/consts"
 	"basic-frame/util/mysql"
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/pkg/errors"
 	"gorm.io/gorm"
@@ -28,6 +29,7 @@ func (a *UserGroup) Query(c *gin.Context, params schema.UserGroupQueryParam) (*s
 	return a.UserGroupModel.Query(params)
 }
 
+// Get 获取用户组基本信息
 func (a *UserGroup) Get(c *gin.Context, id uint64) (*schema.UserGroup, error) {
 	item, err := a.UserGroupModel.Get(id)
 	if err != nil {
@@ -39,6 +41,7 @@ func (a *UserGroup) Get(c *gin.Context, id uint64) (*schema.UserGroup, error) {
 	return item, nil
 }
 
+// GetUserGroupUsers 获取指定用户组的用户列表
 func (a *UserGroup) GetUserGroupUsers(c *gin.Context, id uint64) (*schema.Users, error) {
 	UserQueryResult, err := a.UserModel.Query(schema.UserQueryParam{
 		UserGroupID:  id,
@@ -52,6 +55,7 @@ func (a *UserGroup) GetUserGroupUsers(c *gin.Context, id uint64) (*schema.Users,
 	return &UserQueryResult.Data, nil
 }
 
+// Create 创建用户组
 func (a *UserGroup) Create(c *gin.Context, item schema.UserGroup) (*common.IDResult, error) {
 	// 检查角色是否被禁用
 	if err := a.UserGroupParamsCheck(c, &item); err != nil {
@@ -67,14 +71,17 @@ func (a *UserGroup) Create(c *gin.Context, item schema.UserGroup) (*common.IDRes
 	return IDResult, nil
 }
 
+// Update 更新用户组基本信息
 func (a *UserGroup) Update(c *gin.Context, id uint64, item schema.UserGroup) error {
-	// 检查角色是否被禁用
-	if err := a.UserGroupParamsCheck(c, &item); err != nil {
+	// 检查用户组是否存在
+	if userGroupInfo, err := a.Get(c, id); err != nil {
 		return err
+	} else {
+		item.ID = userGroupInfo.ID
 	}
 
-	// 检查用户组是否存在
-	if _, err := a.Get(c, id); err != nil {
+	// 检查角色是否被禁用
+	if err := a.UserGroupParamsCheck(c, &item); err != nil {
 		return err
 	}
 
@@ -92,20 +99,7 @@ func (a *UserGroup) Update(c *gin.Context, id uint64, item schema.UserGroup) err
 	return nil
 }
 
-func (a *UserGroup) Delete(c *gin.Context, id uint64) error {
-	// 检查用户组是否存在
-	if _, err := a.Get(c, id); err != nil {
-		return err
-	}
-
-	// 删除用户组
-	if err := a.UserGroupModel.Delete(id); err != nil {
-		return err
-	}
-	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
-	return nil
-}
-
+// UserJoinUserGroup 多个用户加入指定用户组
 func (a *UserGroup) UserJoinUserGroup(c *gin.Context, userGroupID uint64, userIDs []uint64) error {
 	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
 		// 获取用户组信息
@@ -121,13 +115,11 @@ func (a *UserGroup) UserJoinUserGroup(c *gin.Context, userGroupID uint64, userID
 			if err != nil {
 				return err
 			}
-			// 遍历用户当前的用户组。如果没有加入，则加入用户组
-			for _, userUserGroup := range userInfo.UserGroups {
-				if userUserGroup.ID == userGroupID {
-					// 该用户已经加入用户组了
-					return errors.New("用户已加入该用户组")
-				}
+			// 检查用户是否已加入该用户组
+			if common.ContainsUint64(userInfo.UserGroups.GetIDs(), userGroupID) {
+				return errors.New(fmt.Sprintf("用户: %s 已加入该用户组", userInfo.UserName))
 			}
+
 			// 用户加入用户组
 			if err = a.UserModel.AppendUserUserGroup(userID, schema.UserGroups{userGroupInfo}); err != nil {
 				return err
@@ -142,6 +134,7 @@ func (a *UserGroup) UserJoinUserGroup(c *gin.Context, userGroupID uint64, userID
 	return nil
 }
 
+// UserGroupRemoveUser 从用户组中移出多个用户
 func (a *UserGroup) UserGroupRemoveUser(c *gin.Context, userGroupID uint64, userIDs []uint64) error {
 	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
 		// 获取用户组信息
@@ -152,6 +145,18 @@ func (a *UserGroup) UserGroupRemoveUser(c *gin.Context, userGroupID uint64, user
 
 		// 将用户从用户组中移除
 		for _, userID := range userIDs {
+			// 获取用户信息
+			var userInfo *schema.User
+			if userInfo, err = a.UserModel.Get(userID); err != nil {
+				return err
+			} else if len(userInfo.UserGroups) != 0 {
+				if !common.ContainsUint64(userInfo.UserGroups.GetIDs(), userGroupID) {
+					// 如果用户没有加入该用户组
+					return errors.New(fmt.Sprintf("用户: %s 未加入到用户组 %s，无法移出", userInfo.UserName, userGroupInfo.Name))
+				}
+			}
+
+			// 将用户从用户组中移除
 			if err = a.UserModel.UserRemoveUserGroup(userID, *userGroupInfo); err != nil {
 				return err
 			}
@@ -159,6 +164,32 @@ func (a *UserGroup) UserGroupRemoveUser(c *gin.Context, userGroupID uint64, user
 		return nil
 	})
 	if err != nil {
+		return err
+	}
+	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
+	return nil
+}
+
+// Delete 删除用户组
+func (a *UserGroup) Delete(c *gin.Context, id uint64) error {
+	// 检查用户组是否存在
+	if _, err := a.Get(c, id); err != nil {
+		return err
+	}
+
+	// 检查用户组是否正在被用户使用
+	if userQueryResult, err := a.UserModel.Query(schema.UserQueryParam{
+		UserGroupID:  id,
+		OmitPassword: true,
+		FindAll:      true,
+	}); err != nil {
+		return errors.WithMessage(err, "检查用户组是否被使用失败")
+	} else if len(userQueryResult.Data) != 0 {
+		return errors.New(fmt.Sprintf("该用户组正在被用户: %s 使用", common.StringSliceToString(userQueryResult.Data.GetUserNames(), ",")))
+	}
+
+	// 删除用户组
+	if err := a.UserGroupModel.Delete(id); err != nil {
 		return err
 	}
 	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)

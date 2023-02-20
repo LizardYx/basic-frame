@@ -29,6 +29,7 @@ func (a *SecurityLevel) Query(c *gin.Context, params schema.SecurityLevelQueryPa
 	return a.SecurityLevelModel.Query(params)
 }
 
+// Get 获取安全级别和绑定的角色信息
 func (a *SecurityLevel) Get(c *gin.Context, id uint64) (*schema.SecurityLevel, error) {
 	// 获取安全等级信息
 	item, err := a.SecurityLevelModel.GetPre(id)
@@ -37,7 +38,6 @@ func (a *SecurityLevel) Get(c *gin.Context, id uint64) (*schema.SecurityLevel, e
 	} else if item == nil {
 		return nil, errors.New("未找到该安全等级")
 	}
-
 	return item, nil
 }
 
@@ -69,6 +69,7 @@ func (a *SecurityLevel) GetUserSecurityLevels(c *gin.Context, userID uint64) (sc
 	return securityLevels, nil
 }
 
+// Create 创建安全级别(如果绑定的角色没有ID，则创建角色)
 func (a *SecurityLevel) Create(c *gin.Context, item schema.SecurityLevel) (*common.IDResult, error) {
 	// 参数检查
 	if err := a.SecurityLevelParamsCheck(c, &item); err != nil {
@@ -79,6 +80,7 @@ func (a *SecurityLevel) Create(c *gin.Context, item schema.SecurityLevel) (*comm
 	return a.SecurityLevelModel.Create(item)
 }
 
+// Update 更新安全级别基础信息和安全级别与角色的关联关系
 func (a *SecurityLevel) Update(c *gin.Context, id uint64, item schema.SecurityLevel) error {
 	// 参数检查
 	if err := a.SecurityLevelParamsCheck(c, &item); err != nil {
@@ -90,7 +92,7 @@ func (a *SecurityLevel) Update(c *gin.Context, id uint64, item schema.SecurityLe
 		return err
 	}
 
-	// 更新安全级别和关联的角色信息
+	// 更新安全级别基础信息和
 	return mysql.DB.Transaction(func(tx *gorm.DB) error {
 		// 更新安全等级基本信息
 		if err := a.SecurityLevelModel.UpdateByID(id, map[string]interface{}{
@@ -102,7 +104,7 @@ func (a *SecurityLevel) Update(c *gin.Context, id uint64, item schema.SecurityLe
 			return err
 		}
 
-		// 更新安全等级关联的角色
+		// 更新安全等级与角色的关联关系
 		if err := a.ReplaceSecurityLevelRoles(c, id, item.Roles); err != nil {
 			return err
 		}
@@ -121,14 +123,10 @@ func (a *SecurityLevel) ReplaceSecurityLevelRoles(c *gin.Context, id uint64, ite
 	return a.SecurityLevelModel.ReplaceSecurityLevelRoles(id, items)
 }
 
+// Delete 删除安全级别
 func (a *SecurityLevel) Delete(c *gin.Context, id uint64) error {
 	// 检查安全级别是否存在
 	if _, err := a.Get(c, id); err != nil {
-		return err
-	}
-
-	// 判断安全级别是否被任务、项目、项目集等使用
-	if err := a.SecurityLevelModel.SecurityLevelUsed(id); err != nil {
 		return err
 	}
 
@@ -144,6 +142,7 @@ func (a *SecurityLevel) SecurityLevelParamsCheck(c *gin.Context, item *schema.Se
 	if item.Name == "" {
 		return errors.New("安全级别的名称不能为空")
 	}
+
 	// 检查角色是否被禁用
 	if len(item.Roles) != 0 {
 		if RoleQueryResult, err := a.RoleModel.Query(schema.RoleQueryParam{

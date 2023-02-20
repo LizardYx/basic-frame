@@ -130,6 +130,7 @@ func (a *User) Get(id uint64) (*schema.User, error) {
 	return item.ToSchemaUser(), nil
 }
 
+// Create 创建用户
 func (a *User) Create(item schema.User) (*common.IDResult, error) {
 	eitem := entity.SchemaUser(item).ToUser()
 	result := mysql.DB.Create(&eitem)

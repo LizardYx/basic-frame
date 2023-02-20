@@ -53,6 +53,7 @@ func (a *UserGroup) Query(params schema.UserGroupQueryParam) (*schema.UserGroupQ
 	return qr, nil
 }
 
+// Get 获取用户组基本信息
 func (a *UserGroup) Get(id uint64) (*schema.UserGroup, error) {
 	db := mysql.DB.Model(&entity.UserGroup{}).Where("id = ?", id)
 
@@ -65,6 +66,7 @@ func (a *UserGroup) Get(id uint64) (*schema.UserGroup, error) {
 	return item.ToSchemaUserGroup(), nil
 }
 
+// Create 创建用户组
 func (a *UserGroup) Create(item schema.UserGroup) (*common.IDResult, error) {
 	eitem := entity.SchemaUserGroup(item).ToUserGroup()
 	result := mysql.DB.Create(&eitem)
@@ -76,6 +78,7 @@ func (a *UserGroup) UpdateByID(id uint64, item map[string]interface{}) error {
 	return errors.WithStack(result.Error)
 }
 
+// Delete 删除用户组
 func (a *UserGroup) Delete(id uint64) error {
 	result := mysql.DB.Model(&entity.UserGroup{}).Unscoped().Delete(&entity.UserGroup{}, id)
 	return errors.WithStack(result.Error)

@@ -223,6 +223,7 @@ func (a *User) Init(c *gin.Context) error {
 	return nil
 }
 
+// Get 获取用户和用户与组织、职位、角色的关联信息
 func (a *User) Get(c *gin.Context, id uint64) (*schema.User, error) {
 	// 获取用户信息
 	item, err := a.UserModel.Get(id)
@@ -236,6 +237,7 @@ func (a *User) Get(c *gin.Context, id uint64) (*schema.User, error) {
 	return item, nil
 }
 
+// Create 创建用户
 func (a *User) Create(c *gin.Context, item schema.User) (*common.IDResult, error) {
 	// 检查组织、职位、角色、用户组是否被禁用
 	if err := a.UserParamsCheck(c, &item); err != nil {
@@ -271,6 +273,11 @@ func (a *User) Update(c *gin.Context, id uint64, item schema.User) error {
 		return err
 	}
 
+	// 检查是否使用了正确的状态
+	if !common.ContainsInt(consts.BaseStatusSlice, item.Status) {
+		return errors.New("请使用正确的用户状态")
+	}
+
 	// 更新用户信息
 	if err := a.UserModel.UpdateByID(id, map[string]interface{}{
 		"status":   item.Status,
@@ -282,7 +289,13 @@ func (a *User) Update(c *gin.Context, id uint64, item schema.User) error {
 	return nil
 }
 
+// UpdateStatus 更新指定用户状态
 func (a *User) UpdateStatus(c *gin.Context, id uint64, newStatus int) error {
+	// 检查状态参数
+	if !common.ContainsInt(consts.BaseStatusSlice, newStatus) {
+		return errors.New("请使用正确的用户状态")
+	}
+
 	// 检查用户是否存在
 	if oldItem, err := a.Get(c, id); err != nil {
 		return err
@@ -319,9 +332,11 @@ func (a *User) UpdatePassword(c *gin.Context, id uint64, item schema.UpdatePassw
 	})
 }
 
+// Delete 删除用户、用户扩展信息
 func (a *User) Delete(c *gin.Context, id uint64) error {
 	// 检查用户是否存在
-	if oldItem, err := a.Get(c, id); err != nil {
+	oldItem, err := a.Get(c, id)
+	if err != nil {
 		return err
 	} else if oldItem.UserName == consts.AdminName {
 		// 检查是否是超管
@@ -329,9 +344,22 @@ func (a *User) Delete(c *gin.Context, id uint64) error {
 	}
 
 	// 删除用户、用户扩展信息
-	if err := a.UserModel.Delete(id); err != nil {
-		return err
+	err = mysql.DB.Transaction(func(tx *gorm.DB) error {
+		// 删除用户扩展信息
+		if err = a.UserExtendInfoModel.Delete(oldItem.ExtendInfo.ID); err != nil {
+			return errors.WithMessage(err, "删除用户扩展信息失败")
+		}
+
+		// 删除用户信息
+		if err = a.UserModel.Delete(id); err != nil {
+			return err
+		}
+		return nil
+	})
+	if err != nil {
+		return errors.WithMessage(err, "删除删除用户、用户扩展信息失败")
 	}
+
 	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
 	return nil
 }
@@ -518,7 +546,7 @@ func (a *User) UpdateUserUserGroup(c *gin.Context, id uint64, items schema.UserG
 
 // ---------------------------------------- User Permission --------------------------------------
 
-// UpdateUserPermission 更新用户权限
+// UpdateUserPermission 更新用户基础信息及用户与组织、职位、角色、用户组的关联关系
 func (a *User) UpdateUserPermission(c *gin.Context, id uint64, item schema.User) error {
 	err := mysql.DB.Transaction(func(tx *gorm.DB) error {
 		// 检查用户是否存在
@@ -535,7 +563,7 @@ func (a *User) UpdateUserPermission(c *gin.Context, id uint64, item schema.User)
 			return err
 		}
 
-		// 更新用户权重
+		// 更新用户基础信息
 		if err = a.Update(c, id, item); err != nil {
 			return err
 		}
@@ -569,7 +597,7 @@ func (a *User) UpdateUserPermission(c *gin.Context, id uint64, item schema.User)
 	return nil
 }
 
-// BatchUpdateUserPermission 批量更新用户权限
+// BatchUpdateUserPermission 更新多个的用户基础信息及用户与组织、职位、角色、用户组的关联关系
 func (a *User) BatchUpdateUserPermission(c *gin.Context, items schema.Users) error {
 	return mysql.DB.Transaction(func(tx *gorm.DB) error {
 		for _, item := range items {
@@ -583,6 +611,7 @@ func (a *User) BatchUpdateUserPermission(c *gin.Context, items schema.Users) err
 
 // ---------------------------------------- Params Validate --------------------------------------
 
+// UserParamsCheck 参数检查
 func (a *User) UserParamsCheck(c *gin.Context, item *schema.User) error {
 	// 检查用户名或密码是否为空
 	item.UserName = strings.TrimSpace(item.UserName)
@@ -612,11 +641,7 @@ func (a *User) UserParamsCheck(c *gin.Context, item *schema.User) error {
 		}); err != nil {
 			return err
 		} else if len(OrgQueryResult.Data) != 0 {
-			var orgName []string
-			for _, orgInfo := range OrgQueryResult.Data {
-				orgName = append(orgName, orgInfo.Name)
-			}
-			return errors.New(fmt.Sprintf("组织: %s 已被禁用", common.StringSliceToString(orgName, ",")))
+			return errors.New(fmt.Sprintf("组织: %s 已被禁用", common.StringSliceToString(OrgQueryResult.Data.GetNames(), ",")))
 		}
 	}
 
@@ -628,11 +653,7 @@ func (a *User) UserParamsCheck(c *gin.Context, item *schema.User) error {
 		}); err != nil {
 			return err
 		} else if len(PositionQueryResult.Data) != 0 {
-			var positionNames []string
-			for _, position := range PositionQueryResult.Data {
-				positionNames = append(positionNames, position.Name)
-			}
-			return errors.New(fmt.Sprintf("职位: %s 已被禁用", common.StringSliceToString(positionNames, ",")))
+			return errors.New(fmt.Sprintf("职位: %s 已被禁用", common.StringSliceToString(PositionQueryResult.Data.GetNames(), ",")))
 		}
 	}
 
@@ -671,11 +692,7 @@ func (a *User) UserParamsCheck(c *gin.Context, item *schema.User) error {
 		}); err != nil {
 			return errors.WithMessage(err, "检查用户组是否被禁用失败")
 		} else if len(UserGroupQueryResult.Data) != 0 {
-			var userGroupNames []string
-			for _, userGroup := range UserGroupQueryResult.Data {
-				userGroupNames = append(userGroupNames, userGroup.Name)
-			}
-			return errors.New(fmt.Sprintf("角色组: %s 已被禁用", common.StringSliceToString(userGroupNames, ",")))
+			return errors.New(fmt.Sprintf("角色组: %s 已被禁用", common.StringSliceToString(UserGroupQueryResult.Data.GetNames(), ",")))
 		}
 	}
 	return nil

@@ -17,8 +17,8 @@ var RouterBase = &Router{
 	RoleApi:           api.RoleApi,
 	PositionApi:       api.PositionApi,
 	OrganizationApi:   api.OrganizationApi,
-	UserExtendInfoApi: api.UserExtendInfoApi,
 	UserGroupApi:      api.UserGroupApi,
+	UserExtendInfoApi: api.UserExtendInfoApi,
 	UserApi:           api.UserApi,
 }
 
@@ -34,8 +34,8 @@ type Router struct {
 	RoleApi           *api.Role
 	PositionApi       *api.Position
 	OrganizationApi   *api.Organization
-	UserExtendInfoApi *api.UserExtendInfo
 	UserGroupApi      *api.UserGroup
+	UserExtendInfoApi *api.UserExtendInfo
 	UserApi           *api.User
 }
 
@@ -59,6 +59,11 @@ func (a *Router) Register(api *gin.RouterGroup) {
 		UserGroup.DELETE(":id", a.UserApi.Delete)
 	}
 
+	UserExtendInfoGroup := api.Group("base/user-extend-infos")
+	{
+		UserExtendInfoGroup.PUT(":id", a.UserExtendInfoApi.Update)
+	}
+
 	UserGroupsGroup := api.Group("base/user-groups")
 	{
 		UserGroupsGroup.GET("", a.UserGroupApi.Query)
@@ -69,11 +74,6 @@ func (a *Router) Register(api *gin.RouterGroup) {
 		UserGroupsGroup.PUT(":id/user-join", a.UserGroupApi.UserJoinUserGroup)
 		UserGroupsGroup.PUT(":id/user-remove", a.UserGroupApi.UserGroupRemoveUser)
 		UserGroupsGroup.DELETE(":id", a.UserGroupApi.Delete)
-	}
-
-	UserExtendInfoGroup := api.Group("base/user-extend-infos")
-	{
-		UserExtendInfoGroup.PUT(":id", a.UserExtendInfoApi.Update)
 	}
 
 	OrganizationGroup := api.Group("base/organizations")

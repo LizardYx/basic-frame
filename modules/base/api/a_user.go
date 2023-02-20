@@ -70,6 +70,7 @@ func (a *User) Query(c *gin.Context) {
 	}
 
 	params.Pagination = true
+	params.OmitPassword = true
 	result, err := a.UserBll.Query(c, params)
 	if err != nil {
 		ginx.ResError(c, params, err)
@@ -93,6 +94,7 @@ func (a *User) GetSubUsers(c *gin.Context) {
 	ginx.ResList(c, params, result.Data)
 }
 
+// Get 获取用户和用户与组织、职位、角色的关联信息
 func (a *User) Get(c *gin.Context) {
 	item, err := a.UserBll.Get(c, ginx.ParseParamID(c, "id"))
 	if err != nil {
@@ -111,6 +113,7 @@ func (a *User) GetMenuTree(c *gin.Context) {
 	ginx.ResSuccess(c, "", item)
 }
 
+// UpdateUserPermission 更新用户基础信息及用户与组织、职位、角色、用户组的关联关系
 func (a *User) UpdateUserPermission(c *gin.Context) {
 	var item schema.User
 	if err := ginx.ParseJSON(c, &item); err != nil {
@@ -125,6 +128,7 @@ func (a *User) UpdateUserPermission(c *gin.Context) {
 	ginx.ResOperateSuccess(c, "")
 }
 
+// BatchUpdateUserPermission 更新多个的用户基础信息及用户与组织、职位、角色、用户组的关联关系
 func (a *User) BatchUpdateUserPermission(c *gin.Context) {
 	var items schema.Users
 	if err := ginx.ParseJSON(c, &items); err != nil {
@@ -139,6 +143,7 @@ func (a *User) BatchUpdateUserPermission(c *gin.Context) {
 	ginx.ResOperateSuccess(c, "")
 }
 
+// Create 创建用户
 func (a *User) Create(c *gin.Context) {
 	var item schema.User
 	if err := ginx.ParseJSON(c, &item); err != nil {
@@ -155,6 +160,7 @@ func (a *User) Create(c *gin.Context) {
 	ginx.ResSuccess(c, item, result)
 }
 
+// Update 更新用户基础信息
 func (a *User) Update(c *gin.Context) {
 	var item schema.User
 	if err := ginx.ParseJSON(c, &item); err != nil {
@@ -169,6 +175,7 @@ func (a *User) Update(c *gin.Context) {
 	ginx.ResOperateSuccess(c, item)
 }
 
+// EnableUser 启用指定用户
 func (a *User) EnableUser(c *gin.Context) {
 	if err := a.UserBll.UpdateStatus(c, ginx.ParseParamID(c, "id"), consts.BaseStatusEnable); err != nil {
 		ginx.ResError(c, "", err)
@@ -199,6 +206,7 @@ func (a *User) UpdatePassword(c *gin.Context) {
 	ginx.ResOperateSuccess(c, "")
 }
 
+// Delete 删除用户、用户扩展信息
 func (a *User) Delete(c *gin.Context) {
 	if err := a.UserBll.Delete(c, ginx.ParseParamID(c, "id")); err != nil {
 		ginx.ResError(c, "", err)

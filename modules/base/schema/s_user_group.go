@@ -50,3 +50,11 @@ func (a UserGroups) GetRoleIds(roleIDs *[]uint64) {
 		}
 	}
 }
+
+func (a UserGroups) GetNames() []string {
+	var names []string
+	for _, userGroup := range a {
+		names = append(names, userGroup.Name)
+	}
+	return names
+}

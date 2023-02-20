@@ -212,6 +212,15 @@ func (a Organizations) GetRoleIds(roleIDs *[]uint64) {
 	}
 }
 
+// GetNames 获取正在名称集合
+func (a Organizations) GetNames() []string {
+	var names []string
+	for _, organization := range a {
+		names = append(names, organization.Name)
+	}
+	return names
+}
+
 // SortOrganizations 对所有数据进行排序
 func (a Organizations) SortOrganizations() *Organizations {
 	if len(a) != 0 {

@@ -57,6 +57,7 @@ func (a *SecurityLevel) Query(params schema.SecurityLevelQueryParam) (*schema.Se
 	return qr, nil
 }
 
+// Get 获取安全级别的基本信息
 func (a *SecurityLevel) Get(id uint64) (*schema.SecurityLevel, error) {
 	db := mysql.DB.Model(&entity.SecurityLevel{}).Where("id = ?", id)
 
@@ -69,6 +70,7 @@ func (a *SecurityLevel) Get(id uint64) (*schema.SecurityLevel, error) {
 	return item.ToSchemaSecurityLevel(), nil
 }
 
+// GetPre 获取安全级别和绑定的角色信息
 func (a *SecurityLevel) GetPre(id uint64) (*schema.SecurityLevel, error) {
 	db := mysql.DB.Model(&entity.SecurityLevel{}).Where("id = ?", id).Preload("Roles")
 
@@ -81,6 +83,7 @@ func (a *SecurityLevel) GetPre(id uint64) (*schema.SecurityLevel, error) {
 	return item.ToSchemaSecurityLevel(), nil
 }
 
+// Create 创建安全级别(如果绑定的角色没有ID，则创建角色)
 func (a *SecurityLevel) Create(item schema.SecurityLevel) (*common.IDResult, error) {
 	eitem := entity.SchemaSecurityLevel(item).ToSecurityLevel()
 	result := mysql.DB.Create(&eitem)
@@ -103,33 +106,8 @@ func (a *SecurityLevel) ReplaceSecurityLevelRoles(id uint64, items schema.Roles)
 	return nil
 }
 
+// Delete 删除安全级别
 func (a *SecurityLevel) Delete(id uint64) error {
 	result := mysql.DB.Model(&entity.SecurityLevel{}).Delete(&entity.SecurityLevel{}, id)
 	return errors.WithStack(result.Error)
-}
-
-// SecurityLevelUsed 检查安全等级是否被使用
-func (a *SecurityLevel) SecurityLevelUsed(id uint64) error {
-	var count int64
-	// 检查安全等级是否被任务使用
-	if err := mysql.DB.Table("tk_safe_level").Where("level = ?", id).Count(&count).Error; err != nil {
-		return errors.WithStack(err)
-	} else if count != 0 {
-		return errors.New("安全等级已被任务使用")
-	}
-
-	// 检查安全等级是否被项目使用
-	if err := mysql.DB.Table("project ").Where("sec_level = ?", id).Count(&count).Error; err != nil {
-		return errors.WithStack(err)
-	} else if count != 0 {
-		return errors.New("安全等级已被项目使用")
-	}
-
-	// 检查安全等级是否被项目集使用
-	if err := mysql.DB.Table("project_group").Where("sec_level = ?", id).Count(&count).Error; err != nil {
-		return errors.WithStack(err)
-	} else if count != 0 {
-		return errors.New("安全等级已被项目集使用")
-	}
-	return nil
 }

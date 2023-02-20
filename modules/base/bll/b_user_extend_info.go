@@ -31,13 +31,15 @@ func (a *UserExtendInfo) Get(c *gin.Context, id uint64) (*schema.UserExtendInfo,
 
 // Update 更新用户扩展信息
 func (a *UserExtendInfo) Update(c *gin.Context, id uint64, item schema.UserExtendInfo) error {
-	// 检查用户是否存在
-	if err := a.ExtendInfoParamsCheck(c, &item); err != nil {
+	// 检查扩展信息是否存在
+	if userExtendInfo, err := a.Get(c, id); err != nil {
 		return err
+	} else {
+		item.ID = userExtendInfo.ID
 	}
 
-	// 检查扩展信息是否存在
-	if _, err := a.Get(c, id); err != nil {
+	// 参数检查
+	if err := a.ExtendInfoParamsCheck(c, &item); err != nil {
 		return err
 	}
 
