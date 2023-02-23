@@ -232,20 +232,25 @@ func (a *Menu) Delete(c *gin.Context, id uint64) error {
 		var buttonIDs []uint64
 		menuTree.GetButtonIDs(&buttonIDs)
 
-		// 获取菜单的按钮和按钮的RestfulApi信息
-		var buttonPres *schema.ButtonPres
-		if buttonPres, err = a.ButtonModel.GetButtonsRestfulApis(buttonIDs); err != nil {
-			return errors.New("获取按钮信息失败")
-		} else {
-			// 删除按钮的RestfulApi信息
-			btnRestfulApis := buttonPres.GetRestfulApis()
-			if err = a.RestfulApiModel.BatchDelete(btnRestfulApis.GetIDs()); err != nil {
-				return errors.New("删除按钮的RestfulApi信息失败")
-			}
+		// 如果菜单有按钮集合
+		if len(buttonIDs) != 0 {
+			// 获取菜单的按钮和按钮的RestfulApi信息
+			var buttonPres *schema.ButtonPres
+			if buttonPres, err = a.ButtonModel.GetButtonsRestfulApis(buttonIDs); err != nil {
+				return errors.New("获取按钮信息失败")
+			} else {
+				// 删除按钮的RestfulApi信息
+				btnRestfulApiIDs := buttonPres.GetRestfulApis().GetIDs()
+				if len(btnRestfulApiIDs) != 0 {
+					if err = a.RestfulApiModel.BatchDelete(btnRestfulApiIDs); err != nil {
+						return errors.New("删除按钮的RestfulApi信息失败")
+					}
+				}
 
-			// 删除菜单的按钮信息
-			if err = a.ButtonModel.BatchDelete(buttonIDs); err != nil {
-				return errors.New("删除按钮信息失败")
+				// 删除菜单的按钮信息
+				if err = a.ButtonModel.BatchDelete(buttonIDs); err != nil {
+					return errors.New("删除按钮信息失败")
+				}
 			}
 		}
 
