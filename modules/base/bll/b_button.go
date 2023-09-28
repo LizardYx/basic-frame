@@ -267,6 +267,8 @@ func (a *Button) InitUUID(item *schema.ButtonPre, isCreate bool) {
 		item.ID = 0
 	}
 	for _, restfulApi := range item.RestfulApis {
+		restfulApi.Method = strings.TrimSpace(restfulApi.Method)
+		restfulApi.Path = strings.TrimSpace(restfulApi.Path)
 		if restfulApi.UUID == "" {
 			restfulApi.ID = 0
 			restfulApi.UUID = common.GetUUID()

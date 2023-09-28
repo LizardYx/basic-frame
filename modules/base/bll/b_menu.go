@@ -465,6 +465,8 @@ func (a *Menu) UpdateMenuTree(c *gin.Context, item schema.MenuPre) error {
 // UpdateRestfulApis 更新或新增RestfulApi的信息
 func (a *Menu) UpdateRestfulApis(c *gin.Context, items *schema.RestfulApis) error {
 	for _, item := range *items {
+		item.Method = strings.TrimSpace(item.Method)
+		item.Path = strings.TrimSpace(item.Path)
 		if item.UUID == "" {
 			// 创建restfulApi
 			item.ID = 0
@@ -684,6 +686,8 @@ func (a *Menu) InitUUID(item *schema.MenuPre, isCreate bool) {
 		item.ID = 0
 	}
 	for _, restfulApi := range item.RestfulApis {
+		restfulApi.Method = strings.TrimSpace(restfulApi.Method)
+		restfulApi.Path = strings.TrimSpace(restfulApi.Path)
 		if restfulApi.UUID == "" {
 			restfulApi.UUID = common.GetUUID()
 		} else if isCreate {
