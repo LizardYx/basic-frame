@@ -15,6 +15,15 @@ type SystemConfig struct {
 	SystemConfigBll *bll.SystemConfig
 }
 
+// Query 查询系统配置信息列表
+//
+//	@Summary		查询系统配置信息列表
+//	@Description	查询系统配置信息列表
+//	@Tags			SystemConfig
+//	@Param			q	query		schema.SystemConfigQueryParam	false	"查询系统配置信息列表参数"
+//	@Success		200	{object}	ginx.ListResult
+//	@Failure		500	{object}	ginx.OperateResult
+//	@Router			/api/v1/base/system-config [get]
 func (a *SystemConfig) Query(c *gin.Context) {
 	var params schema.SystemConfigQueryParam
 	if err := ginx.ParseQuery(c, &params); err != nil {
@@ -31,6 +40,16 @@ func (a *SystemConfig) Query(c *gin.Context) {
 	ginx.ResList(c, params, result.Data)
 }
 
+// Update 更新系统基础配置信息
+//
+//	@Summary		更新系统基础配置信息
+//	@Description	更新系统基础配置信息
+//	@Tags			SystemConfig
+//	@Param			id		path		int					true	"系统基础配置ID"
+//	@Param			body	body		schema.SystemConfig	true	"更新系统基础配置信息"
+//	@Success		200		{object}	ginx.OperateResult
+//	@Failure		500		{object}	ginx.OperateResult
+//	@Router			/api/v1/base/system-config/:id [put]
 func (a *SystemConfig) Update(c *gin.Context) {
 	var item schema.SystemConfig
 	if err := ginx.ParseJSON(c, &item); err != nil {

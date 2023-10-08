@@ -2,6 +2,7 @@ package main
 
 import (
 	"basic-frame/config"
+	"basic-frame/middleware"
 	baseBll "basic-frame/modules/base/bll"
 	casbin_adapter "basic-frame/util/casbin-adapter"
 	"basic-frame/util/logger"
@@ -13,6 +14,7 @@ import (
 	"log"
 )
 
+//	@license.name	Apache 2.0
 func main() {
 	// 加载系统配置文件
 	if errMessage, err := config.LoadSystemConfigFile(); err != nil {
@@ -45,6 +47,9 @@ func main() {
 
 	// 初始化菜单数据
 	go baseBll.MenuBll.InitData()
+
+	// 初始化swagger API文档
+	go middleware.SwaggerMiddleware()
 
 	// 注册定时任务
 	RegisterCronTask(context.Background())

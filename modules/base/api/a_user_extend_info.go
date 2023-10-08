@@ -16,6 +16,15 @@ type UserExtendInfo struct {
 }
 
 // Update 更新用户扩展信息
+//
+//	@Summary		更新用户扩展信息
+//	@Description	更新用户扩展信息
+//	@Tags			UserExtendInfo
+//	@Param			id		path		int						true	"用户扩展信息ID"
+//	@Param			body	body		schema.UserExtendInfo	true	"更新用户扩展信息参数"
+//	@Success		200		{object}	ginx.OperateResult
+//	@Failure		500		{object}	ginx.OperateResult
+//	@Router			/api/v1/base/user-extend-infos/:id [put]
 func (a *UserExtendInfo) Update(c *gin.Context) {
 	var item schema.UserExtendInfo
 	if err := ginx.ParseJSON(c, &item); err != nil {

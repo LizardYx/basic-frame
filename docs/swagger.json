@@ -1,0 +1,4107 @@
+{
+    "swagger": "2.0",
+    "info": {
+        "contact": {},
+        "license": {
+            "name": "Apache 2.0"
+        }
+    },
+    "paths": {
+        "/api/v1/base/button": {
+            "put": {
+                "description": "批量更新按钮基础信息",
+                "tags": [
+                    "Button"
+                ],
+                "summary": "批量更新按钮基础信息",
+                "parameters": [
+                    {
+                        "description": "更新按钮基础信息参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/schema.Button"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "创建按钮和按钮关联的RestfulApi(不会创建子按钮)",
+                "tags": [
+                    "Button"
+                ],
+                "summary": "创建按钮",
+                "parameters": [
+                    {
+                        "description": "创建按钮参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.ButtonPre"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.IDResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/button/:id": {
+            "put": {
+                "description": "更新按钮基础信息、按钮关联的Restful接口信息、指定Restful接口基础信息",
+                "tags": [
+                    "Button"
+                ],
+                "summary": "更新按钮信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "按钮ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新按钮信息参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.ButtonPre"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "删除按钮和按钮调用的Api",
+                "tags": [
+                    "Button"
+                ],
+                "summary": "删除按钮",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "按钮ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/disabled_field/:id": {
+            "delete": {
+                "description": "删除禁用字段",
+                "tags": [
+                    "DisabledField"
+                ],
+                "summary": "删除禁用字段",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "字段ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/menu": {
+            "put": {
+                "description": "菜单、按钮及可禁用字段的基础信息(创建、更新)。菜单和按钮调用的api(创建、更新、删除)",
+                "tags": [
+                    "Menu"
+                ],
+                "summary": "更新菜单树",
+                "parameters": [
+                    {
+                        "description": "更新菜单树参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.PermissionTree"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/menu//basic-info-update": {
+            "put": {
+                "description": "批量更新菜单基本信息",
+                "tags": [
+                    "Menu"
+                ],
+                "summary": "批量更新菜单基本信息",
+                "parameters": [
+                    {
+                        "description": "菜单信息参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/schema.Menu"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/menu/:id": {
+            "delete": {
+                "description": "删除菜单、菜单的Api、菜单按钮、菜单按钮的Api",
+                "tags": [
+                    "Menu"
+                ],
+                "summary": "删除菜单",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "菜单ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/menu/create-role": {
+            "get": {
+                "description": "获取所有的菜单树、按钮树、特殊接口(不包含禁用的菜单和按钮)",
+                "tags": [
+                    "Menu"
+                ],
+                "summary": "获取创建角色的菜单树",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schema.PermissionTree"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/menu/download": {
+            "get": {
+                "description": "下载菜单树",
+                "tags": [
+                    "Menu"
+                ],
+                "summary": "下载菜单树",
+                "responses": {
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/menu/edit": {
+            "get": {
+                "description": "获取所有的菜单树、特殊接口(包含禁用)",
+                "tags": [
+                    "Menu"
+                ],
+                "summary": "获取编辑菜单的菜单树",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schema.PermissionTree"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/menu/menu-tree": {
+            "get": {
+                "description": "获取用户菜单树",
+                "tags": [
+                    "User"
+                ],
+                "summary": "获取用户菜单树",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/schema.MenuPre"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/organizations": {
+            "get": {
+                "description": "查询组织列表",
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "查询组织列表",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "是否仅查询count",
+                        "name": "-",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "当前页",
+                        "name": "current",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否查询所有数据",
+                        "name": "find_all",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "组织ID集合(逗号分隔)",
+                        "name": "ids",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页大小",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "name": "parent_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "模糊搜索(搜索 组织名称/备注)",
+                        "name": "queryValue",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "角色ID",
+                        "name": "role_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否显示组织树(获取组织树、职位列表.不包含禁用的组织和职位)",
+                        "name": "show_details",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否显示组织的职位列表",
+                        "name": "show_positions",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态(1:启用 2:禁用)",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ListResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "创建组织信息(职位没有ID且职位的组织ID为0，则创建职位)",
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "创建组织",
+                "parameters": [
+                    {
+                        "description": "创建组织参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/schema.Organization"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.IDResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/organizations/:id": {
+            "delete": {
+                "description": "删除组织和组织的职位",
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "删除组织",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "组织ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/organizations/create-notifications": {
+            "get": {
+                "description": "获取组织树(不包含职位和禁用的组织)",
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "获取创建通知公告的组织树",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/schema.Organization"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/organizations/create-user": {
+            "get": {
+                "description": "获取组织树、职位列表(不包含禁用的组织和职位)",
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "获取创建用户的组织树",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/schema.Organization"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/organizations/edit": {
+            "get": {
+                "description": "获取组织树、职位列表(包含禁用的组织、职位)",
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "获取可编辑的组织树",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/schema.Organization"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/organizations/include-user": {
+            "get": {
+                "description": "获取包含用户的组织树、职位列表(不包含禁用的组织和职位)",
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "获取人员组织架构树",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/schema.OrganizationTree"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/organizations/update-basic-info/:id": {
+            "put": {
+                "description": "更新组织的基础信息",
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "更新组织的基础信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "组织ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "组织基础信息参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.Organization"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/organizations/user-join/:id": {
+            "put": {
+                "description": "用户加入指定组织",
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "用户加入指定组织",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "组织ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "用户ID参数集合",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/organizations/user-remove/:id": {
+            "put": {
+                "description": "用户移出指定组织",
+                "tags": [
+                    "Organization"
+                ],
+                "summary": "用户移出指定组织",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "组织ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "用户D参数集合",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/positions": {
+            "get": {
+                "description": "查询职位列表",
+                "tags": [
+                    "Position"
+                ],
+                "summary": "查询职位列表",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "是否仅查询count",
+                        "name": "-",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "当前页",
+                        "name": "current",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否查找所有数据",
+                        "name": "find_all",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "职位ID集合(逗号分隔)",
+                        "name": "ids",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "备注(模糊查询)",
+                        "name": "memo",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "职位名称",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "职位的组织ID",
+                        "name": "organization_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页大小",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "模糊搜索(模糊查询:职位名称、备注)",
+                        "name": "queryValue",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "职位的角色",
+                        "name": "role_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "按权重值排序(1:升序排序  2:降序排序)",
+                        "name": "sequence_sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态(1:启用 2:禁用)",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ListResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "创建职位",
+                "tags": [
+                    "Position"
+                ],
+                "summary": "创建职位",
+                "parameters": [
+                    {
+                        "description": "创建职位参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.Position"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.IDResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/positions/:id": {
+            "get": {
+                "description": "获取职位基础信息",
+                "tags": [
+                    "Position"
+                ],
+                "summary": "获取职位基础信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "职位ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schema.Position"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "更新职位基础信息",
+                "tags": [
+                    "Position"
+                ],
+                "summary": "更新职位基础信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "职位ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新职位基础信息参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.Position"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "删除职位",
+                "tags": [
+                    "Position"
+                ],
+                "summary": "删除职位",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "职位ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/positions/user-join/:id": {
+            "put": {
+                "description": "用户新增职位",
+                "tags": [
+                    "Position"
+                ],
+                "summary": "用户新增职位",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "职位ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "用户ID集合",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/positions/user-remove/:id": {
+            "put": {
+                "description": "用户移除职位",
+                "tags": [
+                    "Position"
+                ],
+                "summary": "用户移除职位",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "职位ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "用户ID集合",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/roles": {
+            "get": {
+                "description": "查询角色列表",
+                "tags": [
+                    "Role"
+                ],
+                "summary": "查询角色列表",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "是否仅查询count",
+                        "name": "-",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "审核类型集合(逗号分隔)",
+                        "name": "auditor_types",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "当前页",
+                        "name": "current",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否查找所有数据",
+                        "name": "find_all",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "角色ID",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "角色ID集合(逗号分隔)",
+                        "name": "ids",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "备注(模糊查询)",
+                        "name": "memo",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "角色名称",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页大小",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "模糊搜索(搜索 角色名称/备注)",
+                        "name": "query_value",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否显示菜单、按钮、可禁用字段信息",
+                        "name": "show_details",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态(1:启用 2:禁用)",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "角色类型",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "角色类型集合(逗号分隔)",
+                        "name": "types",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ListResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "创建角色",
+                "tags": [
+                    "Role"
+                ],
+                "summary": "创建角色",
+                "parameters": [
+                    {
+                        "description": "创建角色参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.RolePre"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.IDResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/roles/:id": {
+            "get": {
+                "description": "获取角色所有信息(包含菜单、按钮、禁用字段。以及菜单、按钮是否为全选)",
+                "tags": [
+                    "Role"
+                ],
+                "summary": "获取角色所有信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "角色ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schema.RolePre"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "更新角色基本信息、角色和菜单的关联、角色和按钮的关联、角色和可禁用字段的关联",
+                "tags": [
+                    "Role"
+                ],
+                "summary": "更新角色信息",
+                "parameters": [
+                    {
+                        "description": "更新角色信息参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.RolePre"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "删除角色",
+                "tags": [
+                    "Role"
+                ],
+                "summary": "删除角色",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "角色ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/roles/:id/auditor_type": {
+            "put": {
+                "description": "角色新增审核类型",
+                "tags": [
+                    "Role"
+                ],
+                "summary": "角色新增审核类型",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "角色ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "角色新增审核类型参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.UpdateAuditorTypeParam"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/roles/:id/permission-tree": {
+            "get": {
+                "description": "获取角色的菜单树",
+                "tags": [
+                    "Role"
+                ],
+                "summary": "获取角色的菜单树",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "角色ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/schema.MenuPre"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/roles/:id/user-join": {
+            "put": {
+                "description": "用户新增角色",
+                "tags": [
+                    "Role"
+                ],
+                "summary": "用户新增角色",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "角色ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "用户ID集合",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/roles/:id/user-remove": {
+            "put": {
+                "description": "移除用户的指定角色",
+                "tags": [
+                    "Role"
+                ],
+                "summary": "移除用户的指定角色",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "角色ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "用户ID集合",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/security-levels": {
+            "get": {
+                "description": "查询安全级别列表",
+                "tags": [
+                    "SecurityLevel"
+                ],
+                "summary": "查询安全级别列表",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "是否仅查询count",
+                        "name": "-",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "当前页",
+                        "name": "current",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否查找所有数据",
+                        "name": "find_all",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "安全级别ID",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "安全级别ID集合(逗号分隔)",
+                        "name": "ids",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "安全级别名称(模糊查询)",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页大小",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "模糊搜索(搜索 安全级别名称/备注)",
+                        "name": "queryValue",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "角色ID集合(逗号分隔)",
+                        "name": "role_ids",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否显示角色信息",
+                        "name": "show_details",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态(1:启用 2:禁用)",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ListResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "创建安全级别(如果绑定的角色没有ID，则创建角色)",
+                "tags": [
+                    "SecurityLevel"
+                ],
+                "summary": "创建安全级别(如果绑定的角色没有ID，则创建角色)",
+                "parameters": [
+                    {
+                        "description": "创建安全级别参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.SecurityLevel"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.IDResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/security-levels/:id": {
+            "get": {
+                "description": "获取安全级别和绑定的角色信息",
+                "tags": [
+                    "SecurityLevel"
+                ],
+                "summary": "获取安全级别和绑定的角色信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "安全级别ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schema.SecurityLevel"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "更新安全级别基础信息和安全级别与角色的关联关系",
+                "tags": [
+                    "SecurityLevel"
+                ],
+                "summary": "更新安全级别基础信息和安全级别与角色的关联关系",
+                "parameters": [
+                    {
+                        "description": "更新安全级别信息参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.SecurityLevel"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "删除安全级别",
+                "tags": [
+                    "SecurityLevel"
+                ],
+                "summary": "删除安全级别",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "安全级别ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/system-config": {
+            "get": {
+                "description": "查询系统配置信息列表",
+                "tags": [
+                    "SystemConfig"
+                ],
+                "summary": "查询系统配置信息列表",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "是否仅查询count",
+                        "name": "-",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "当前页",
+                        "name": "current",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页大小",
+                        "name": "pageSize",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ListResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/system-config/:id": {
+            "put": {
+                "description": "更新系统基础配置信息",
+                "tags": [
+                    "SystemConfig"
+                ],
+                "summary": "更新系统基础配置信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "系统基础配置ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新系统基础配置信息",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.SystemConfig"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/tag-manages": {
+            "get": {
+                "description": "查询标签列表",
+                "tags": [
+                    "TagManage"
+                ],
+                "summary": "查询标签列表",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "是否仅查询count",
+                        "name": "-",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "当前页",
+                        "name": "current",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "标签名称",
+                        "name": "key_name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页大小",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "模糊搜索(模糊查询:标签名称、标签值)",
+                        "name": "query_value",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "标签类型",
+                        "name": "type",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "标签值",
+                        "name": "value",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ListResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "创建标签",
+                "tags": [
+                    "TagManage"
+                ],
+                "summary": "创建标签",
+                "parameters": [
+                    {
+                        "description": "创建标签参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.TagManage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.IDResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/tag-manages/:id": {
+            "get": {
+                "description": "查询指定标签详情",
+                "tags": [
+                    "TagManage"
+                ],
+                "summary": "查询指定标签详情",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "标签ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schema.TagManage"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "更新标签信息",
+                "tags": [
+                    "TagManage"
+                ],
+                "summary": "更新标签信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "标签ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新标签信息参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.TagManage"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "删除标签信息",
+                "tags": [
+                    "TagManage"
+                ],
+                "summary": "删除标签信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "标签ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/user-extend-infos/:id": {
+            "put": {
+                "description": "更新用户扩展信息",
+                "tags": [
+                    "UserExtendInfo"
+                ],
+                "summary": "更新用户扩展信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户扩展信息ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新用户扩展信息参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.UserExtendInfo"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/user-groups": {
+            "get": {
+                "description": "查询用户组列表",
+                "tags": [
+                    "UserGroup"
+                ],
+                "summary": "查询用户组列表",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "是否仅查询count",
+                        "name": "-",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "当前页",
+                        "name": "current",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否查找所有",
+                        "name": "find_all",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户组ID集合(逗号分隔)",
+                        "name": "ids",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "备注(模糊查询)",
+                        "name": "memo",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户组名称",
+                        "name": "name",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页大小",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "模糊搜索(模糊查询:用户组名称、备注)",
+                        "name": "query_value",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "用户组的角色",
+                        "name": "role_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态(1:启用 2:禁用)",
+                        "name": "status",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ListResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "创建用户组",
+                "tags": [
+                    "UserGroup"
+                ],
+                "summary": "创建用户组",
+                "parameters": [
+                    {
+                        "description": "创建用户组参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.UserGroup"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.IDResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/user-groups/:id": {
+            "get": {
+                "description": "获取用户组基本信息",
+                "tags": [
+                    "UserGroup"
+                ],
+                "summary": "获取用户组基本信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户组ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schema.UserGroup"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "更新用户组基本信息",
+                "tags": [
+                    "UserGroup"
+                ],
+                "summary": "更新用户组基本信息",
+                "parameters": [
+                    {
+                        "description": "用户组基本信息参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.UserGroup"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "删除用户组",
+                "tags": [
+                    "UserGroup"
+                ],
+                "summary": "删除用户组",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户组ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/user-groups/:id/user-join": {
+            "put": {
+                "description": "用户加入指定用户组",
+                "tags": [
+                    "UserGroup"
+                ],
+                "summary": "用户加入指定用户组",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户组ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "用户ID集合",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/user-groups/:id/user-remove": {
+            "put": {
+                "description": "用户组中移出多个用户",
+                "tags": [
+                    "UserGroup"
+                ],
+                "summary": "用户组中移出多个用户",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户组ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "用户ID集合",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "type": "integer"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/user-groups/:id/users": {
+            "get": {
+                "description": "获取指定用户组的用户列表",
+                "tags": [
+                    "UserGroup"
+                ],
+                "summary": "获取指定用户组的用户列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户组ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/schema.User"
+                            }
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/users": {
+            "get": {
+                "description": "查询用户列表",
+                "tags": [
+                    "User"
+                ],
+                "summary": "查询用户列表",
+                "parameters": [
+                    {
+                        "type": "boolean",
+                        "description": "是否仅查询count",
+                        "name": "-",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "审核类型(逗号分隔)",
+                        "name": "auditor_types",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "当前页",
+                        "name": "current",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否查找所有",
+                        "name": "find_all",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否查找已经删除的用户",
+                        "name": "find_deleted",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户ID集合(逗号分隔)",
+                        "name": "ids",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否隐藏密码",
+                        "name": "omit_password",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "组织ID",
+                        "name": "org_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "组织ID集合(逗号分隔)",
+                        "name": "org_ids",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "页大小",
+                        "name": "pageSize",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "职位ID",
+                        "name": "position_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "职位ID集合(逗号分隔)",
+                        "name": "position_ids",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "模糊搜索(搜索 用户名称/用户昵称/移动手机/QQ账号/邮箱账号)",
+                        "name": "query_value",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "角色ID",
+                        "name": "role_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "角色ID集合(逗号分隔)",
+                        "name": "role_ids",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "按权重排序(1:升序排序 2:降序排序)",
+                        "name": "sequence_sort",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否显示详情",
+                        "name": "show_details",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否显示扩赞信息",
+                        "name": "show_extend_info",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "状态(1:启用 2:禁用)",
+                        "name": "status",
+                        "in": "query"
+                    },
+                    {
+                        "type": "integer",
+                        "description": "用户组ID",
+                        "name": "user_group_id",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户组ID集合(逗号分隔)",
+                        "name": "user_group_ids",
+                        "in": "query"
+                    },
+                    {
+                        "type": "string",
+                        "description": "用户名称",
+                        "name": "user_name",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ListResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "更新多个的用户基础信息及用户与组织、职位、角色、用户组的关联关系",
+                "tags": [
+                    "User"
+                ],
+                "summary": "批量更新用户的信息和权限",
+                "parameters": [
+                    {
+                        "description": "更新用户信息和权限的参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/schema.User"
+                            }
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "post": {
+                "description": "创建用户",
+                "tags": [
+                    "User"
+                ],
+                "summary": "创建用户",
+                "parameters": [
+                    {
+                        "description": "创建用户参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/common.IDResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/users/:id": {
+            "get": {
+                "description": "获取用户和用户与组织、职位、角色的关联信息",
+                "tags": [
+                    "User"
+                ],
+                "summary": "获取用户信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schema.User"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "put": {
+                "description": "更新用户基础信息",
+                "tags": [
+                    "User"
+                ],
+                "summary": "更新用户基础信息",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新用户基础信息参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            },
+            "delete": {
+                "description": "删除用户、用户扩展信息",
+                "tags": [
+                    "User"
+                ],
+                "summary": "删除用户",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/users/:id/disabled": {
+            "put": {
+                "description": "禁用指定用户",
+                "tags": [
+                    "User"
+                ],
+                "summary": "禁用指定用户",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/users/:id/enable": {
+            "put": {
+                "description": "启用指定用户",
+                "tags": [
+                    "User"
+                ],
+                "summary": "启用指定用户",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/users/:id/permission": {
+            "put": {
+                "description": "更新用户基础信息及用户与组织、职位、角色、用户组的关联关系",
+                "tags": [
+                    "User"
+                ],
+                "summary": "更新用户的信息和权限",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "description": "更新用户信息和权限的参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.User"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/base/users/:id/sub-users": {
+            "get": {
+                "description": "获取子用户列表",
+                "tags": [
+                    "User"
+                ],
+                "summary": "获取子用户列表",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "用户ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否包含当前组织的用户",
+                        "name": "current_org",
+                        "in": "query"
+                    },
+                    {
+                        "type": "boolean",
+                        "description": "是否包含子组织的用户",
+                        "name": "son_org",
+                        "in": "query"
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.ListResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/login": {
+            "post": {
+                "description": "用户登录",
+                "tags": [
+                    "User"
+                ],
+                "summary": "用户登录",
+                "parameters": [
+                    {
+                        "description": "用户登录参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.LoginParam"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/schema.LoginRes"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/logout": {
+            "post": {
+                "description": "用户登出(前端需要自己删除Jwt Token字符串)",
+                "tags": [
+                    "User"
+                ],
+                "summary": "用户登出",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/refresh-token": {
+            "get": {
+                "description": "更新用户登录缓存Token",
+                "tags": [
+                    "User"
+                ],
+                "summary": "更新用户登录缓存Token",
+                "responses": {
+                    "200": {
+                        "description": "{\"token_info\": \"\"}",
+                        "schema": {
+                            "type": "string"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        },
+        "/api/v1/update-password": {
+            "put": {
+                "description": "更新用户密码",
+                "tags": [
+                    "User"
+                ],
+                "summary": "更新用户密码",
+                "parameters": [
+                    {
+                        "description": "更新用户密码参数",
+                        "name": "body",
+                        "in": "body",
+                        "required": true,
+                        "schema": {
+                            "$ref": "#/definitions/schema.UpdatePasswordParam"
+                        }
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    },
+                    "500": {
+                        "description": "Internal Server Error",
+                        "schema": {
+                            "$ref": "#/definitions/ginx.OperateResult"
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "definitions": {
+        "common.IDResult": {
+            "type": "object",
+            "properties": {
+                "id": {
+                    "type": "string",
+                    "example": "0"
+                }
+            }
+        },
+        "common.PaginationResult": {
+            "type": "object",
+            "properties": {
+                "current": {
+                    "type": "integer"
+                },
+                "pageSize": {
+                    "type": "integer"
+                },
+                "total": {
+                    "type": "integer"
+                }
+            }
+        },
+        "ginx.ListResult": {
+            "type": "object",
+            "properties": {
+                "list": {},
+                "pagination": {
+                    "$ref": "#/definitions/common.PaginationResult"
+                }
+            }
+        },
+        "ginx.OperateResult": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "description": "错误码",
+                    "type": "integer"
+                },
+                "message": {
+                    "description": "错误信息",
+                    "type": "string"
+                }
+            }
+        },
+        "schema.Button": {
+            "type": "object",
+            "required": [
+                "btn_id",
+                "menu_id",
+                "name"
+            ],
+            "properties": {
+                "UUID": {
+                    "description": "前端组装菜单需要的",
+                    "type": "string"
+                },
+                "btn_id": {
+                    "description": "前端识别按钮用",
+                    "type": "integer"
+                },
+                "class": {
+                    "description": "按钮样式",
+                    "type": "string"
+                },
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "creator": {
+                    "description": "创建者",
+                    "type": "integer"
+                },
+                "icon": {
+                    "description": "按钮图标",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "唯一标识",
+                    "type": "integer"
+                },
+                "memo": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "menu_id": {
+                    "description": "菜单ID",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "按钮名称",
+                    "type": "string"
+                },
+                "parent_id": {
+                    "description": "父级按钮ID",
+                    "type": "integer"
+                },
+                "select": {
+                    "description": "是否全选(前端用于判断按钮的子按钮是否全部被选中)",
+                    "type": "boolean"
+                },
+                "sequence": {
+                    "description": "排序值",
+                    "type": "integer"
+                },
+                "show_status": {
+                    "description": "显示状态(1:显示 2:隐藏)",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "状态(1:启用 2:禁用)",
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "description": "更新时间",
+                    "type": "string"
+                }
+            }
+        },
+        "schema.ButtonPre": {
+            "type": "object",
+            "required": [
+                "btn_id",
+                "menu_id",
+                "name"
+            ],
+            "properties": {
+                "UUID": {
+                    "description": "前端组装菜单需要的",
+                    "type": "string"
+                },
+                "btn_id": {
+                    "description": "前端识别按钮用",
+                    "type": "integer"
+                },
+                "class": {
+                    "description": "按钮样式",
+                    "type": "string"
+                },
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "creator": {
+                    "description": "创建者",
+                    "type": "integer"
+                },
+                "icon": {
+                    "description": "按钮图标",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "唯一标识",
+                    "type": "integer"
+                },
+                "memo": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "menu_id": {
+                    "description": "菜单ID",
+                    "type": "integer"
+                },
+                "name": {
+                    "description": "按钮名称",
+                    "type": "string"
+                },
+                "parent_id": {
+                    "description": "父级按钮ID",
+                    "type": "integer"
+                },
+                "restful_apis": {
+                    "description": "按钮调用的Api",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.RestfulApi"
+                    }
+                },
+                "select": {
+                    "description": "是否全选(前端用于判断按钮的子按钮是否全部被选中)",
+                    "type": "boolean"
+                },
+                "sequence": {
+                    "description": "排序值",
+                    "type": "integer"
+                },
+                "show_status": {
+                    "description": "显示状态(1:显示 2:隐藏)",
+                    "type": "integer"
+                },
+                "son_buttons": {
+                    "description": "子按钮",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.ButtonPre"
+                    }
+                },
+                "status": {
+                    "description": "状态(1:启用 2:禁用)",
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "description": "更新时间",
+                    "type": "string"
+                }
+            }
+        },
+        "schema.DisabledField": {
+            "type": "object",
+            "required": [
+                "key_name",
+                "key_value"
+            ],
+            "properties": {
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "creator": {
+                    "description": "创建者",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "唯一标识",
+                    "type": "integer"
+                },
+                "key_name": {
+                    "description": "字段名称",
+                    "type": "string"
+                },
+                "key_value": {
+                    "description": "字段值",
+                    "type": "string"
+                },
+                "memo": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "description": "更新时间",
+                    "type": "string"
+                },
+                "uuid": {
+                    "description": "可禁用字段UUID",
+                    "type": "string"
+                }
+            }
+        },
+        "schema.LoginParam": {
+            "type": "object",
+            "required": [
+                "password",
+                "user_name"
+            ],
+            "properties": {
+                "password": {
+                    "description": "密码(md5加密)",
+                    "type": "string"
+                },
+                "user_name": {
+                    "description": "用户名",
+                    "type": "string"
+                }
+            }
+        },
+        "schema.LoginRes": {
+            "type": "object",
+            "properties": {
+                "token_info": {
+                    "$ref": "#/definitions/schema.LoginTokenInfo"
+                },
+                "user_info": {
+                    "$ref": "#/definitions/schema.User"
+                }
+            }
+        },
+        "schema.LoginTokenInfo": {
+            "type": "object",
+            "properties": {
+                "access_token": {
+                    "description": "访问令牌",
+                    "type": "string"
+                },
+                "expires_at": {
+                    "description": "令牌到期时间戳",
+                    "type": "integer"
+                },
+                "token_type": {
+                    "description": "令牌类型",
+                    "type": "string"
+                }
+            }
+        },
+        "schema.Menu": {
+            "type": "object",
+            "required": [
+                "name",
+                "router"
+            ],
+            "properties": {
+                "UUID": {
+                    "description": "前端组装菜单需要的",
+                    "type": "string"
+                },
+                "class": {
+                    "description": "菜单样式",
+                    "type": "string"
+                },
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "creator": {
+                    "description": "创建者",
+                    "type": "integer"
+                },
+                "icon": {
+                    "description": "菜单图标",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "唯一标识",
+                    "type": "integer"
+                },
+                "memo": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "菜单名称",
+                    "type": "string"
+                },
+                "parent_id": {
+                    "description": "父级菜单ID",
+                    "type": "integer"
+                },
+                "router": {
+                    "description": "访问路由",
+                    "type": "string"
+                },
+                "select": {
+                    "description": "是否全选(前端用于判断菜单的子菜单和按钮是否都被选中)",
+                    "type": "boolean"
+                },
+                "sequence": {
+                    "description": "排序值",
+                    "type": "integer"
+                },
+                "show_status": {
+                    "description": "显示状态(1:显示 2:隐藏)",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "状态(1:启用 2:禁用)",
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "description": "更新时间",
+                    "type": "string"
+                }
+            }
+        },
+        "schema.MenuPre": {
+            "type": "object",
+            "required": [
+                "name",
+                "router"
+            ],
+            "properties": {
+                "UUID": {
+                    "description": "前端组装菜单需要的",
+                    "type": "string"
+                },
+                "buttons": {
+                    "description": "页面的按钮",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.ButtonPre"
+                    }
+                },
+                "class": {
+                    "description": "菜单样式",
+                    "type": "string"
+                },
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "creator": {
+                    "description": "创建者",
+                    "type": "integer"
+                },
+                "icon": {
+                    "description": "菜单图标",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "唯一标识",
+                    "type": "integer"
+                },
+                "memo": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "菜单名称",
+                    "type": "string"
+                },
+                "parent_id": {
+                    "description": "父级菜单ID",
+                    "type": "integer"
+                },
+                "restful_apis": {
+                    "description": "页面调用的Api",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.RestfulApi"
+                    }
+                },
+                "router": {
+                    "description": "访问路由",
+                    "type": "string"
+                },
+                "select": {
+                    "description": "是否全选(前端用于判断菜单的子菜单和按钮是否都被选中)",
+                    "type": "boolean"
+                },
+                "sequence": {
+                    "description": "排序值",
+                    "type": "integer"
+                },
+                "show_status": {
+                    "description": "显示状态(1:显示 2:隐藏)",
+                    "type": "integer"
+                },
+                "son_menus": {
+                    "description": "子菜单",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/schema.MenuPres"
+                        }
+                    ]
+                },
+                "status": {
+                    "description": "状态(1:启用 2:禁用)",
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "description": "更新时间",
+                    "type": "string"
+                }
+            }
+        },
+        "schema.MenuPres": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/schema.MenuPre"
+            }
+        },
+        "schema.Organization": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "creator": {
+                    "description": "创建者",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "唯一标识",
+                    "type": "integer"
+                },
+                "memo": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "组织名称",
+                    "type": "string"
+                },
+                "parent_id": {
+                    "description": "父级组织ID",
+                    "type": "integer"
+                },
+                "positions": {
+                    "description": "组织的职位列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.Position"
+                    }
+                },
+                "role_id": {
+                    "description": "组织的基础角色",
+                    "type": "integer"
+                },
+                "sequence": {
+                    "description": "排序值",
+                    "type": "integer"
+                },
+                "son_organizations": {
+                    "description": "下属组织列表",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/schema.Organizations"
+                        }
+                    ]
+                },
+                "status": {
+                    "description": "状态(1:启用 2:禁用)",
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "description": "更新时间",
+                    "type": "string"
+                }
+            }
+        },
+        "schema.OrganizationTree": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "creator": {
+                    "description": "创建者",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "唯一标识",
+                    "type": "integer"
+                },
+                "memo": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "组织名称",
+                    "type": "string"
+                },
+                "parent_id": {
+                    "description": "父级组织ID",
+                    "type": "integer"
+                },
+                "positions": {
+                    "description": "组织的职位列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.Position"
+                    }
+                },
+                "role_id": {
+                    "description": "组织的基础角色",
+                    "type": "integer"
+                },
+                "sequence": {
+                    "description": "排序值",
+                    "type": "integer"
+                },
+                "son_organization_trees": {
+                    "description": "下属组织列表",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/schema.OrganizationTrees"
+                        }
+                    ]
+                },
+                "status": {
+                    "description": "状态(1:启用 2:禁用)",
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "description": "更新时间",
+                    "type": "string"
+                },
+                "users": {
+                    "description": "组织用户列表",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.User"
+                    }
+                }
+            }
+        },
+        "schema.OrganizationTrees": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/schema.OrganizationTree"
+            }
+        },
+        "schema.Organizations": {
+            "type": "array",
+            "items": {
+                "$ref": "#/definitions/schema.Organization"
+            }
+        },
+        "schema.PermissionTree": {
+            "type": "object",
+            "properties": {
+                "disabled_fields": {
+                    "description": "可禁用的字段",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.DisabledField"
+                    }
+                },
+                "menu_trees": {
+                    "description": "菜单树",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.MenuPre"
+                    }
+                }
+            }
+        },
+        "schema.Position": {
+            "type": "object",
+            "required": [
+                "name",
+                "organization_id"
+            ],
+            "properties": {
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "creator": {
+                    "description": "创建者",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "唯一标识",
+                    "type": "integer"
+                },
+                "memo": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "职位名称",
+                    "type": "string"
+                },
+                "organization_id": {
+                    "description": "职位的组织ID",
+                    "type": "integer"
+                },
+                "role_id": {
+                    "description": "职位的角色",
+                    "type": "integer"
+                },
+                "sequence": {
+                    "description": "排序值",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "状态(1:启用 2:禁用)",
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "description": "更新时间",
+                    "type": "string"
+                }
+            }
+        },
+        "schema.RestfulApi": {
+            "type": "object",
+            "required": [
+                "method",
+                "path"
+            ],
+            "properties": {
+                "UUID": {
+                    "description": "接口UUID",
+                    "type": "string"
+                },
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "creator": {
+                    "description": "创建者",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "唯一标识",
+                    "type": "integer"
+                },
+                "memo": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "method": {
+                    "description": "资源请求方式(支持正则)",
+                    "type": "string"
+                },
+                "path": {
+                    "description": "资源请求路径（支持/:id匹配）",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "description": "更新时间",
+                    "type": "string"
+                }
+            }
+        },
+        "schema.Role": {
+            "type": "object",
+            "required": [
+                "name",
+                "type"
+            ],
+            "properties": {
+                "auditor_types": {
+                    "description": "审核类型(逗号分隔)",
+                    "type": "string"
+                },
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "creator": {
+                    "description": "创建者",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "唯一标识",
+                    "type": "integer"
+                },
+                "memo": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "角色名称",
+                    "type": "string"
+                },
+                "sequence": {
+                    "description": "排序值",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "状态(1:启用 2:禁用)",
+                    "type": "integer"
+                },
+                "type": {
+                    "description": "角色类型(1.用户角色 2.组织角色 3.职位角色 4.用户组角色)",
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "description": "更新时间",
+                    "type": "string"
+                }
+            }
+        },
+        "schema.RolePre": {
+            "type": "object",
+            "required": [
+                "name",
+                "type"
+            ],
+            "properties": {
+                "auditor_types": {
+                    "description": "审核类型(逗号分隔)",
+                    "type": "string"
+                },
+                "buttons": {
+                    "description": "角色能使用的按钮",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.Button"
+                    }
+                },
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "creator": {
+                    "description": "创建者",
+                    "type": "integer"
+                },
+                "disabled_fields": {
+                    "description": "角色禁用的字段",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.DisabledField"
+                    }
+                },
+                "id": {
+                    "description": "唯一标识",
+                    "type": "integer"
+                },
+                "memo": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "menus": {
+                    "description": "角色能使用的菜单",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.Menu"
+                    }
+                },
+                "name": {
+                    "description": "角色名称",
+                    "type": "string"
+                },
+                "sequence": {
+                    "description": "排序值",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "状态(1:启用 2:禁用)",
+                    "type": "integer"
+                },
+                "type": {
+                    "description": "角色类型(1.用户角色 2.组织角色 3.职位角色 4.用户组角色)",
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "description": "更新时间",
+                    "type": "string"
+                }
+            }
+        },
+        "schema.SecurityLevel": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "creator": {
+                    "description": "创建者",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "唯一标识",
+                    "type": "integer"
+                },
+                "memo": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "安全级别名称",
+                    "type": "string"
+                },
+                "roles": {
+                    "description": "安全级别绑定的角色",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.Role"
+                    }
+                },
+                "sequence": {
+                    "description": "排序值",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "状态(1:启用 2:禁用)",
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "description": "更新时间",
+                    "type": "string"
+                }
+            }
+        },
+        "schema.SystemConfig": {
+            "type": "object",
+            "required": [
+                "web_server_host",
+                "web_server_port"
+            ],
+            "properties": {
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "https_crt_file": {
+                    "description": "Https Crt证书",
+                    "type": "string"
+                },
+                "https_key_file": {
+                    "description": "Https私钥",
+                    "type": "string"
+                },
+                "https_mode": {
+                    "description": "是否启用Https",
+                    "type": "boolean"
+                },
+                "id": {
+                    "description": "唯一标识",
+                    "type": "integer"
+                },
+                "menu_version": {
+                    "description": "前端菜单版本号(只能通过定时任务，由菜单json中的版本号字段修改)",
+                    "type": "number"
+                },
+                "updated_at": {
+                    "description": "更新时间",
+                    "type": "string"
+                },
+                "web_server_host": {
+                    "description": "Web服务IP地址",
+                    "type": "string"
+                },
+                "web_server_port": {
+                    "description": "Web服务端口",
+                    "type": "integer"
+                }
+            }
+        },
+        "schema.TagManage": {
+            "type": "object",
+            "required": [
+                "type",
+                "value"
+            ],
+            "properties": {
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "creator": {
+                    "description": "创建者",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "唯一标识",
+                    "type": "integer"
+                },
+                "key_name": {
+                    "description": "标签名称",
+                    "type": "string"
+                },
+                "type": {
+                    "description": "标签类型",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "description": "更新时间",
+                    "type": "string"
+                },
+                "value": {
+                    "description": "标签值",
+                    "type": "string"
+                }
+            }
+        },
+        "schema.UpdateAuditorTypeParam": {
+            "type": "object",
+            "properties": {
+                "auditor_type": {
+                    "description": "审核类型",
+                    "type": "integer"
+                }
+            }
+        },
+        "schema.UpdatePasswordParam": {
+            "type": "object",
+            "required": [
+                "new_password",
+                "old_password"
+            ],
+            "properties": {
+                "new_password": {
+                    "description": "新密码(md5加密)",
+                    "type": "string"
+                },
+                "old_password": {
+                    "description": "旧密码(md5加密)",
+                    "type": "string"
+                }
+            }
+        },
+        "schema.User": {
+            "type": "object",
+            "required": [
+                "user_name"
+            ],
+            "properties": {
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "creator": {
+                    "description": "创建者",
+                    "type": "integer"
+                },
+                "extend_info": {
+                    "description": "用户扩展信息",
+                    "allOf": [
+                        {
+                            "$ref": "#/definitions/schema.UserExtendInfo"
+                        }
+                    ]
+                },
+                "id": {
+                    "description": "唯一标识",
+                    "type": "integer"
+                },
+                "organizations": {
+                    "description": "用户所属的组织结构",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.Organization"
+                    }
+                },
+                "password": {
+                    "description": "用户密码",
+                    "type": "string"
+                },
+                "positions": {
+                    "description": "用户所属的职位",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.Position"
+                    }
+                },
+                "roles": {
+                    "description": "用户所属的角色(直接绑定给用户的角色)",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.Role"
+                    }
+                },
+                "sequence": {
+                    "description": "排序值",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "状态(1:启用 2:禁用)",
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "description": "更新时间",
+                    "type": "string"
+                },
+                "user_groups": {
+                    "description": "用户所属的的用户组",
+                    "type": "array",
+                    "items": {
+                        "$ref": "#/definitions/schema.UserGroup"
+                    }
+                },
+                "user_name": {
+                    "description": "用户名称",
+                    "type": "string"
+                }
+            }
+        },
+        "schema.UserExtendInfo": {
+            "type": "object",
+            "properties": {
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "creator": {
+                    "description": "创建者",
+                    "type": "integer"
+                },
+                "email": {
+                    "description": "邮箱账号",
+                    "type": "string"
+                },
+                "id": {
+                    "description": "唯一标识",
+                    "type": "integer"
+                },
+                "mobile_phone": {
+                    "description": "移动手机",
+                    "type": "integer"
+                },
+                "qq_account": {
+                    "description": "QQ账号",
+                    "type": "integer"
+                },
+                "real_name": {
+                    "description": "用户昵称",
+                    "type": "string"
+                },
+                "updated_at": {
+                    "description": "更新时间",
+                    "type": "string"
+                },
+                "user_id": {
+                    "description": "用户ID",
+                    "type": "integer"
+                }
+            }
+        },
+        "schema.UserGroup": {
+            "type": "object",
+            "required": [
+                "name"
+            ],
+            "properties": {
+                "created_at": {
+                    "description": "创建时间",
+                    "type": "string"
+                },
+                "creator": {
+                    "description": "创建者",
+                    "type": "integer"
+                },
+                "id": {
+                    "description": "唯一标识",
+                    "type": "integer"
+                },
+                "memo": {
+                    "description": "备注",
+                    "type": "string"
+                },
+                "name": {
+                    "description": "用户组名称",
+                    "type": "string"
+                },
+                "role_id": {
+                    "description": "用户组的基础角色",
+                    "type": "integer"
+                },
+                "sequence": {
+                    "description": "排序值",
+                    "type": "integer"
+                },
+                "status": {
+                    "description": "状态(1:启用 2:禁用)",
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "description": "更新时间",
+                    "type": "string"
+                }
+            }
+        }
+    }
+}

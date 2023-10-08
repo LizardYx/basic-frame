@@ -4,7 +4,10 @@ import (
 	"basic-frame/middleware"
 	"basic-frame/modules/base"
 	"basic-frame/util/common"
+	"basic-frame/util/consts"
 	"github.com/gin-gonic/gin"
+	swaggerFiles "github.com/swaggo/files"
+	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
 // 全局路由实例
@@ -45,5 +48,9 @@ func (a *Router) RegisterAPI(app *gin.Engine) {
 	v1 := g.Group("/v1")
 	{
 		a.BaseRouter.Register(v1)
+	}
+	if common.SysConfig.RunMode != consts.RunModeRelease {
+		// swagger/index.html
+		app.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	}
 }
