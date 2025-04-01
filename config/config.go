@@ -4,7 +4,9 @@ import (
 	"basic-frame/util/common"
 	"basic-frame/util/consts"
 	"fmt"
+	"github.com/pkg/errors"
 	"gopkg.in/ini.v1"
+	"log"
 )
 
 // LoadSystemConfigFile 加载系统配置文件
@@ -13,11 +15,13 @@ func LoadSystemConfigFile() (string, error) {
 	cfg, err := ini.Load(consts.SystemConfigFile)
 	if err != nil {
 		// 未找到系统配置文件，创建默认系统配置文件
+		log.Printf("Not found system config file. Create System config file automatically")
 		var errMessage string
 		if errMessage, err = createSystemConfigFile(); err != nil {
 			return errMessage, err
 		} else {
-			cfg, _ = ini.Load(consts.SystemConfigFile)
+			errMessage = fmt.Sprintf("Create System config file successfully. Please edit system config file in '%s'", consts.SystemConfigFile)
+			return errMessage, errors.New("")
 		}
 	}
 	common.SysConfig.RunMode = cfg.Section("").Key("RunMode").String()

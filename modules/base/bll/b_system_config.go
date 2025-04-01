@@ -36,10 +36,10 @@ func (a *SystemConfig) Init() error {
 			HttpsKeyFile:  common.SysConfig.WebServer.HttpsKeyFile,
 			MenuVersion:   common.SysConfig.MenuVersion,
 		}); err != nil {
-			return errors.WithMessage(err, "检查系统基础配置项是否存在失败")
+			return errors.WithMessage(err, "创建系统基础配置项失败")
 		}
 	} else {
-		// 如果数据库中有系统基础配置项,将数据写入全局缓存中
+		// 如果数据库中有系统基础配置项,将配置信息写入全局缓存中
 		basicConfig := systemConfigQueryResult.Data[0]
 		common.SysConfig.WebServer = common.WebServer{
 			Host:         basicConfig.WebServerHost,
@@ -91,8 +91,8 @@ func (a *SystemConfig) Update(c *gin.Context, id uint64, item schema.SystemConfi
 func (a *SystemConfig) ParamsValidate(item schema.SystemConfig) error {
 	// 如果启用Https模式
 	if item.HttpsMode {
-		if item.WebServerHost == "" || item.WebServerPort == 0 {
-			return errors.New("启用HTTPS模式时,Web服务IP地址、端口 不能为空")
+		if item.HttpsCrtFile == "" || item.HttpsKeyFile == "" {
+			return errors.New("启用HTTPS模式时,HTTPS证书和私钥不能为空")
 		}
 	}
 	return nil

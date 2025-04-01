@@ -41,12 +41,12 @@ func (a *Menu) InitData() {
 	loadFileFailed := false
 	sleepTime := 5
 	for {
-		// 读取前端页面菜单配置文件
+		// 读取菜单配置文件
 		data, err := a.readData(common.SysConfig.MenuFile)
 		if err != nil {
-			fmt.Println("读取前端页面菜单配置文件失败")
+			fmt.Println("读取菜单配置文件失败")
 			if !loadFileFailed {
-				logger.Log.Warning("读取前端页面菜单配置文件失败")
+				logger.Log.Warning("读取菜单配置文件失败")
 				loadFileFailed = true
 			}
 			if sleepTime < 10 {
@@ -57,7 +57,7 @@ func (a *Menu) InitData() {
 		}
 		if loadFileFailed {
 			loadFileFailed = false
-			logger.Log.Warning("读取前端页面菜单配置文件成功")
+			logger.Log.Warning("读取菜单配置文件成功")
 		}
 		// Json文件中的版本号大于DB中的版本号。则表明Json文件有更新
 		if data.MenuVersion > common.SysConfig.MenuVersion {
@@ -103,7 +103,7 @@ func (a *Menu) InitData() {
 	}
 }
 
-// readData 读取前端页面菜单配置文件
+// readData 读取菜单配置文件
 func (a *Menu) readData(name string) (data schema.MenuTreeJson, err error) {
 	file, err := os.Open(name)
 	if err != nil {
@@ -112,10 +112,10 @@ func (a *Menu) readData(name string) (data schema.MenuTreeJson, err error) {
 	defer file.Close()
 	// 创建json解码器
 	decoder := json.NewDecoder(file)
-	// 解析前端页面路由配置文件
+	// 解析页面路由配置文件
 	if err = decoder.Decode(&data); err != nil {
-		logger.Log.Warningf("解析前端页面路由配置文件失败: %s", err.Error())
-		fmt.Println(fmt.Sprintf("解析前端页面路由配置文件失败: %s", err.Error()))
+		logger.Log.Warningf("解析页面路由配置文件失败: %s", err.Error())
+		fmt.Println(fmt.Sprintf("解析页面路由配置文件失败: %s", err.Error()))
 		return
 	}
 	return

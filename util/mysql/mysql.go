@@ -22,8 +22,7 @@ func InitMysql() {
 	if DB, err = gorm.Open(mysql.Open(common.SysConfig.Mysql.GetDBConnString()), &gorm.Config{
 		Logger: gormLogger(),
 		NamingStrategy: schema.NamingStrategy{
-			//TablePrefix:   fmt.Sprintf("%s_", strings.ToLower(common.SysConfig.AppName)), // 表名前缀，`User` 的表名应该是 `t_users`
-			SingularTable: false, // 使用单数表名，启用该选项，此时，`User` 的表名应该是 `t_user`
+			SingularTable: false, // 是否使用单数表名。启用该选项时，`User` 的表名应该是 `users`
 		},
 	}); err != nil {
 		logger.Log.Warn("mysql connect error: ", err)
@@ -76,7 +75,7 @@ func Paginate(db *gorm.DB, params common.PaginationParam, out interface{}) (*com
 		return nil, err
 	} else {
 		// 分页查询
-		if params.Current == 0 {
+		if params.Current <= 0 {
 			params.Current = 1
 		} else if params.PageSize <= 0 {
 			params.PageSize = 10

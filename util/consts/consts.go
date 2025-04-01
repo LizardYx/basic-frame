@@ -51,7 +51,7 @@ const (
 // Logger默认配置信息
 const (
 	LoggerRotationTime = "24"  // 设置日志分割的时间(单位:小时)
-	LoggerMaxAge       = "168" // 设置文件清理前的最长保存时间(单位:小时)
+	LoggerMaxAge       = "720" // 设置文件清理前的最长保存时间，默认保存30天(单位:小时)
 )
 
 // SmtpServer邮件服务默认配置信息

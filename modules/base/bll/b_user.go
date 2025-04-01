@@ -207,10 +207,7 @@ func (a *User) Init(c *gin.Context) error {
 		OmitPassword: true,
 	}); err != nil {
 		return errors.WithMessage(err, "检查超管用户是否创建失败")
-	} else if len(UserQueryResult.Data) != 0 {
-		// 超管已创建
-		return nil
-	} else {
+	} else if len(UserQueryResult.Data) == 0 {
 		// 超管未创建
 		if _, err = a.Create(c, schema.User{
 			UserName: consts.AdminName,
@@ -247,19 +244,18 @@ func (a *User) Create(c *gin.Context, item schema.User) (*common.IDResult, error
 	item.Password = secret.SHA1String(item.Password)
 	var IDResult *common.IDResult
 	var err error
-	_ = mysql.DB.Transaction(func(tx *gorm.DB) error {
+	if err = mysql.DB.Transaction(func(tx *gorm.DB) error {
 		// 创建用户
 		if IDResult, err = a.UserModel.Create(item); err != nil {
-			return err
+			return errors.WithMessage(err, fmt.Sprintf("创建用户:'%s' 失败", item.UserName))
 		}
 
 		// 创建用户扩展信息
 		if _, err = a.UserExtendInfoModel.Create(schema.UserExtendInfo{UserID: IDResult.ID, RealName: item.UserName}); err != nil {
-			return err
+			return errors.WithMessage(err, fmt.Sprintf("创建用户:'%s' 的扩展信息失败", item.UserName))
 		}
 		return nil
-	})
-	if err != nil {
+	}); err != nil {
 		return nil, err
 	}
 	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
@@ -283,7 +279,7 @@ func (a *User) Update(c *gin.Context, id uint64, item schema.User) error {
 		"status":   item.Status,
 		"sequence": item.Sequence,
 	}); err != nil {
-		return err
+		return errors.WithMessage(err, "更新用户信息失败")
 	}
 	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)
 	return nil
@@ -308,9 +304,12 @@ func (a *User) UpdateStatus(c *gin.Context, id uint64, newStatus int) error {
 	}
 
 	// 更新用户状态
-	return a.UserModel.UpdateByID(id, map[string]interface{}{
+	if err := a.UserModel.UpdateByID(id, map[string]interface{}{
 		"status": newStatus,
-	})
+	}); err != nil {
+		return errors.WithMessage(err, "更新用户状态失败")
+	}
+	return nil
 }
 
 func (a *User) UpdatePassword(c *gin.Context, id uint64, item schema.UpdatePasswordParam) error {
@@ -325,11 +324,14 @@ func (a *User) UpdatePassword(c *gin.Context, id uint64, item schema.UpdatePassw
 		return errors.New("新密码不能为空")
 	}
 
-	// 更新用户信息
+	// 更新用户密码
 	item.NewPassword = secret.SHA1String(item.NewPassword)
-	return a.UserModel.UpdateByID(id, map[string]interface{}{
+	if err := a.UserModel.UpdateByID(id, map[string]interface{}{
 		"password": item.NewPassword,
-	})
+	}); err != nil {
+		return errors.WithMessage(err, "更新用户密码失败")
+	}
+	return nil
 }
 
 // Delete 删除用户、用户扩展信息
@@ -344,7 +346,7 @@ func (a *User) Delete(c *gin.Context, id uint64) error {
 	}
 
 	// 删除用户、用户扩展信息
-	err = mysql.DB.Transaction(func(tx *gorm.DB) error {
+	if err = mysql.DB.Transaction(func(tx *gorm.DB) error {
 		// 删除用户扩展信息
 		if err = a.UserExtendInfoModel.Delete(oldItem.ExtendInfo.ID); err != nil {
 			return errors.WithMessage(err, "删除用户扩展信息失败")
@@ -352,12 +354,11 @@ func (a *User) Delete(c *gin.Context, id uint64) error {
 
 		// 删除用户信息
 		if err = a.UserModel.Delete(id); err != nil {
-			return err
+			return errors.WithMessage(err, "删除用户信息失败")
 		}
 		return nil
-	})
-	if err != nil {
-		return errors.WithMessage(err, "删除删除用户、用户扩展信息失败")
+	}); err != nil {
+		return err
 	}
 
 	LoadCasbinPolicy(c, common.SysConfig.CasbinSyncEnforcer)

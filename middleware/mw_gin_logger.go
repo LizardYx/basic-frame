@@ -35,6 +35,7 @@ func GinLoggerMiddleware() gin.HandlerFunc {
 		clientIP := c.ClientIP()
 
 		// 日志格式
+		// TODO:考虑是否将API请求的info日志单独记录到一个日志目录
 		logger.Log.WithFields(logrus.Fields{
 			"status_code":  statusCode,
 			"latency_time": latencyTime,
